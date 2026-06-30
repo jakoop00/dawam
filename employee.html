@@ -10,6 +10,8 @@
         body { font-family: 'Tajawal', sans-serif; }
      .loader { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+     .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
+     .modal-content { background-color: white; margin: 10% auto; padding: 30px; border-radius: 20px; width: 90%; max-width: 500px; }
     </style>
 </head>
 <body class="bg-gradient-to-br from-blue-50 to-purple-50 min-h-screen">
@@ -18,6 +20,31 @@
             <div class="text-center">
                 <div class="loader"></div>
                 <p class="text-xl text-gray-600 mt-4">جاري تحميل بيانات الموظف...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة العمولة -->
+    <div id="commissionModal" class="modal">
+        <div class="modal-content">
+            <h2 class="text-2xl font-bold mb-6 text-gray-800">💰 إضافة عمولة الشهر</h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-gray-700 font-bold mb-2">الأرباح (دينار)</label>
+                    <input type="number" id="profitInput" placeholder="مثال: 1000" step="0.001" class="w-full px-4 py-3 border-2 rounded-xl outline-none focus:ring-2 focus:ring-green-500">
+                </div>
+                <div>
+                    <label class="block text-gray-700 font-bold mb-2">نسبة العمولة %</label>
+                    <input type="number" id="percentInput" value="1" step="0.1" class="w-full px-4 py-3 border-2 rounded-xl outline-none focus:ring-2 focus:ring-green-500">
+                </div>
+                <div class="bg-green-50 border-2 border-green-500 rounded-xl p-4 text-center">
+                    <p class="text-sm text-gray-600">قيمة العمولة</p>
+                    <p class="text-3xl font-bold text-green-600" id="modalCommissionResult">0.000 د.أ</p>
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="saveCommission()" class="flex-1 bg-gradient-to-r from-green-500 to-green-600 text-white py-3 rounded-xl font-bold hover:opacity-90">إضافة العمولة</button>
+                    <button onclick="closeCommissionModal()" class="flex-1 bg-gray-400 text-white py-3 rounded-xl font-bold hover:opacity-90">إلغاء</button>
+                </div>
             </div>
         </div>
     </div>
@@ -83,6 +110,10 @@
             const weekTotal = weekRecords.reduce((sum, r) => sum + r.dailyWage, 0);
 
             const monthTotal = records.reduce((sum, r) => sum + r.dailyWage, 0);
+            
+            // اجمالي الشهر مع العمولة
+            const totalCommission = employeeData.totalCommission || 0;
+            const monthWithCommission = monthTotal + totalCommission;
 
             const defaultImg = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(employeeData.name) + '&background=6c5ce7&color=fff&size=200';
 
@@ -93,7 +124,6 @@
                         <h1 class="text-2xl font-bold">ملف الموظف</h1>
                         <div class="w-32"></div>
                     </div>
-                </div>
                 <div class="max-w-7xl mx-auto p-6">
                     <div class="bg-white rounded-2xl shadow-xl p-6 mb-6">
                         <div class="flex items-center gap-6">
@@ -105,18 +135,28 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
                         <div class="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-2xl p-6 text-center shadow-xl">
                             <p class="text-sm opacity-90">إجمالي اليوم</p>
-                            <h3 class="text-4xl font-bold mt-2">${todayTotal.toFixed(3)} د.أ</h3>
+                            <h3 class="text-3xl font-bold mt-2">${todayTotal.toFixed(3)} د.أ</h3>
                         </div>
                         <div class="bg-gradient-to-br from-orange-500 to-orange-600 text-white rounded-2xl p-6 text-center shadow-xl">
                             <p class="text-sm opacity-90">إجمالي الأسبوع</p>
-                            <h3 class="text-4xl font-bold mt-2">${weekTotal.toFixed(3)} د.أ</h3>
+                            <h3 class="text-3xl font-bold mt-2">${weekTotal.toFixed(3)} د.أ</h3>
                         </div>
                         <div class="bg-gradient-to-br from-green-500 to-green-600 text-white rounded-2xl p-6 text-center shadow-xl">
                             <p class="text-sm opacity-90">إجمالي الشهر</p>
-                            <h3 class="text-4xl font-bold mt-2">${monthTotal.toFixed(3)} د.أ</h3>
+                            <h3 class="text-3xl font-bold mt-2">${monthTotal.toFixed(3)} د.أ</h3>
+                        </div>
+                        <div class="bg-gradient-to-br from-purple-500 to-pink-600 text-white rounded-2xl p-6 text-center shadow-xl md:col-span-4">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="text-sm opacity-90">اجمالي الشهر مع العمولة</p>
+                                    <h3 class="text-4xl font-bold mt-2">${monthWithCommission.toFixed(3)} د.أ</h3>
+                                    <p class="text-xs opacity-75 mt-1">العمولة المضافة: ${totalCommission.toFixed(3)} د.أ</p>
+                                </div>
+                                <button onclick="openCommissionModal()" class="bg-white text-purple-600 px-6 py-3 rounded-xl font-bold hover:bg-gray-100">💰 إضافة عمولة</button>
+                            </div>
                         </div>
                     </div>
 
@@ -193,6 +233,45 @@
             `;
 
             document.getElementById('addForm').addEventListener('submit', addRecord);
+            
+            // حساب العمولة بالنافذة
+            document.getElementById('profitInput').addEventListener('input', updateModalCommission);
+            document.getElementById('percentInput').addEventListener('input', updateModalCommission);
+        }
+
+        function updateModalCommission() {
+            const profit = parseFloat(document.getElementById('profitInput').value) || 0;
+            const percent = parseFloat(document.getElementById('percentInput').value) || 0;
+            const commission = profit * (percent / 100);
+            document.getElementById('modalCommissionResult').innerText = commission.toFixed(3) + ' د.أ';
+        }
+
+        window.openCommissionModal = function() {
+            document.getElementById('commissionModal').style.display = 'block';
+        }
+
+        window.closeCommissionModal = function() {
+            document.getElementById('commissionModal').style.display = 'none';
+            document.getElementById('profitInput').value = '';
+            document.getElementById('percentInput').value = '1';
+            document.getElementById('modalCommissionResult').innerText = '0.000 د.أ';
+        }
+
+        window.saveCommission = async function() {
+            const profit = parseFloat(document.getElementById('profitInput').value) || 0;
+            const percent = parseFloat(document.getElementById('percentInput').value) || 0;
+            const commission = profit * (percent / 100);
+            
+            if (profit <= 0) return alert('اكتب قيمة الارباح');
+
+            const currentCommission = employeeData.totalCommission || 0;
+            await updateDoc(doc(db, 'employees', employeeId), {
+                totalCommission: currentCommission + commission
+            });
+            
+            alert(`تم اضافة عمولة ${commission.toFixed(3)} د.أ ✅`);
+            closeCommissionModal();
+            loadData();
         }
 
         window.saveProfileImage = async function() {
@@ -225,13 +304,13 @@
             const end = new Date(`2000-01-01T${checkOut}`);
             const diffMinutes = (end - start) / 60000;
             if (diffMinutes < 0) return null;
-            const baseSalary = diffMinutes / 60; // 60 دقيقة = 1 دينار
+            const baseSalary = diffMinutes / 60;
             const over = parseFloat(overtime) || 0;
             const bon = parseFloat(bonus) || 0;
             const ded = parseFloat(deduction) || 0;
             return {
                 baseSalary,
-                dailyWage: baseSalary + over + bon - ded, // الكل
+                dailyWage: baseSalary + over + bon - ded,
                 minutes: diffMinutes
             };
         }
