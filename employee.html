@@ -8,17 +8,27 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap');
         body { font-family: 'Tajawal', sans-serif; }
+       .loader { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 20px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="bg-gradient-to-br from-blue-50 to-purple-50 min-h-screen">
-    <div id="app"><div class="flex items-center justify-center min-h-screen"><div class="text-xl">جاري التحميل...</div></div></div>
+    <div id="app">
+        <div class="flex items-center justify-center min-h-screen">
+            <div class="text-center">
+                <div class="loader"></div>
+                <p class="text-xl text-gray-600 mt-4" id="loadingText">جاري تحميل بيانات الموظف...</p>
+            </div>
+        </div>
+    </div>
 
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        import { getFirestore, doc, getDoc, updateDoc, collection, addDoc, getDocs, query, where, deleteDoc, orderBy } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { getFirestore, doc, getDoc, updateDoc, collection, addDoc, getDocs, query, where, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
         import { getStorage, ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js';
 
+        // نفس الكونفيج تبع index.html
         const firebaseConfig = {
             apiKey: "AIzaSyDHbtLO5NbRoDddk7CH0u5jAxC5gOAl1iE",
             authDomain: "employee-dawam.firebaseapp.com",
@@ -39,20 +49,47 @@
         let records = [];
 
         onAuthStateChanged(auth, (user) => {
-            if (!user ||!employeeId) return window.location.href = 'index.html';
+            if (!user) {
+                window.location.href = 'index.html';
+                return;
+            }
+            if (!employeeId) {
+                appDiv.innerHTML = '<div class="text-center p-8"><h2 class="text-2xl text-red-600">خطأ: لم يتم تحديد الموظف</h2><button onclick="window.location.href=\'index.html\'" class="mt-4 bg-blue-600 text-white px-6 py-2 rounded-xl">رجوع للقائمة</button></div>';
+                return;
+            }
             loadData();
         });
 
         async function loadData() {
-            const empDoc = await getDoc(doc(db, 'employees', employeeId));
-            if (!empDoc.exists()) return window.location.href = 'index.html';
-            employeeData = empDoc.data();
+            try {
+                document.getElementById('loadingText').innerText = 'جاري تحميل بيانات الموظف...';
+                
+                const empDoc = await getDoc(doc(db, 'employees', employeeId));
+                if (!empDoc.exists()) throw new Error('الموظف غير موجود');
+                employeeData = empDoc.data();
 
-            const q = query(collection(db, 'attendance'), where('employeeId', '==', employeeId), orderBy('date', 'desc'));
-            const snapshot = await getDocs(q);
-            records = snapshot.docs.map(doc => ({ id: doc.id,...doc.data() }));
+                document.getElementById('loadingText').innerText = 'جاري تحميل سجلات الدوام...';
 
-            renderPage();
+                // بدون orderBy عشان ما يحتاج Index
+                const q = query(collection(db, 'attendance'), where('employeeId', '==', employeeId));
+                const snapshot = await getDocs(q);
+                records = snapshot.docs.map(doc => ({ id: doc.id,...doc.data() }));
+                records.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                renderPage();
+
+            } catch (error) {
+                console.error(error);
+                appDiv.innerHTML = `
+                    <div class="flex items-center justify-center min-h-screen">
+                        <div class="bg-white p-8 rounded-2xl shadow-xl text-center max-w-md">
+                            <h2 class="text-2xl font-bold text-red-600 mb-4">صار خطأ!</h2>
+                            <p class="text-gray-600 mb-4">${error.message}</p>
+                            <button onclick="window.location.href='index.html'" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold">رجوع للقائمة الرئيسية</button>
+                        </div>
+                    </div>
+                `;
+            }
         }
 
         function renderPage() {
@@ -63,9 +100,9 @@
             appDiv.innerHTML = `
                 <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-5 shadow-xl">
                     <div class="max-w-7xl mx-auto flex justify-between items-center">
-                        <button onclick="window.location.href='index.html'" class="bg-white text-blue-600 px-5 py-2 rounded-xl font-bold hover:bg-gray-100">← رجوع للقائمة</button>
+                        <button onclick="window.location.href='index.html'" class="bg-white text-blue-600 px-5 py-2 rounded-xl font-bold hover:bg-gray-100 transition">← رجوع للقائمة</button>
                         <h1 class="text-2xl font-bold">ملف الموظف</h1>
-                        <div class="w-24"></div>
+                        <div class="w-32"></div>
                     </div>
                 </div>
                 <div class="max-w-7xl mx-auto p-6">
@@ -105,7 +142,7 @@
                                         <p class="text-sm text-gray-600">قيمة العمولة 1%</p>
                                         <p class="text-3xl font-bold text-green-600" id="commissionResult">0.000 د.أ</p>
                                     </div>
-                                    <button type="submit" class="md:col-span-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-xl font-bold hover:opacity-90">إضافة السجل وحساب الراتب</button>
+                                    <button type="submit" class="md:col-span-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-xl font-bold hover:opacity-90 transition">إضافة السجل وحساب الراتب</button>
                                 </form>
                             </div>
 
@@ -132,7 +169,7 @@
                                             ${records.length === 0? '<tr><td colspan="11" class="p-8 text-center text-gray-400">لا توجد سجلات بعد</td></tr>' : records.map(r => {
                                                 const h = Math.floor(r.minutes/60);
                                                 const m = Math.floor(r.minutes%60);
-                                                return `<tr class="border-b hover:bg-blue-50">
+                                                return `<tr class="border-b hover:bg-blue-50 transition">
                                                     <td class="p-3">${r.date}</td>
                                                     <td class="p-3">${r.checkIn}</td>
                                                     <td class="p-3">${r.checkOut}</td>
