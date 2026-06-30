@@ -8,11 +8,10 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap');
         body { font-family: 'Tajawal', sans-serif; }
-      .card { background: white; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.07); }
     </style>
 </head>
 <body class="bg-gradient-to-br from-blue-50 to-purple-50 min-h-screen">
-    <div id="app"></div>
+    <div id="app"><div class="flex items-center justify-center min-h-screen"><div class="text-xl">جاري التحميل...</div></div></div>
 
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
@@ -35,103 +34,86 @@
         const storage = getStorage(app);
         const appDiv = document.getElementById('app');
 
-        const urlParams = new URLSearchParams(window.location.search);
-        const employeeId = urlParams.get('id');
+        const employeeId = new URLSearchParams(window.location.search).get('id');
         let employeeData = {};
         let records = [];
 
         onAuthStateChanged(auth, (user) => {
-            if (!user) {
-                window.location.href = 'index.html';
-            } else if (!employeeId) {
-                alert('لم يتم تحديد الموظف');
-                window.location.href = 'index.html';
-            } else {
-                loadEmployeeData();
-            }
+            if (!user ||!employeeId) return window.location.href = 'index.html';
+            loadData();
         });
 
-        async function loadEmployeeData() {
+        async function loadData() {
             const empDoc = await getDoc(doc(db, 'employees', employeeId));
-            if (!empDoc.exists()) {
-                alert('الموظف غير موجود');
-                window.location.href = 'index.html';
-                return;
-            }
+            if (!empDoc.exists()) return window.location.href = 'index.html';
             employeeData = empDoc.data();
-            await loadRecords();
-            renderEmployeePage();
-        }
 
-        async function loadRecords() {
             const q = query(collection(db, 'attendance'), where('employeeId', '==', employeeId), orderBy('date', 'desc'));
             const snapshot = await getDocs(q);
             records = snapshot.docs.map(doc => ({ id: doc.id,...doc.data() }));
+
+            renderPage();
         }
 
-        function renderEmployeePage() {
-            const totalSalary = records.reduce((sum, r) => sum + r.dailyWage, 0);
+        function renderPage() {
+            const total = records.reduce((sum, r) => sum + r.dailyWage, 0);
             const today = new Date().toISOString().split('T')[0];
             const todayTotal = records.filter(r => r.date === today).reduce((sum, r) => sum + r.dailyWage, 0);
 
             appDiv.innerHTML = `
-                <div class="bg-blue-600 text-white p-4 shadow-lg">
+                <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-5 shadow-xl">
                     <div class="max-w-7xl mx-auto flex justify-between items-center">
-                        <button onclick="window.location.href='index.html'" class="bg-white text-blue-600 px-4 py-2 rounded-lg font-bold hover:bg-gray-100">← رجوع للقائمة</button>
+                        <button onclick="window.location.href='index.html'" class="bg-white text-blue-600 px-5 py-2 rounded-xl font-bold hover:bg-gray-100">← رجوع للقائمة</button>
                         <h1 class="text-2xl font-bold">ملف الموظف</h1>
                         <div class="w-24"></div>
                     </div>
                 </div>
-
                 <div class="max-w-7xl mx-auto p-6">
-                    <div class="card p-6 mb-6">
-                        <h2 class="text-2xl font-bold text-gray-800 mb-1">👤 ${employeeData.name}</h2>
+                    <div class="bg-white rounded-2xl shadow-xl p-6 mb-6">
+                        <h2 class="text-3xl font-bold text-gray-800 mb-2">👤 ${employeeData.name}</h2>
                         <p class="text-gray-600">الرقم الوظيفي: ${employeeData.employeeId} | القسم: ${employeeData.department}</p>
                     </div>
 
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-                        <div class="card p-6 text-center bg-gradient-to-br from-blue-500 to-blue-600 text-white">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                        <div class="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-2xl p-6 text-center shadow-xl">
                             <p class="text-sm opacity-90">إجمالي اليوم</p>
-                            <h3 class="text-3xl font-bold mt-2">${todayTotal.toFixed(3)} د.أ</h3>
+                            <h3 class="text-4xl font-bold mt-2">${todayTotal.toFixed(3)} د.أ</h3>
                         </div>
-                        <div class="card p-6 text-center bg-gradient-to-br from-green-500 to-green-600 text-white">
+                        <div class="bg-gradient-to-br from-green-500 to-green-600 text-white rounded-2xl p-6 text-center shadow-xl">
                             <p class="text-sm opacity-90">إجمالي الشهر</p>
-                            <h3 class="text-3xl font-bold mt-2">${totalSalary.toFixed(3)} د.أ</h3>
+                            <h3 class="text-4xl font-bold mt-2">${total.toFixed(3)} د.أ</h3>
                         </div>
-                        <div class="card p-6 text-center bg-gradient-to-br from-purple-500 to-purple-600 text-white">
+                        <div class="bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-2xl p-6 text-center shadow-xl">
                             <p class="text-sm opacity-90">عدد السجلات</p>
-                            <h3 class="text-3xl font-bold mt-2">${records.length}</h3>
+                            <h3 class="text-4xl font-bold mt-2">${records.length}</h3>
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <div class="lg:col-span-2 space-y-6">
-                            <div class="card p-6">
+                            <div class="bg-white rounded-2xl shadow-xl p-6">
                                 <h3 class="text-xl font-bold mb-4 text-gray-800">➕ إضافة سجل عمل جديد</h3>
-                                <form id="addRecordForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <input type="date" id="date" class="px-4 py-3 border rounded-lg" required>
-                                    <input type="time" id="checkIn" placeholder="وقت الدخول" class="px-4 py-3 border rounded-lg" required>
-                                    <input type="time" id="checkOut" placeholder="وقت الخروج" class="px-4 py-3 border rounded-lg" required>
-                                    <input type="number" id="overtime" placeholder="ساعات إضافية" value="0" step="0.5" class="px-4 py-3 border rounded-lg">
-                                    <input type="number" id="bonus" placeholder="مكافآت (دينار)" value="0" step="0.001" class="px-4 py-3 border rounded-lg">
-                                    <input type="number" id="deduction" placeholder="خصومات (دينار)" value="0" step="0.001" class="px-4 py-3 border rounded-lg">
-                                    <input type="number" id="profit" placeholder="ربح الشهر (دينار)" value="0" step="0.001" class="px-4 py-3 border rounded-lg md:col-span-2">
-                                    <div class="md:col-span-2 bg-green-50 border-2 border-green-500 rounded-lg p-4 text-center">
+                                <form id="addForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <input type="date" id="date" class="px-4 py-3 border-2 rounded-xl outline-none focus:ring-2 focus:ring-blue-500" required>
+                                    <input type="time" id="checkIn" placeholder="وقت الدخول" class="px-4 py-3 border-2 rounded-xl outline-none focus:ring-2 focus:ring-blue-500" required>
+                                    <input type="time" id="checkOut" placeholder="وقت الخروج" class="px-4 py-3 border-2 rounded-xl outline-none focus:ring-2 focus:ring-blue-500" required>
+                                    <input type="number" id="overtime" placeholder="ساعات إضافية" value="0" step="0.5" class="px-4 py-3 border-2 rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
+                                    <input type="number" id="bonus" placeholder="مكافآت (دينار)" value="0" step="0.001" class="px-4 py-3 border-2 rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
+                                    <input type="number" id="deduction" placeholder="خصومات (دينار)" value="0" step="0.001" class="px-4 py-3 border-2 rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
+                                    <input type="number" id="profit" placeholder="ربح الشهر (دينار)" value="0" step="0.001" class="px-4 py-3 border-2 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 md:col-span-2">
+                                    <div class="md:col-span-2 bg-green-50 border-2 border-green-500 rounded-xl p-4 text-center">
                                         <p class="text-sm text-gray-600">قيمة العمولة 1%</p>
-                                        <p class="text-2xl font-bold text-green-600" id="commissionResult">0.000 د.أ</p>
+                                        <p class="text-3xl font-bold text-green-600" id="commissionResult">0.000 د.أ</p>
                                     </div>
-                                    <button type="submit" class="md:col-span-2 bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700">إضافة السجل وحساب الراتب</button>
+                                    <button type="submit" class="md:col-span-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-xl font-bold hover:opacity-90">إضافة السجل وحساب الراتب</button>
                                 </form>
                             </div>
 
-                            <div class="card p-6">
-                                <div class="flex justify-between items-center mb-4">
-                                    <h3 class="text-xl font-bold text-gray-800">📊 سجلات العمل</h3>
-                                    <button onclick="deleteAllRecords()" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 text-sm">مسح الكل 🗑️</button>
-                                </div>
+                            <div class="bg-white rounded-2xl shadow-xl p-6">
+                                <h3 class="text-xl font-bold mb-4 text-gray-800">📊 سجلات العمل</h3>
                                 <div class="overflow-x-auto">
                                     <table class="w-full text-sm">
-                                        <thead class="bg-gray-100">
+                                        <thead class="bg-gradient-to-r from-gray-100 to-gray-200">
                                             <tr>
                                                 <th class="p-3 text-right">التاريخ</th>
                                                 <th class="p-3">الدخول</th>
@@ -147,44 +129,36 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            ${records.length === 0? '<tr><td colspan="11" class="p-8 text-center text-gray-500">لا توجد سجلات بعد</td></tr>' : records.map(r => {
-                                                const hours = Math.floor(r.minutes/60);
-                                                const mins = Math.floor(r.minutes%60);
-                                                return `
-                                                    <tr class="border-b hover:bg-gray-50">
-                                                        <td class="p-3">${r.date}</td>
-                                                        <td class="p-3">${r.checkIn}</td>
-                                                        <td class="p-3">${r.checkOut}</td>
-                                                        <td class="p-3">${hours}:${mins.toString().padStart(2,'0')}</td>
-                                                        <td class="p-3">${r.overtime}</td>
-                                                        <td class="p-3">${r.bonus.toFixed(3)}</td>
-                                                        <td class="p-3">${r.deduction.toFixed(3)}</td>
-                                                        <td class="p-3">${r.profit.toFixed(3)}</td>
-                                                        <td class="p-3 font-bold text-green-600">${r.commissionAmount.toFixed(3)}</td>
-                                                        <td class="p-3 font-bold">${r.dailyWage.toFixed(3)} د.أ</td>
-                                                        <td class="p-3"><button onclick="deleteRecord('${r.id}')" class="text-red-600 hover:underline">حذف</button></td>
-                                                    </tr>
-                                                `;
+                                            ${records.length === 0? '<tr><td colspan="11" class="p-8 text-center text-gray-400">لا توجد سجلات بعد</td></tr>' : records.map(r => {
+                                                const h = Math.floor(r.minutes/60);
+                                                const m = Math.floor(r.minutes%60);
+                                                return `<tr class="border-b hover:bg-blue-50">
+                                                    <td class="p-3">${r.date}</td>
+                                                    <td class="p-3">${r.checkIn}</td>
+                                                    <td class="p-3">${r.checkOut}</td>
+                                                    <td class="p-3">${h}:${m.toString().padStart(2,'0')}</td>
+                                                    <td class="p-3">${r.overtime}</td>
+                                                    <td class="p-3">${r.bonus.toFixed(3)}</td>
+                                                    <td class="p-3">${r.deduction.toFixed(3)}</td>
+                                                    <td class="p-3">${r.profit.toFixed(3)}</td>
+                                                    <td class="p-3 font-bold text-green-600">${r.commissionAmount.toFixed(3)}</td>
+                                                    <td class="p-3 font-bold">${r.dailyWage.toFixed(3)} د.أ</td>
+                                                    <td class="p-3"><button onclick="deleteRecord('${r.id}')" class="text-red-600 hover:underline font-bold">حذف</button></td>
+                                                </tr>`;
                                             }).join('')}
                                         </tbody>
                                     </table>
                                 </div>
                             </div>
-
-                            <div class="card p-8 bg-gradient-to-br from-blue-600 to-purple-600 text-white text-center">
-                                <p class="text-lg opacity-90 mb-2">المجموع الكلي للموظف</p>
-                                <h2 class="text-5xl font-bold mb-2">${totalSalary.toFixed(3)} د.أ</h2>
-                                <p class="text-sm opacity-75">شامل الضرائب والخصومات ✅</p>
-                            </div>
                         </div>
 
                         <div class="space-y-6">
-                            <div class="card p-6">
+                            <div class="bg-white rounded-2xl shadow-xl p-6">
                                 <h3 class="text-xl font-bold mb-4 text-gray-800">📋 بيانات الهوية</h3>
-                                <input type="text" id="idNumber" placeholder="رقم الهوية / التصريح" value="${employeeData.idNumber || ''}" class="w-full px-4 py-3 border rounded-lg mb-3">
-                                <input type="file" id="idImage" accept="image/*" class="w-full px-4 py-3 border rounded-lg mb-3">
-                                <button onclick="saveIdData()" class="w-full bg-green-600 text-white py-3 rounded-lg font-bold hover:bg-green-700">حفظ بيانات الهوية</button>
-                                ${employeeData.idImageUrl? `<img src="${employeeData.idImageUrl}" class="w-full mt-4 rounded-lg border-2 border-gray-200">` : ''}
+                                <input type="text" id="idNumber" placeholder="رقم الهوية / التصريح" value="${employeeData.idNumber || ''}" class="w-full px-4 py-3 border-2 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-500">
+                                <input type="file" id="idImage" accept="image/*" class="w-full px-4 py-3 border-2 rounded-xl mb-3">
+                                <button onclick="saveIdData()" class="w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-3 rounded-xl font-bold hover:opacity-90">حفظ بيانات الهوية</button>
+                                ${employeeData.idImageUrl? `<img src="${employeeData.idImageUrl}" class="w-full mt-4 rounded-xl border-2 border-gray-200">` : ''}
                             </div>
                         </div>
                     </div>
@@ -192,48 +166,41 @@
             `;
 
             document.getElementById('profit').addEventListener('input', function() {
-                const profit = parseFloat(this.value) || 0;
-                document.getElementById('commissionResult').innerText = (profit * 0.01).toFixed(3) + ' د.أ';
+                document.getElementById('commissionResult').innerText = ((parseFloat(this.value) || 0) * 0.01).toFixed(3) + ' د.أ';
             });
-
-            document.getElementById('addRecordForm').addEventListener('submit', addRecord);
+            document.getElementById('addForm').addEventListener('submit', addRecord);
         }
 
         window.saveIdData = async function() {
             const idNumber = document.getElementById('idNumber').value;
             const file = document.getElementById('idImage').files[0];
             let updateData = { idNumber };
-
             if (file) {
                 const ref = storage.ref(`ids/${employeeId}_${Date.now()}`);
                 await uploadBytes(ref, file);
                 updateData.idImageUrl = await getDownloadURL(ref);
             }
-
             await updateDoc(doc(db, 'employees', employeeId), updateData);
             alert('تم الحفظ ✅');
-            loadEmployeeData();
+            loadData();
         }
 
-        function calculateSalary(checkIn, checkOut, overtime, bonus, deduction, profit) {
+        function calc(checkIn, checkOut, overtime, bonus, deduction, profit) {
             const start = new Date(`2000-01-01T${checkIn}`);
             const end = new Date(`2000-01-01T${checkOut}`);
             const diffMinutes = (end - start) / 60000;
             if (diffMinutes < 0) return null;
-
-            const baseSalary = diffMinutes / 60;
-            const overtimeSalary = parseFloat(overtime) || 0;
-            const bonusAmount = parseFloat(bonus) || 0;
-            const deductionAmount = parseFloat(deduction) || 0;
-            const commissionAmount = (parseFloat(profit) || 0) * 0.01;
-            const dailyWage = baseSalary + overtimeSalary + bonusAmount + commissionAmount - deductionAmount;
-
-            return { baseSalary, dailyWage, minutes: diffMinutes, commissionAmount };
+            const base = diffMinutes / 60;
+            const over = parseFloat(overtime) || 0;
+            const bon = parseFloat(bonus) || 0;
+            const ded = parseFloat(deduction) || 0;
+            const comm = (parseFloat(profit) || 0) * 0.01;
+            return { base, dailyWage: base + over + bon + comm - ded, minutes: diffMinutes, commissionAmount: comm };
         }
 
         async function addRecord(e) {
             e.preventDefault();
-            const calc = calculateSalary(
+            const c = calc(
                 document.getElementById('checkIn').value,
                 document.getElementById('checkOut').value,
                 document.getElementById('overtime').value,
@@ -241,11 +208,7 @@
                 document.getElementById('deduction').value,
                 document.getElementById('profit').value
             );
-
-            if (!calc) {
-                alert('وقت الخروج لازم يكون بعد الدخول');
-                return;
-            }
+            if (!c) return alert('وقت الخروج لازم يكون بعد الدخول');
 
             await addDoc(collection(db, 'attendance'), {
                 employeeId,
@@ -256,35 +219,21 @@
                 bonus: parseFloat(document.getElementById('bonus').value) || 0,
                 deduction: parseFloat(document.getElementById('deduction').value) || 0,
                 profit: parseFloat(document.getElementById('profit').value) || 0,
-                dailyWage: calc.dailyWage,
-                minutes: calc.minutes,
-                commissionAmount: calc.commissionAmount,
+                dailyWage: c.dailyWage,
+                minutes: c.minutes,
+                commissionAmount: c.commissionAmount,
                 createdAt: new Date().toISOString()
             });
-
             alert('تم اضافة السجل ✅');
             e.target.reset();
             document.getElementById('commissionResult').innerText = '0.000 د.أ';
-            await loadRecords();
-            renderEmployeePage();
+            loadData();
         }
 
         window.deleteRecord = async function(id) {
             if (confirm('متأكد من حذف السجل؟')) {
                 await deleteDoc(doc(db, 'attendance', id));
-                await loadRecords();
-                renderEmployeePage();
-            }
-        }
-
-        window.deleteAllRecords = async function() {
-            if (confirm('متأكد من مسح كل سجلات هذا الموظف؟')) {
-                const q = query(collection(db, 'attendance'), where('employeeId', '==', employeeId));
-                const snapshot = await getDocs(q);
-                const promises = snapshot.docs.map(doc => deleteDoc(doc.ref));
-                await Promise.all(promises);
-                await loadRecords();
-                renderEmployeePage();
+                loadData();
             }
         }
     </script>
