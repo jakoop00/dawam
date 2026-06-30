@@ -8,7 +8,7 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap');
         body { font-family: 'Tajawal', sans-serif; }
-       .loader { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 20px auto; }
+      .loader { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
@@ -17,7 +17,7 @@
         <div class="flex items-center justify-center min-h-screen">
             <div class="text-center">
                 <div class="loader"></div>
-                <p class="text-xl text-gray-600 mt-4" id="loadingText">جاري تحميل بيانات الموظف...</p>
+                <p class="text-xl text-gray-600 mt-4">جاري تحميل بيانات الموظف...</p>
             </div>
         </div>
     </div>
@@ -28,7 +28,6 @@
         import { getFirestore, doc, getDoc, updateDoc, collection, addDoc, getDocs, query, where, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
         import { getStorage, ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js';
 
-        // نفس الكونفيج تبع index.html
         const firebaseConfig = {
             apiKey: "AIzaSyDHbtLO5NbRoDddk7CH0u5jAxC5gOAl1iE",
             authDomain: "employee-dawam.firebaseapp.com",
@@ -49,80 +48,77 @@
         let records = [];
 
         onAuthStateChanged(auth, (user) => {
-            if (!user) {
-                window.location.href = 'index.html';
-                return;
-            }
-            if (!employeeId) {
-                appDiv.innerHTML = '<div class="text-center p-8"><h2 class="text-2xl text-red-600">خطأ: لم يتم تحديد الموظف</h2><button onclick="window.location.href=\'index.html\'" class="mt-4 bg-blue-600 text-white px-6 py-2 rounded-xl">رجوع للقائمة</button></div>';
-                return;
-            }
+            if (!user ||!employeeId) return window.location.href = 'index.html';
             loadData();
         });
 
         async function loadData() {
             try {
-                document.getElementById('loadingText').innerText = 'جاري تحميل بيانات الموظف...';
-                
                 const empDoc = await getDoc(doc(db, 'employees', employeeId));
                 if (!empDoc.exists()) throw new Error('الموظف غير موجود');
                 employeeData = empDoc.data();
 
-                document.getElementById('loadingText').innerText = 'جاري تحميل سجلات الدوام...';
-
-                // بدون orderBy عشان ما يحتاج Index
                 const q = query(collection(db, 'attendance'), where('employeeId', '==', employeeId));
                 const snapshot = await getDocs(q);
                 records = snapshot.docs.map(doc => ({ id: doc.id,...doc.data() }));
                 records.sort((a, b) => new Date(b.date) - new Date(a.date));
 
                 renderPage();
-
             } catch (error) {
-                console.error(error);
-                appDiv.innerHTML = `
-                    <div class="flex items-center justify-center min-h-screen">
-                        <div class="bg-white p-8 rounded-2xl shadow-xl text-center max-w-md">
-                            <h2 class="text-2xl font-bold text-red-600 mb-4">صار خطأ!</h2>
-                            <p class="text-gray-600 mb-4">${error.message}</p>
-                            <button onclick="window.location.href='index.html'" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold">رجوع للقائمة الرئيسية</button>
-                        </div>
-                    </div>
-                `;
+                appDiv.innerHTML = `<div class="flex items-center justify-center min-h-screen"><div class="bg-white p-8 rounded-2xl shadow-xl text-center"><h2 class="text-2xl font-bold text-red-600 mb-4">صار خطأ!</h2><p class="text-gray-600 mb-4">${error.message}</p><button onclick="window.location.href='index.html'" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold">رجوع للقائمة</button></div></div>`;
             }
         }
 
         function renderPage() {
-            const total = records.reduce((sum, r) => sum + r.dailyWage, 0);
             const today = new Date().toISOString().split('T')[0];
-            const todayTotal = records.filter(r => r.date === today).reduce((sum, r) => sum + r.dailyWage, 0);
+            const weekAgo = new Date();
+            weekAgo.setDate(weekAgo.getDate() - 7);
+            const weekAgoStr = weekAgo.toISOString().split('T')[0];
+
+            // 1. اجمالي اليوم = بس دوام + اضافي بدون مكافآت وخصم
+            const todayRecords = records.filter(r => r.date === today);
+            const todayTotal = todayRecords.reduce((sum, r) => sum + r.baseSalary + r.overtime, 0);
+
+            // 2. اجمالي الاسبوع = اخر 7 ايام كاملة
+            const weekRecords = records.filter(r => r.date >= weekAgoStr);
+            const weekTotal = weekRecords.reduce((sum, r) => sum + r.dailyWage, 0);
+
+            // 3. اجمالي الشهر
+            const monthTotal = records.reduce((sum, r) => sum + r.dailyWage, 0);
+
+            const defaultImg = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(employeeData.name) + '&background=6c5ce7&color=fff&size=200';
 
             appDiv.innerHTML = `
                 <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-5 shadow-xl">
                     <div class="max-w-7xl mx-auto flex justify-between items-center">
-                        <button onclick="window.location.href='index.html'" class="bg-white text-blue-600 px-5 py-2 rounded-xl font-bold hover:bg-gray-100 transition">← رجوع للقائمة</button>
+                        <button onclick="window.location.href='index.html'" class="bg-white text-blue-600 px-5 py-2 rounded-xl font-bold hover:bg-gray-100">← رجوع للقائمة</button>
                         <h1 class="text-2xl font-bold">ملف الموظف</h1>
                         <div class="w-32"></div>
                     </div>
                 </div>
                 <div class="max-w-7xl mx-auto p-6">
                     <div class="bg-white rounded-2xl shadow-xl p-6 mb-6">
-                        <h2 class="text-3xl font-bold text-gray-800 mb-2">👤 ${employeeData.name}</h2>
-                        <p class="text-gray-600">الرقم الوظيفي: ${employeeData.employeeId} | القسم: ${employeeData.department}</p>
+                        <div class="flex items-center gap-6">
+                            <img src="${employeeData.profileImageUrl || defaultImg}" class="w-24 h-24 rounded-full border-4 border-blue-500 object-cover">
+                            <div>
+                                <h2 class="text-3xl font-bold text-gray-800 mb-2">👤 ${employeeData.name}</h2>
+                                <p class="text-gray-600">الرقم الوظيفي: ${employeeData.employeeId} | القسم: ${employeeData.department}</p>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                         <div class="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-2xl p-6 text-center shadow-xl">
-                            <p class="text-sm opacity-90">إجمالي اليوم</p>
+                            <p class="text-sm opacity-90">إجمالي اليوم (دوام+اضافي)</p>
                             <h3 class="text-4xl font-bold mt-2">${todayTotal.toFixed(3)} د.أ</h3>
+                        </div>
+                        <div class="bg-gradient-to-br from-orange-500 to-orange-600 text-white rounded-2xl p-6 text-center shadow-xl">
+                            <p class="text-sm opacity-90">إجمالي الأسبوع</p>
+                            <h3 class="text-4xl font-bold mt-2">${weekTotal.toFixed(3)} د.أ</h3>
                         </div>
                         <div class="bg-gradient-to-br from-green-500 to-green-600 text-white rounded-2xl p-6 text-center shadow-xl">
                             <p class="text-sm opacity-90">إجمالي الشهر</p>
-                            <h3 class="text-4xl font-bold mt-2">${total.toFixed(3)} د.أ</h3>
-                        </div>
-                        <div class="bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-2xl p-6 text-center shadow-xl">
-                            <p class="text-sm opacity-90">عدد السجلات</p>
-                            <h3 class="text-4xl font-bold mt-2">${records.length}</h3>
+                            <h3 class="text-4xl font-bold mt-2">${monthTotal.toFixed(3)} د.أ</h3>
                         </div>
                     </div>
 
@@ -142,7 +138,7 @@
                                         <p class="text-sm text-gray-600">قيمة العمولة 1%</p>
                                         <p class="text-3xl font-bold text-green-600" id="commissionResult">0.000 د.أ</p>
                                     </div>
-                                    <button type="submit" class="md:col-span-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-xl font-bold hover:opacity-90 transition">إضافة السجل وحساب الراتب</button>
+                                    <button type="submit" class="md:col-span-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-xl font-bold hover:opacity-90">إضافة السجل وحساب الراتب</button>
                                 </form>
                             </div>
 
@@ -169,7 +165,7 @@
                                             ${records.length === 0? '<tr><td colspan="11" class="p-8 text-center text-gray-400">لا توجد سجلات بعد</td></tr>' : records.map(r => {
                                                 const h = Math.floor(r.minutes/60);
                                                 const m = Math.floor(r.minutes%60);
-                                                return `<tr class="border-b hover:bg-blue-50 transition">
+                                                return `<tr class="border-b hover:bg-blue-50">
                                                     <td class="p-3">${r.date}</td>
                                                     <td class="p-3">${r.checkIn}</td>
                                                     <td class="p-3">${r.checkOut}</td>
@@ -191,6 +187,11 @@
 
                         <div class="space-y-6">
                             <div class="bg-white rounded-2xl shadow-xl p-6">
+                                <h3 class="text-xl font-bold mb-4 text-gray-800">🖼️ الصورة الشخصية</h3>
+                                <input type="file" id="profileImage" accept="image/*" class="w-full px-4 py-3 border-2 rounded-xl mb-3">
+                                <button onclick="saveProfileImage()" class="w-full bg-gradient-to-r from-purple-500 to-purple-600 text-white py-3 rounded-xl font-bold hover:opacity-90">تحديث الصورة</button>
+                            </div>
+                            <div class="bg-white rounded-2xl shadow-xl p-6">
                                 <h3 class="text-xl font-bold mb-4 text-gray-800">📋 بيانات الهوية</h3>
                                 <input type="text" id="idNumber" placeholder="رقم الهوية / التصريح" value="${employeeData.idNumber || ''}" class="w-full px-4 py-3 border-2 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-500">
                                 <input type="file" id="idImage" accept="image/*" class="w-full px-4 py-3 border-2 rounded-xl mb-3">
@@ -206,6 +207,17 @@
                 document.getElementById('commissionResult').innerText = ((parseFloat(this.value) || 0) * 0.01).toFixed(3) + ' د.أ';
             });
             document.getElementById('addForm').addEventListener('submit', addRecord);
+        }
+
+        window.saveProfileImage = async function() {
+            const file = document.getElementById('profileImage').files[0];
+            if (!file) return alert('اختار صورة اول');
+            const ref = storage.ref(`profiles/${employeeId}_${Date.now()}`);
+            await uploadBytes(ref, file);
+            const url = await getDownloadURL(ref);
+            await updateDoc(doc(db, 'employees', employeeId), { profileImageUrl: url });
+            alert('تم تحديث الصورة ✅');
+            loadData();
         }
 
         window.saveIdData = async function() {
@@ -227,44 +239,54 @@
             const end = new Date(`2000-01-01T${checkOut}`);
             const diffMinutes = (end - start) / 60000;
             if (diffMinutes < 0) return null;
-            const base = diffMinutes / 60;
+            const baseSalary = diffMinutes / 60; // الاساسي
             const over = parseFloat(overtime) || 0;
             const bon = parseFloat(bonus) || 0;
             const ded = parseFloat(deduction) || 0;
             const comm = (parseFloat(profit) || 0) * 0.01;
-            return { base, dailyWage: base + over + bon + comm - ded, minutes: diffMinutes, commissionAmount: comm };
+            return {
+                baseSalary,
+                dailyWage: baseSalary + over + bon + comm - ded,
+                minutes: diffMinutes,
+                commissionAmount: comm
+            };
         }
 
         async function addRecord(e) {
             e.preventDefault();
-            const c = calc(
-                document.getElementById('checkIn').value,
-                document.getElementById('checkOut').value,
-                document.getElementById('overtime').value,
-                document.getElementById('bonus').value,
-                document.getElementById('deduction').value,
-                document.getElementById('profit').value
-            );
-            if (!c) return alert('وقت الخروج لازم يكون بعد الدخول');
+            try {
+                const c = calc(
+                    document.getElementById('checkIn').value,
+                    document.getElementById('checkOut').value,
+                    document.getElementById('overtime').value,
+                    document.getElementById('bonus').value,
+                    document.getElementById('deduction').value,
+                    document.getElementById('profit').value
+                );
+                if (!c) return alert('وقت الخروج لازم يكون بعد الدخول');
 
-            await addDoc(collection(db, 'attendance'), {
-                employeeId,
-                date: document.getElementById('date').value,
-                checkIn: document.getElementById('checkIn').value,
-                checkOut: document.getElementById('checkOut').value,
-                overtime: parseFloat(document.getElementById('overtime').value) || 0,
-                bonus: parseFloat(document.getElementById('bonus').value) || 0,
-                deduction: parseFloat(document.getElementById('deduction').value) || 0,
-                profit: parseFloat(document.getElementById('profit').value) || 0,
-                dailyWage: c.dailyWage,
-                minutes: c.minutes,
-                commissionAmount: c.commissionAmount,
-                createdAt: new Date().toISOString()
-            });
-            alert('تم اضافة السجل ✅');
-            e.target.reset();
-            document.getElementById('commissionResult').innerText = '0.000 د.أ';
-            loadData();
+                await addDoc(collection(db, 'attendance'), {
+                    employeeId,
+                    date: document.getElementById('date').value,
+                    checkIn: document.getElementById('checkIn').value,
+                    checkOut: document.getElementById('checkOut').value,
+                    overtime: parseFloat(document.getElementById('overtime').value) || 0,
+                    bonus: parseFloat(document.getElementById('bonus').value) || 0,
+                    deduction: parseFloat(document.getElementById('deduction').value) || 0,
+                    profit: parseFloat(document.getElementById('profit').value) || 0,
+                    baseSalary: c.baseSalary, // جديد: نخزن الاساسي لحاله
+                    dailyWage: c.dailyWage,
+                    minutes: c.minutes,
+                    commissionAmount: c.commissionAmount,
+                    createdAt: new Date().toISOString()
+                });
+                alert('تم اضافة السجل ✅');
+                e.target.reset();
+                document.getElementById('commissionResult').innerText = '0.000 د.أ';
+                loadData();
+            } catch (error) {
+                alert('خطأ بالاضافة: ' + error.message);
+            }
         }
 
         window.deleteRecord = async function(id) {
