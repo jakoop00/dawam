@@ -8,17 +8,17 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap');
         body { font-family: 'Tajawal', sans-serif; color: #000; }
-        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 20px auto; }
+       .loader { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); }
-        .modal-content { background-color: white; margin: 5% auto; padding: 30px; border-radius: 20px; width: 90%; max-width: 600px; max-height: 80vh; overflow-y: auto; }
-        .input-label { display: block; color: #000; font-weight: 800; margin-bottom: 8px; font-size: 16px; }
-        .input-field { width: 100%; padding: 14px; border: 3px solid #2563eb; border-radius: 12px; font-size: 16px; background: #fff; color: #000; font-weight: 700; }
-        .input-field:focus { outline: none; border-color: #1e40af; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2); }
-        .preview-box { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 16px; text-align: center; }
-        .image-modal-content { margin: 5% auto; max-width: 90%; max-height: 80vh; }
-        .image-modal-content img { width: 100%; height: auto; border-radius: 20px; }
-        .close-btn { position: absolute; top: 20px; right: 40px; color: white; font-size: 40px; font-weight: bold; cursor: pointer; }
+       .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); }
+       .modal-content { background-color: white; margin: 5% auto; padding: 30px; border-radius: 20px; width: 90%; max-width: 600px; max-height: 80vh; overflow-y: auto; }
+       .input-label { display: block; color: #000; font-weight: 800; margin-bottom: 8px; font-size: 16px; }
+       .input-field { width: 100%; padding: 14px; border: 3px solid #2563eb; border-radius: 12px; font-size: 16px; background: #fff; color: #000; font-weight: 700; }
+       .input-field:focus { outline: none; border-color: #1e40af; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2); }
+       .preview-box { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 16px; text-align: center; }
+       .image-modal-content { margin: 5% auto; max-width: 90%; max-height: 80vh; }
+       .image-modal-content img { width: 100%; height: auto; border-radius: 20px; }
+       .close-btn { position: absolute; top: 20px; right: 40px; color: white; font-size: 40px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body class="bg-gradient-to-br from-blue-50 to-purple-50 min-h-screen">
@@ -75,11 +75,11 @@
                     <input type="date" id="editDate" class="input-field" required>
                 </div>
                 <div>
-                    <label class="input-label">🕐 وقت الدخول</label>
+                    <label class="input-label">🕐 وقت الدخول (24 ساعة)</label>
                     <input type="time" id="editCheckIn" class="input-field" required>
                 </div>
                 <div>
-                    <label class="input-label">🕐 وقت الخروج</label>
+                    <label class="input-label">🕐 وقت الخروج (24 ساعة)</label>
                     <input type="time" id="editCheckOut" class="input-field" required>
                 </div>
                 <div>
@@ -172,6 +172,28 @@
             }
         }
 
+        // ✅ مصلح: بحسب الدوام الليلي صح
+        function calc(checkIn, checkOut, overtime, bonus, deduction) {
+            let start = new Date(`2000-01-01T${checkIn}`);
+            let end = new Date(`2000-01-01T${checkOut}`);
+
+            // اذا الخروج قبل الدخول، يعني دوام ليلي
+            if (end < start) {
+                end = new Date(`2000-01-02T${checkOut}`); // اليوم الثاني
+            }
+
+            const diffMinutes = (end - start) / 60000;
+            const baseSalary = diffMinutes / 60;
+            const over = parseFloat(overtime) || 0;
+            const bon = parseFloat(bonus) || 0;
+            const ded = parseFloat(deduction) || 0;
+            return {
+                baseSalary,
+                dailyWage: baseSalary + over + bon - ded,
+                minutes: diffMinutes
+            };
+        }
+
         function calcLive() {
             const checkIn = document.getElementById('checkIn').value;
             const checkOut = document.getElementById('checkOut').value;
@@ -184,16 +206,8 @@
                 return;
             }
 
-            const start = new Date(`2000-01-01T${checkIn}`);
-            const end = new Date(`2000-01-01T${checkOut}`);
-            const diffMinutes = (end - start) / 60000;
-            if (diffMinutes < 0) {
-                document.getElementById('livePreview').innerText = 'خطأ: الخروج قبل الدخول';
-                return;
-            }
-            const baseSalary = diffMinutes / 60;
-            const total = baseSalary + overtime + bonus - deduction;
-            document.getElementById('livePreview').innerText = total.toFixed(3) + ' د.أ';
+            const c = calc(checkIn, checkOut, overtime, bonus, deduction);
+            document.getElementById('livePreview').innerText = c.dailyWage.toFixed(3) + ' د.أ';
         }
 
         function renderPage() {
@@ -221,7 +235,6 @@
                         <h1 class="text-2xl font-bold">ملف الموظف</h1>
                         <div class="w-32"></div>
                     </div>
-                </div>
                 <div class="max-w-7xl mx-auto p-6">
                     <div class="bg-white rounded-2xl shadow-xl p-6 mb-6">
                         <div class="flex items-center gap-6 justify-center">
@@ -274,11 +287,11 @@
                                         <input type="date" id="date" class="input-field" required>
                                     </div>
                                     <div>
-                                        <label class="input-label">🕐 وقت الدخول</label>
+                                        <label class="input-label">🕐 وقت الدخول (24 ساعة)</label>
                                         <input type="time" id="checkIn" class="input-field" required>
                                     </div>
                                     <div>
-                                        <label class="input-label">🕐 وقت الخروج</label>
+                                        <label class="input-label">🕐 وقت الخروج (24 ساعة)</label>
                                         <input type="time" id="checkOut" class="input-field" required>
                                     </div>
                                     <div>
@@ -445,22 +458,6 @@
             }
         }
 
-        function calc(checkIn, checkOut, overtime, bonus, deduction) {
-            const start = new Date(`2000-01-01T${checkIn}`);
-            const end = new Date(`2000-01-01T${checkOut}`);
-            const diffMinutes = (end - start) / 60000;
-            if (diffMinutes < 0) return null;
-            const baseSalary = diffMinutes / 60;
-            const over = parseFloat(overtime) || 0;
-            const bon = parseFloat(bonus) || 0;
-            const ded = parseFloat(deduction) || 0;
-            return {
-                baseSalary,
-                dailyWage: baseSalary + over + bon - ded,
-                minutes: diffMinutes
-            };
-        }
-
         async function addRecord(e) {
             e.preventDefault();
             try {
@@ -471,7 +468,6 @@
                     document.getElementById('bonus').value,
                     document.getElementById('deduction').value
                 );
-                if (!c) return alert('وقت الخروج لازم يكون بعد الدخول');
 
                 await addDoc(collection(db, 'attendance'), {
                     employeeId,
@@ -522,7 +518,6 @@
                 document.getElementById('editBonus').value,
                 document.getElementById('editDeduction').value
             );
-            if (!c) return alert('وقت الخروج لازم يكون بعد الدخول');
 
             await updateDoc(doc(db, 'attendance', id), {
                 date: document.getElementById('editDate').value,
