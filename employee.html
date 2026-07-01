@@ -63,7 +63,7 @@
     </div>
 
     <!-- نافذة الصورة المنبثقة -->
-    <div id="imageModal" class="modal no-print" onclick="closeImageModal()">
+    <div id="imageModal" class="modal" onclick="closeImageModal()">
         <span class="close-btn" onclick="closeImageModal()">&times;</span>
         <div class="image-modal-content">
             <img id="popupImage" src="" alt="صورة">
@@ -257,21 +257,11 @@
             const defaultImg = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(employeeData.name) + '&background=6c5ce7&color=fff&size=200';
 
             appDiv.innerHTML = `
-                <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-5 shadow-xl no-print">
+                <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-5 shadow-xl">
                     <div class="max-w-7xl mx-auto flex justify-between items-center">
                         <button onclick="window.location.href='index.html'" class="bg-white text-blue-600 px-5 py-2 rounded-xl font-bold hover:bg-gray-100">← رجوع للقائمة</button>
                         <h1 class="text-2xl font-bold">ملف الموظف</h1>
-                        <div class="relative inline-block no-print">
-    <button onclick="togglePrintMenuFinal(event)" class="bg-white text-blue-600 px-5 py-2 rounded-xl font-bold hover:bg-gray-100 flex items-center gap-2">
-      🖨 طباعة
-      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-    </button>
-    <div id="printMenuFinal" class="hidden absolute left-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border z-50">
-      <button onclick="doPrintFinal('full', event)" class="block w-full text-right px-4 py-3 hover:bg-gray-50 text-gray-800 rounded-t-xl font-medium">طباعة سجل الموظف كامل</button>
-      <button onclick="doPrintFinal('front', event)" class="block w-full text-right px-4 py-3 hover:bg-gray-50 text-gray-800 border-t font-medium">طباعة الهوية - الوجه الأمامي</button>
-      <button onclick="doPrintFinal('back', event)" class="block w-full text-right px-4 py-3 hover:bg-gray-50 text-gray-800 border-t rounded-b-xl font-medium">طباعة الهوية - الوجه الخلفي</button>
-    </div>
-  </div>
+                        
                     </div>
                 <div class="max-w-7xl mx-auto p-6">
                     <div class="bg-white rounded-2xl shadow-xl p-6 mb-6">
@@ -300,7 +290,7 @@
                         </div>
                     </div>
 
-                    <div class="bg-gradient-to-br from-purple-500 to-pink-600 text-white rounded-2xl p-6 shadow-xl mb-6 no-print">
+                    <div class="bg-gradient-to-br from-purple-500 to-pink-600 text-white rounded-2xl p-6 shadow-xl mb-6">
                         <div class="flex justify-center items-center gap-4">
                             <button onclick="openCommissionModal()" class="bg-white text-purple-600 px-8 py-3 rounded-xl font-bold hover:bg-gray-100">💰 إضافة عمولة</button>
                             <button onclick="resetCommission()" class="bg-red-500 text-white px-8 py-3 rounded-xl font-bold hover:bg-red-600">🗑 حذف العمولة</button>
@@ -308,7 +298,7 @@
                     </div>
 
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <div class="lg:col-span-2 space-y-6 no-print">
+                        <div class="lg:col-span-2 space-y-6">
                             <div class="bg-white rounded-2xl shadow-xl p-6">
                                 <h3 class="text-xl font-bold mb-4 text-gray-900">➕ إضافة سجل عمل جديد</h3>
                                 <div class="preview-box mb-5">
@@ -358,8 +348,8 @@
                                                 <th class="p-3 font-bold text-gray-900">مكافآت</th>
                                                 <th class="p-3 font-bold text-gray-900">سلفة</th>
                                                 <th class="p-3 font-bold text-gray-900">أجر اليوم</th>
-                                                <th class="p-3 font-bold text-gray-900 no-print">تعديل</th>
-                                                <th class="p-3 font-bold text-gray-900 no-print">حذف</th>
+                                                <th class="p-3 font-bold text-gray-900">تعديل</th>
+                                                <th class="p-3 font-bold text-gray-900">حذف</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -375,8 +365,8 @@
                                                     <td class="p-3 text-green-700 font-bold">${r.bonus.toFixed(3)}</td>
                                                     <td class="p-3 text-red-700 font-bold">${r.deduction.toFixed(3)}</td>
                                                     <td class="p-3 font-bold text-purple-700">${r.dailyWage.toFixed(3)} د.أ</td>
-                                                    <td class="p-3 no-print"><button onclick="openEditModal('${r.id}')" class="text-blue-600 hover:underline font-bold">تعديل</button></td>
-                                                    <td class="p-3 no-print"><button onclick="deleteRecord('${r.id}')" class="text-red-600 hover:underline font-bold">حذف</button></td>
+                                                    <td class="p-3"><button onclick="openEditModal('${r.id}')" class="text-blue-600 hover:underline font-bold">تعديل</button></td>
+                                                    <td class="p-3"><button onclick="deleteRecord('${r.id}')" class="text-red-600 hover:underline font-bold">حذف</button></td>
                                                 </tr>`;
                                             }).join('')}
                                         </tbody>
@@ -386,7 +376,7 @@
                         </div>
 
                         <div class="space-y-6">
-                            <div class="bg-white rounded-2xl shadow-xl p-6 no-print">
+                            <div class="bg-white rounded-2xl shadow-xl p-6">
                                 <h3 class="text-xl font-bold mb-4 text-gray-900">🖼 الصورة الشخصية</h3>
                                 <input type="file" id="profileImage" accept="image/*" class="w-full px-4 py-3 border-2 border-blue-300 rounded-xl mb-3 text-gray-900">
                                 <div class="flex gap-2">
@@ -394,7 +384,7 @@
                                     <button onclick="deleteProfileImage()" class="bg-red-500 text-white px-4 py-3 rounded-xl font-bold hover:opacity-90">🗑</button>
                                 </div>
                             </div>
-                            <div class="bg-white rounded-2xl shadow-xl p-6 no-print">
+                            <div class="bg-white rounded-2xl shadow-xl p-6">
                                 <h3 class="text-xl font-bold mb-4 text-gray-900">📋  بيانات الهوية / التصريح</h3>
                                 <input type="text" id="idNumber" placeholder="رقم الهوية / التصريح" value="${employeeData.idNumber || ''}" class="w-full px-4 py-3 border-2 border-blue-300 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 font-bold">
 
