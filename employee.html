@@ -50,6 +50,20 @@
 }
 
 </style>
+
+  <style>
+    @media print {
+      .no-print, #printToolbar { display: none !important; }
+      body.print-record .id-front, body.print-record .id-back { display: none !important; }
+      body.print-id-front * { visibility: hidden; }
+      body.print-id-front .id-front, body.print-id-front .id-front * { visibility: visible; }
+      body.print-id-front .id-front { position: absolute; left: 0; top: 0; width: 100%; text-align: center; }
+      body.print-id-back * { visibility: hidden; }
+      body.print-id-back .id-back, body.print-id-back .id-back * { visibility: visible; }
+      body.print-id-back .id-back { position: absolute; left: 0; top: 0; width: 100%; text-align: center; }
+    }
+  </style>
+
 </head>
 <body class="bg-gradient-to-br from-blue-50 to-purple-50 min-h-screen">
     <div class="realtime-badge">🔥 تحديث مباشر jakoop.tech </div>
@@ -645,6 +659,47 @@ if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(naviga
       profileInput.parentNode.insertBefore(camBtn, profileInput);
     }
   });
+}
+</script>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const sel = document.getElementById('empSelect');
+  const employees = document.querySelectorAll('.employee-record, [data-employee-id]');
+  employees.forEach((el, i) => {
+    const name = el.dataset.employeeName || el.querySelector('.name, .employee-name')?.textContent?.trim() || `موظف ${i+1}`;
+    const opt = document.createElement('option');
+    opt.value = i; opt.textContent = name;
+    sel.appendChild(opt);
+  });
+  
+  sel.onchange = () => {
+    document.querySelectorAll('.employee-record').forEach(e => e.style.display = 'none');
+    if(sel.value !== '') {
+      const el = document.querySelectorAll('.employee-record')[sel.value];
+      if(el) el.style.display = 'block';
+    } else {
+      document.querySelectorAll('.employee-record').forEach(e => e.style.display = 'block');
+    }
+  };
+  
+  document.getElementById('printBtn').onclick = () => {
+    if(sel.value === '') { alert('اختر موظف أولاً'); return; }
+    document.getElementById('printMenu').classList.toggle('hidden');
+  };
+  
+  document.addEventListener('click', e => {
+    if(!e.target.closest('#printBtn')) document.getElementById('printMenu').classList.add('hidden');
+  });
+});
+
+function doPrint(type) {
+  document.body.classList.remove('print-record','print-id-front','print-id-back');
+  if(type === 'record') document.body.classList.add('print-record');
+  if(type === 'front') document.body.classList.add('print-id-front');
+  if(type === 'back') document.body.classList.add('print-id-back');
+  window.print();
 }
 </script>
 
