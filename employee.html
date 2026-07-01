@@ -652,5 +652,49 @@ function groupByMonth(records) {
   </div>
 </div>
 
+
+<script>
+// Add camera buttons for employee photo and ID - mobile only
+if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+  document.addEventListener('DOMContentLoaded', function() {
+    
+    function addCameraButton(inputId, label) {
+      const input = document.getElementById(inputId);
+      if (input) {
+        const camBtn = document.createElement('button');
+        camBtn.innerHTML = '📷 ' + label;
+        camBtn.type = 'button';
+        camBtn.className = 'no-print bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-lg text-sm ml-2';
+        camBtn.onclick = () => {
+          const fileInput = document.createElement('input');
+          fileInput.type = 'file';
+          fileInput.accept = 'image/*';
+          fileInput.capture = 'environment';
+          fileInput.onchange = e => {
+            const file = e.target.files[0];
+            if (file) {
+              // Put file into the original input
+              const dataTransfer = new DataTransfer();
+              dataTransfer.items.add(file);
+              input.files = dataTransfer.files;
+              // Trigger change event
+              input.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+          };
+          fileInput.click();
+        };
+        input.parentNode.insertBefore(camBtn, input.nextSibling);
+      }
+    }
+    
+    // IDs might be different, try common ones
+    addCameraButton('employeePhoto', 'تصوير');
+    addCameraButton('employeeIdPhoto', 'تصوير الهوية');
+    addCameraButton('photo', 'تصوير');
+    addCameraButton('idPhoto', 'تصوير الهوية');
+  });
+}
+</script>
+
 </body>
 </html>
