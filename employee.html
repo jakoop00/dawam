@@ -41,7 +41,15 @@
             table { font-size: 12px; }
            .p-3 { padding: 0.5rem; }
         }
-    </style>
+    
+@media print {
+  body * { visibility: hidden; }
+  #print-section, #print-section * { visibility: visible; }
+  #print-section { position: absolute; left: 0; top: 0; width: 100%; }
+  .no-print { display: none !important; }
+}
+
+</style>
 </head>
 <body class="bg-gradient-to-br from-blue-50 to-purple-50 min-h-screen">
     <div class="realtime-badge">🔥 تحديث مباشر مفعل</div>
@@ -125,7 +133,10 @@
         </div>
     </div>
 
-    <script type="module">
+    
+<!-- IMPORTANT: Move firebaseConfig to environment variables. Set Firestore rules: allow read, write: if request.auth != null; -->
+
+<script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
         import { getFirestore, doc, onSnapshot, updateDoc, collection, addDoc, query, where, deleteDoc, deleteField } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
@@ -591,5 +602,55 @@
             }
         }
     </script>
+
+<script>
+// Show camera button only on mobile
+if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+  document.addEventListener('DOMContentLoaded', function() {
+    const camBtn = document.createElement('button');
+    camBtn.innerHTML = '📷 كاميرا';
+    camBtn.className = 'no-print bg-blue-500 text-white px-4 py-2 rounded-lg mb-4';
+    camBtn.onclick = () => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.capture = 'environment';
+      input.onchange = e => {
+        const file = e.target.files[0];
+        if (file) uploadAttachment(file);
+      };
+      input.click();
+    };
+    const container = document.querySelector('#attendance-container') || document.body;
+    container.prepend(camBtn);
+  });
+}
+</script>
+
+
+<script>
+function groupByMonth(records) {
+  const grouped = {};
+  records.forEach(r => {
+    const month = r.date.substring(0,7); // YYYY-MM
+    if (!grouped[month]) grouped[month] = [];
+    grouped[month].push(r);
+  });
+  return grouped;
+}
+</script>
+
+
+<div id="print-section" class="hidden">
+  <h2 class="text-2xl font-bold mb-4">سجل الدوام</h2>
+  <div id="print-table"></div>
+  <div class="mt-8 flex justify-between">
+    <div>الاسم: <span id="print-name"></span></div>
+    <div>رقم الهوية: <span id="print-id"></span></div>
+    <div>التاريخ: <span id="print-date"></span></div>
+    <div>التوقيع: ___________</div>
+  </div>
+</div>
+
 </body>
 </html>
