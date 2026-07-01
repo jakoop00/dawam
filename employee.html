@@ -262,14 +262,14 @@
                         <button onclick="window.location.href='index.html'" class="bg-white text-blue-600 px-5 py-2 rounded-xl font-bold hover:bg-gray-100">← رجوع للقائمة</button>
                         <h1 class="text-2xl font-bold">ملف الموظف</h1>
                         <div class="relative inline-block no-print">
-    <button id="newPrintBtn" class="bg-white text-blue-600 px-5 py-2 rounded-xl font-bold hover:bg-gray-100 flex items-center gap-2">
+    <button onclick="togglePrintMenuFinal(event)" class="bg-white text-blue-600 px-5 py-2 rounded-xl font-bold hover:bg-gray-100 flex items-center gap-2">
       🖨 طباعة
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
     </button>
-    <div id="newPrintMenu" class="hidden absolute left-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border z-50">
-      <button onclick="doPrintFinal('full')" class="block w-full text-right px-4 py-3 hover:bg-gray-50 text-gray-800 rounded-t-xl">طباعة سجل الموظف كامل</button>
-      <button onclick="doPrintFinal('front')" class="block w-full text-right px-4 py-3 hover:bg-gray-50 text-gray-800 border-t">طباعة الهوية - الوجه الأمامي</button>
-      <button onclick="doPrintFinal('back')" class="block w-full text-right px-4 py-3 hover:bg-gray-50 text-gray-800 border-t rounded-b-xl">طباعة الهوية - الوجه الخلفي</button>
+    <div id="printMenuFinal" class="hidden absolute left-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border z-50">
+      <button onclick="doPrintFinal('full', event)" class="block w-full text-right px-4 py-3 hover:bg-gray-50 text-gray-800 rounded-t-xl font-medium">طباعة سجل الموظف كامل</button>
+      <button onclick="doPrintFinal('front', event)" class="block w-full text-right px-4 py-3 hover:bg-gray-50 text-gray-800 border-t font-medium">طباعة الهوية - الوجه الأمامي</button>
+      <button onclick="doPrintFinal('back', event)" class="block w-full text-right px-4 py-3 hover:bg-gray-50 text-gray-800 border-t rounded-b-xl font-medium">طباعة الهوية - الوجه الخلفي</button>
     </div>
   </div>
                     </div>
