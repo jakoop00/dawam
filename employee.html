@@ -652,7 +652,7 @@ if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(naviga
 
 
 <script>
-// Camera for idImage + profileImage - mobile only
+// Camera for idImage  - mobile only
 if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
   document.addEventListener('DOMContentLoaded', function() {
     function addCameraBtn(inputId, btnText) {
@@ -692,8 +692,7 @@ if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(naviga
         input.parentNode.insertBefore(camBtn, input);
       }
     }
-    addCameraBtn('profileImage', 'تصوير الصورة الشخصية');
-    addCameraBtn('idImage', 'تصوير الهوية');
+        addCameraBtn('idImage', 'تصوير الهوية');
   });
 }
 
@@ -705,6 +704,202 @@ function printIdOnly() {
   const idImg = document.getElementById('idImagePreviewImg')?.src || '';
   
   if (!idImg) {
+    alert('الرجاء رفع صورة الهوية أولاً');
+    return;
+  }
+  
+  const printWindow = window.open('', '_blank');
+  printWindow.document.write(`
+    <html dir="rtl">
+    <head><title>طباعة الهوية</title>
+    <style>
+      body { font-family: Arial; padding: 40px; text-align: center; }
+      img { max-width: 500px; max-height: 500px; border: 3px solid #000; margin: 20px 0; }
+      .info { margin-top: 30px; font-size: 18px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; text-align: right; }
+      .info div { margin: 10px 0; }
+    </style>
+    </head>
+    <body>
+      <h1>صورة الهوية / التصريح</h1>
+      <img src="${idImg}">
+      <div class="info">
+        <div><strong>الاسم:</strong> ${name}</div>
+        <div><strong>رقم الهوية:</strong> ${idNumber}</div>
+        <div><strong>التاريخ:</strong> ${today}</div>
+        <div><strong>التوقيع:</strong> ___________</div>
+      </div>
+      <script>window.print();<\/script>
+    
+<script>
+// Camera for idImage only - mobile only
+if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+  document.addEventListener('DOMContentLoaded', function() {
+    const input = document.getElementById('idImage');
+    if (input && !input.dataset.cameraAttached) {
+      input.dataset.cameraAttached = 'true';
+      const camBtn = document.createElement('button');
+      camBtn.innerHTML = '📷 تصوير الهوية';
+      camBtn.type = 'button';
+      camBtn.className = 'no-print w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl font-bold mb-2';
+      camBtn.onclick = (e) => {
+        e.preventDefault();
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'image/*';
+        fileInput.capture = 'environment';
+        fileInput.onchange = ev => {
+          const file = ev.target.files[0];
+          if (file) {
+            const dt = new DataTransfer();
+            dt.items.add(file);
+            input.files = dt.files;
+            const previewDiv = document.getElementById('idImagePreview');
+            const previewImg = document.getElementById('idImagePreviewImg');
+            if (previewDiv && previewImg) {
+              const reader = new FileReader();
+              reader.onload = e => {
+                previewImg.src = e.target.result;
+                previewDiv.classList.remove('hidden');
+              };
+              reader.readAsDataURL(file);
+            }
+          }
+        };
+        fileInput.click();
+      };
+      input.parentNode.insertBefore(camBtn, input);
+    }
+  });
+}
+
+// Print ID only - same as before
+function printIdOnly() {
+  const name = employeeData?.name || document.getElementById('employeeName')?.innerText || document.querySelector('[data-name]')?.innerText || 'غير محدد';
+  const idNumber = document.getElementById('idNumber')?.value || '';
+  const today = new Date().toLocaleDateString('ar-SA');
+  const idImg = document.getElementById('idImagePreviewImg')?.src || '';
+  
+  if (!idImg || idImg.includes('data:image/gif')) {
+    alert('الرجاء رفع صورة الهوية أولاً');
+    return;
+  }
+  
+  const printWindow = window.open('', '_blank');
+  printWindow.document.write(`
+    <html dir="rtl">
+    <head><title>طباعة الهوية</title>
+    <style>
+      body { font-family: Arial; padding: 40px; text-align: center; }
+      img { max-width: 500px; max-height: 500px; border: 3px solid #000; margin: 20px 0; }
+      .info { margin-top: 30px; font-size: 18px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; text-align: right; }
+      .info div { margin: 10px 0; }
+    </style>
+    </head>
+    <body>
+      <h1>صورة الهوية / التصريح</h1>
+      <img src="${idImg}">
+      <div class="info">
+        <div><strong>الاسم:</strong> ${name}</div>
+        <div><strong>رقم الهوية:</strong> ${idNumber}</div>
+        <div><strong>التاريخ:</strong> ${today}</div>
+        <div><strong>التوقيع:</strong> ___________</div>
+      </div>
+      <script>window.print();<\/script>
+    </body>
+    </html>
+  `);
+  printWindow.document.close();
+}
+
+// Preview for idImage
+document.addEventListener('change', function(e) {
+  if (e.target.id === 'idImage') {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = e => {
+        document.getElementById('idImagePreviewImg').src = e.target.result;
+        document.getElementById('idImagePreview').classList.remove('hidden');
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+});
+</script>
+
+</body>
+    </html>
+  `);
+  printWindow.document.close();
+}
+
+// Preview for idImage
+document.addEventListener('change', function(e) {
+  if (e.target.id === 'idImage') {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = e => {
+        document.getElementById('idImagePreviewImg').src = e.target.result;
+        document.getElementById('idImagePreview').classList.remove('hidden');
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+});
+</script>
+
+
+<script>
+// Camera for idImage only - mobile only
+if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+  document.addEventListener('DOMContentLoaded', function() {
+    const input = document.getElementById('idImage');
+    if (input && !input.dataset.cameraAttached) {
+      input.dataset.cameraAttached = 'true';
+      const camBtn = document.createElement('button');
+      camBtn.innerHTML = '📷 تصوير الهوية';
+      camBtn.type = 'button';
+      camBtn.className = 'no-print w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl font-bold mb-2';
+      camBtn.onclick = (e) => {
+        e.preventDefault();
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'image/*';
+        fileInput.capture = 'environment';
+        fileInput.onchange = ev => {
+          const file = ev.target.files[0];
+          if (file) {
+            const dt = new DataTransfer();
+            dt.items.add(file);
+            input.files = dt.files;
+            const previewDiv = document.getElementById('idImagePreview');
+            const previewImg = document.getElementById('idImagePreviewImg');
+            if (previewDiv && previewImg) {
+              const reader = new FileReader();
+              reader.onload = e => {
+                previewImg.src = e.target.result;
+                previewDiv.classList.remove('hidden');
+              };
+              reader.readAsDataURL(file);
+            }
+          }
+        };
+        fileInput.click();
+      };
+      input.parentNode.insertBefore(camBtn, input);
+    }
+  });
+}
+
+// Print ID only - same as before
+function printIdOnly() {
+  const name = employeeData?.name || document.getElementById('employeeName')?.innerText || document.querySelector('[data-name]')?.innerText || 'غير محدد';
+  const idNumber = document.getElementById('idNumber')?.value || '';
+  const today = new Date().toLocaleDateString('ar-SA');
+  const idImg = document.getElementById('idImagePreviewImg')?.src || '';
+  
+  if (!idImg || idImg.includes('data:image/gif')) {
     alert('الرجاء رفع صورة الهوية أولاً');
     return;
   }
