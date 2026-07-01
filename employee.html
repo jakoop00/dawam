@@ -653,45 +653,67 @@ function groupByMonth(records) {
 </div>
 
 
+
+
+
 <script>
-// Add camera buttons for employee photo and ID - mobile only
+// Camera button for photo/ID inputs - mobile only, attached directly to file inputs
 if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
   document.addEventListener('DOMContentLoaded', function() {
     
-    function addCameraButton(inputId, label) {
-      const input = document.getElementById(inputId);
-      if (input) {
-        const camBtn = document.createElement('button');
-        camBtn.innerHTML = '📷 ' + label;
-        camBtn.type = 'button';
-        camBtn.className = 'no-print bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-lg text-sm ml-2';
-        camBtn.onclick = () => {
-          const fileInput = document.createElement('input');
-          fileInput.type = 'file';
-          fileInput.accept = 'image/*';
-          fileInput.capture = 'environment';
-          fileInput.onchange = e => {
-            const file = e.target.files[0];
-            if (file) {
-              // Put file into the original input
-              const dataTransfer = new DataTransfer();
-              dataTransfer.items.add(file);
-              input.files = dataTransfer.files;
-              // Trigger change event
-              input.dispatchEvent(new Event('change', { bubbles: true }));
-            }
-          };
-          fileInput.click();
+    function attachCameraToInput(input) {
+      if (input.dataset.cameraAttached) return; // avoid duplicate
+      input.dataset.cameraAttached = 'true';
+      
+      const camBtn = document.createElement('button');
+      camBtn.innerHTML = '📷 كاميرا';
+      camBtn.type = 'button';
+      camBtn.className = 'no-print bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm ml-2';
+      camBtn.onclick = (e) => {
+        e.preventDefault();
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'image/*';
+        fileInput.capture = 'environment';
+        fileInput.onchange = ev => {
+          const file = ev.target.files[0];
+          if (file) {
+            const dt = new DataTransfer();
+            dt.items.add(file);
+            input.files = dt.files;
+            input.dispatchEvent(new Event('change', { bubbles: true }));
+          }
         };
-        input.parentNode.insertBefore(camBtn, input.nextSibling);
-      }
+        fileInput.click();
+      };
+      input.insertAdjacentElement('afterend', camBtn);
     }
     
-    // IDs might be different, try common ones
-    addCameraButton('employeePhoto', 'تصوير');
-    addCameraButton('employeeIdPhoto', 'تصوير الهوية');
-    addCameraButton('photo', 'تصوير');
-    addCameraButton('idPhoto', 'تصوير الهوية');
+    function scanForPhotoInputs() {
+      // Look for inputs that are likely for employee photo or ID
+      const allInputs = document.querySelectorAll('input[type="file"]');
+      allInputs.forEach(input => {
+        const name = (input.name || '').toLowerCase();
+        const id = (input.id || '').toLowerCase();
+        const placeholder = (input.placeholder || '').toLowerCase();
+        const label = input.closest('label')?.innerText.toLowerCase() || '';
+        const parentText = input.parentElement?.innerText.toLowerCase() || '';
+        
+        if (name.includes('photo') || name.includes('image') || name.includes('صورة') || 
+            id.includes('photo') || id.includes('image') || id.includes('صورة') ||
+            placeholder.includes('صورة') || label.includes('صورة') || label.includes('هوية') ||
+            parentText.includes('صورة') || parentText.includes('هوية')) {
+          attachCameraToInput(input);
+        }
+      });
+    }
+    
+    // Initial scan
+    scanForPhotoInputs();
+    
+    // Watch for dynamically added inputs (modals, etc)
+    const observer = new MutationObserver(scanForPhotoInputs);
+    observer.observe(document.body, { childList: true, subtree: true });
   });
 }
 </script>
