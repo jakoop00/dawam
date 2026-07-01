@@ -385,37 +385,40 @@
                                 </div>
                             </div>
                             
-                                                        <div class="bg-white rounded-2xl shadow-xl p-6 no-print">
+                            
+                            
+                            <div class="bg-white rounded-2xl shadow-xl p-6 no-print">
                                 <h3 class="text-xl font-bold mb-4 text-gray-900">📋  بيانات الهوية / التصريح</h3>
-                                <input type="text" id="idNumber" placeholder="رقم الهوية / التصريح" class="w-full px-4 py-3 border-2 border-blue-300 rounded-xl mb-4 outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 font-bold">
+                                <input type="text" id="idNumber" placeholder="رقم الهوية / التصريح" class="w-full px-4 py-3 border-2 border-blue-300 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 font-bold">
                                 
-                                <div class="mb-4">
-                                    <label class="block text-sm font-bold mb-2 text-gray-700">📷 الوجه الأمامي</label>
-                                    <input type="file" id="idImageFront" accept="image/*" class="w-full px-4 py-3 border-2 border-blue-300 rounded-xl mb-2 text-gray-900">
-                                    <div id="idImageFrontPreview" class="hidden mb-2">
+                                <div class="mt-4">
+                                    <label class="block text-sm font-bold mb-2 text-gray-700">📷 صورة الهوية - الجهة الأمامية</label>
+                                    <input type="file" id="idImageFront" accept="image/*" class="w-full px-4 py-3 border-2 border-blue-300 rounded-xl mb-3 text-gray-900">
+                                    <div id="idImageFrontPreview" class="hidden mb-3">
                                         <img id="idImageFrontPreviewImg" class="w-full h-48 object-cover rounded-xl border-2 border-gray-300">
                                     </div>
-                                    <button onclick="printIdFront()" class="w-full bg-indigo-500 hover:bg-indigo-600 text-white py-3 rounded-xl font-bold no-print mb-2">🖨️ طباعة الوجه الأمامي</button>
+                                    <div class="flex gap-2 no-print mb-4">
+                                        <button onclick="printIdFront()" class="flex-1 bg-indigo-500 hover:bg-indigo-600 text-white py-3 rounded-xl font-bold">🖨️ طباعة الجهة الأمامية</button>
+                                    </div>
                                 </div>
 
-                                <div class="mb-4">
-                                    <label class="block text-sm font-bold mb-2 text-gray-700">📷 الوجه الخلفي</label>
-                                    <input type="file" id="idImageBack" accept="image/*" class="w-full px-4 py-3 border-2 border-blue-300 rounded-xl mb-2 text-gray-900">
-                                    <div id="idImageBackPreview" class="hidden mb-2">
+                                <div class="mt-4">
+                                    <label class="block text-sm font-bold mb-2 text-gray-700">📷 صورة الهوية - الجهة الخلفية</label>
+                                    <input type="file" id="idImageBack" accept="image/*" class="w-full px-4 py-3 border-2 border-blue-300 rounded-xl mb-3 text-gray-900">
+                                    <div id="idImageBackPreview" class="hidden mb-3">
                                         <img id="idImageBackPreviewImg" class="w-full h-48 object-cover rounded-xl border-2 border-gray-300">
                                     </div>
-                                    <button onclick="printIdBack()" class="w-full bg-indigo-500 hover:bg-indigo-600 text-white py-3 rounded-xl font-bold no-print mb-2">🖨️ طباعة الوجه الخلفي</button>
-                                </div>
-
-                                <div class="flex flex-col gap-2 mt-4">
-                                    <button onclick="updateIdImages()" class="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-xl font-bold no-print">🔄 تحديث صور الهوية</button>
-                                    <div class="flex gap-2">
-                                        <button onclick="saveIdData()" class="flex-1 bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl font-bold no-print">حفظ بيانات الهوية</button>
-                                        <button onclick="clearIdData()" class="flex-1 bg-red-500 hover:bg-red-600 text-white py-3 rounded-xl font-bold no-print">مسح بيانات الهوية 🗑</button>
+                                    <div class="flex gap-2 no-print">
+                                        <button onclick="printIdBack()" class="flex-1 bg-indigo-500 hover:bg-indigo-600 text-white py-3 rounded-xl font-bold">🖨️ طباعة الجهة الخلفية</button>
                                     </div>
                                 </div>
                             </div>
 
+                            </div>
+
+                            </div>
+
+                        </div>
                     </div>
                 </div>
             `;
@@ -622,52 +625,50 @@
 
 
 
-
-
-
 <script>
-// Preview for idImage only
-document.addEventListener('change', function(e) {
-  if (e.target.id === 'idImage') {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = function(evt) {
-        document.getElementById('idImagePreviewImg').src = evt.target.result;
-        document.getElementById('idImagePreview').classList.remove('hidden');
+// Camera button specifically for #profileImage - mobile only
+if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+  document.addEventListener('DOMContentLoaded', function() {
+    const profileInput = document.getElementById('profileImage');
+    if (profileInput && !profileInput.dataset.cameraAttached) {
+      profileInput.dataset.cameraAttached = 'true';
+      
+      const camBtn = document.createElement('button');
+      camBtn.innerHTML = '📷 تصوير بالكاميرا';
+      camBtn.type = 'button';
+      camBtn.className = 'no-print w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl font-bold mb-2';
+      camBtn.onclick = (e) => {
+        e.preventDefault();
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'image/*';
+        fileInput.capture = 'environment';
+        fileInput.onchange = ev => {
+          const file = ev.target.files[0];
+          if (file) {
+            const dt = new DataTransfer();
+            dt.items.add(file);
+            profileInput.files = dt.files;
+            // Show preview if exists
+            const preview = document.getElementById('profilePreview');
+            if (preview) {
+              const reader = new FileReader();
+              reader.onload = e => preview.src = e.target.result;
+              reader.readAsDataURL(file);
+            }
+          }
+        };
+        fileInput.click();
       };
-      reader.readAsDataURL(file);
+      // Insert before the input
+      profileInput.parentNode.insertBefore(camBtn, profileInput);
     }
-  }
-});
+  });
+}
+</script>
 
-// Print ID only - tested and working
-function printIdOnly() {
-  const name = (typeof employeeData !== 'undefined' && employeeData.name) ? employeeData.name : 
-               document.getElementById('employeeName')?.innerText || 'غير محدد';
-  const idNumber = document.getElementById('idNumber')?.value || '';
-  const today = new Date().toLocaleDateString('ar-SA');
-  const idImg = document.getElementById('idImagePreviewImg')?.src || '';
-  
-  if (!idImg || idImg === '' || idImg.startsWith('data:image/gif')) {
-    alert('الرجاء رفع صورة الهوية أولاً');
-    return;
-  }
-  
-  const printWindow = window.open('', '_blank');
-  printWindow.document.write('<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8"><title>طباعة الهوية</title>');
-  printWindow.document.write('<style>body{font-family:Arial;padding:40px;text-align:center}img{max-width:500px;max-height:500px;border:3px solid #000;margin:20px 0}.info{margin-top:30px;font-size:18px;display:grid;grid-template-columns:1fr 1fr;gap:20px;text-align:right}.info div{margin:10px 0}</style>');
-  printWindow.document.write('</head><body>');
-  printWindow.document.write('<h1>صورة الهوية / التصريح</h1>');
-  printWindow.document.write('<img src="' + idImg + '">');
-  printWindow.document.write('<div class="info">');
-  printWindow.document.write('<div><strong>الاسم:</strong> ' + name + '</div>');
-  printWindow.document.write('<div><strong>رقم الهوية:</strong> ' + idNumber + '</div>');
-  printWindow.document.write('<div><strong>التاريخ:</strong> ' + today + '</div>');
-  printWindow.document.write('<div><strong>التوقيع:</strong> ___________</div>');
-  printWindow.document.write('</div>
 <script>
-// Preview handlers
+// Preview handlers for ID images
 document.addEventListener('change', function(e) {
   if (e.target.id === 'idImageFront') {
     const file = e.target.files[0];
@@ -694,7 +695,6 @@ document.addEventListener('change', function(e) {
 });
 
 function updateIdImages() {
-  // This just triggers a re-save or refresh of the previews
   const frontFile = document.getElementById('idImageFront').files[0];
   const backFile = document.getElementById('idImageBack').files[0];
   if (!frontFile && !backFile) {
@@ -702,100 +702,6 @@ function updateIdImages() {
     return;
   }
   alert('تم تحديث صور الهوية');
-  // If you have Firebase, add save logic here
-  if (typeof saveIdData === 'function') saveIdData();
-}
-
-function printIdFront() {
-  const idNumber = document.getElementById('idNumber')?.value || '___________';
-  const img = document.getElementById('idImageFrontPreviewImg')?.src || '';
-  if (!img || img === '' || img.startsWith('data:image/gif')) {
-    alert('الرجاء رفع صورة الوجه الأمامي أولاً');
-    return;
-  }
-  const w = window.open('', '_blank');
-  w.document.write('<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8"><title>طباعة الوجه الأمامي</title>');
-  w.document.write('<style>body{font-family:Arial;padding:40px;text-align:center}img{max-width:500px;max-height:500px;border:3px solid #000;margin:20px 0}.info{margin-top:30px;font-size:18px;text-align:right}.info div{margin:15px 0;border-bottom:1px solid #ccc;padding-bottom:10px}</style>');
-  w.document.write('</head><body><h1>صورة الهوية - الوجه الأمامي</h1>');
-  w.document.write('<img src="' + img + '"><div class="info">');
-  w.document.write('<div><strong>الاسم:</strong> _________________________</div>');
-  w.document.write('<div><strong>رقم الهوية:</strong> ' + idNumber + '</div>');
-  w.document.write('<div><strong>التاريخ:</strong> _____ / _____ / ________</div>');
-  w.document.write('<div><strong>التوقيع:</strong> _________________________</div>');
-  w.document.write('</div></body></html>');
-  w.document.close();
-  w.focus();
-  setTimeout(function(){ w.print(); }, 250);
-}
-
-function printIdBack() {
-  const idNumber = document.getElementById('idNumber')?.value || '___________';
-  const img = document.getElementById('idImageBackPreviewImg')?.src || '';
-  if (!img || img === '' || img.startsWith('data:image/gif')) {
-    alert('الرجاء رفع صورة الوجه الخلفي أولاً');
-    return;
-  }
-  const w = window.open('', '_blank');
-  w.document.write('<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8"><title>طباعة الوجه الخلفي</title>');
-  w.document.write('<style>body{font-family:Arial;padding:40px;text-align:center}img{max-width:500px;max-height:500px;border:3px solid #000;margin:20px 0}.info{margin-top:30px;font-size:18px;text-align:right}.info div{margin:15px 0;border-bottom:1px solid #ccc;padding-bottom:10px}</style>');
-  w.document.write('</head><body><h1>صورة الهوية - الوجه الخلفي</h1>');
-  w.document.write('<img src="' + img + '"><div class="info">');
-  w.document.write('<div><strong>الاسم:</strong> _________________________</div>');
-  w.document.write('<div><strong>رقم الهوية:</strong> ' + idNumber + '</div>');
-  w.document.write('<div><strong>التاريخ:</strong> _____ / _____ / ________</div>');
-  w.document.write('<div><strong>التوقيع:</strong> _________________________</div>');
-  w.document.write('</div></body></html>');
-  w.document.close();
-  w.focus();
-  setTimeout(function(){ w.print(); }, 250);
-}
-</script>
-
-</body></html>');
-  printWindow.document.close();
-  printWindow.focus();
-  setTimeout(function(){ printWindow.print(); }, 250);
-}
-</script>
-
-
-<script>
-// Preview handlers
-document.addEventListener('change', function(e) {
-  if (e.target.id === 'idImageFront') {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = function(evt) {
-        document.getElementById('idImageFrontPreviewImg').src = evt.target.result;
-        document.getElementById('idImageFrontPreview').classList.remove('hidden');
-      };
-      reader.readAsDataURL(file);
-    }
-  }
-  if (e.target.id === 'idImageBack') {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = function(evt) {
-        document.getElementById('idImageBackPreviewImg').src = evt.target.result;
-        document.getElementById('idImageBackPreview').classList.remove('hidden');
-      };
-      reader.readAsDataURL(file);
-    }
-  }
-});
-
-function updateIdImages() {
-  // This just triggers a re-save or refresh of the previews
-  const frontFile = document.getElementById('idImageFront').files[0];
-  const backFile = document.getElementById('idImageBack').files[0];
-  if (!frontFile && !backFile) {
-    alert('الرجاء اختيار صورة واحدة على الأقل للتحديث');
-    return;
-  }
-  alert('تم تحديث صور الهوية');
-  // If you have Firebase, add save logic here
   if (typeof saveIdData === 'function') saveIdData();
 }
 
