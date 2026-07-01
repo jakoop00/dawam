@@ -261,7 +261,7 @@
                     <div class="max-w-7xl mx-auto flex justify-between items-center">
                         <button onclick="window.location.href='index.html'" class="bg-white text-blue-600 px-5 py-2 rounded-xl font-bold hover:bg-gray-100">← رجوع للقائمة</button>
                         <h1 class="text-2xl font-bold">ملف الموظف</h1>
-                        
+                        <button onclick="window.print()" class="bg-white text-blue-600 px-5 py-2 rounded-xl font-bold hover:bg-gray-100">🖨 طباعة</button>
                     </div>
                 <div class="max-w-7xl mx-auto p-6">
                     <div class="bg-white rounded-2xl shadow-xl p-6 mb-6">
@@ -646,71 +646,6 @@ if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(naviga
     }
   });
 }
-</script>
-
-
-<!-- زر الطباعة الجديد مع الخيارات -->
-<button id="customPrintBtn" onclick="togglePrintMenu()" style="padding:10px 15px; cursor:pointer; font-family:inherit;">طباعة ▼</button>
-<div id="printMenu" style="display:none; border:1px solid #ccc; padding:10px; background:#fff; position:absolute; z-index:1000;">
-  <div style="margin:5px 0;">
-    <span>1- طباعة سجل دوام الموظف</span>
-    <button onclick="printSection('attendance')">اطبع</button>
-  </div>
-  <div style="margin:5px 0;">
-    <span>2- طباعة وجه امامي للهوية</span>
-    <button onclick="printSection('idFront')">اطبع</button>
-  </div>
-  <div style="margin:5px 0;">
-    <span>3- طباعة وجه خلفي للهوية</span>
-    <button onclick="printSection('idBack')">اطبع</button>
-  </div>
-  <div style="margin:5px 0;">
-    <span>4- طباعة معلومات الموظف كاملة مع الصورة بدون سجل الدوام</span>
-    <button onclick="printSection('empFull')">اطبع</button>
-  </div>
-</div>
-
-<script>
-function togglePrintMenu(){
-  var m = document.getElementById('printMenu');
-  m.style.display = m.style.display === 'none' ? 'block' : 'none';
-}
-
-function printSection(type){
-  var content = '';
-  if(type === 'attendance'){
-    var el = document.getElementById('attendanceSection') || document.querySelector('.attendance') || document.body;
-    content = el.innerHTML;
-  } else if(type === 'idFront'){
-    var el = document.getElementById('idFrontSection') || document.querySelector('.id-front') || document.querySelector('img[alt*="امامي"]');
-    content = el ? el.outerHTML : 'لم يتم العثور على وجه الهوية الأمامي';
-  } else if(type === 'idBack'){
-    var el = document.getElementById('idBackSection') || document.querySelector('.id-back') || document.querySelector('img[alt*="خلفي"]');
-    content = el ? el.outerHTML : 'لم يتم العثور على وجه الهوية الخلفي';
-  } else if(type === 'empFull'){
-    var el = document.getElementById('employeeInfoSection') || document.querySelector('.employee-info') || document.body;
-    content = el.innerHTML;
-  }
-  
-  var printWindow = window.open('', '', 'height=800,width=1000');
-  printWindow.document.write('<html><head><title>طباعة</title>');
-  printWindow.document.write('<meta charset="utf-8">');
-  printWindow.document.write('<style>body{font-family:inherit; direction:rtl;} @media print { button { display:none; } }</style>');
-  printWindow.document.write('</head><body>');
-  printWindow.document.write(content);
-  printWindow.document.write('</body></html>');
-  printWindow.document.close();
-  printWindow.print();
-  document.getElementById('printMenu').style.display = 'none';
-}
-
-// Close menu if clicked outside
-document.addEventListener('click', function(e){
-  if(!e.target.closest('#customPrintBtn') && !e.target.closest('#printMenu')){
-    var m = document.getElementById('printMenu');
-    if(m) m.style.display = 'none';
-  }
-});
 </script>
 
 </body>
