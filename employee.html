@@ -8,23 +8,39 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap');
         body { font-family: 'Tajawal', sans-serif; color: #000; }
-    .loader { border: 4px solid #f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 20px auto; }
+       .loader { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); }
-    .modal-content { background-color: white; margin: 5% auto; padding: 30px; border-radius: 20px; width: 90%; max-width: 600px; max-height: 80vh; overflow-y: auto; }
-    .input-label { display: block; color: #000; font-weight: 800; margin-bottom: 8px; font-size: 16px; }
-    .input-field { width: 100%; padding: 14px; border: 3px solid #2563eb; border-radius: 12px; font-size: 16px; background: #fff; color: #000; font-weight: 700; }
-    .input-field:focus { outline: none; border-color: #1e40af; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2); }
-    .preview-box { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 16px; text-align: center; }
-    .image-modal-content { margin: 5% auto; max-width: 90%; max-height: 80vh; }
-    .image-modal-content img { width: 100%; height: auto; border-radius: 20px; }
-    .close-btn { position: absolute; top: 20px; right: 40px; color: white; font-size: 40px; font-weight: bold; cursor: pointer; }
-    .realtime-badge { position: fixed; bottom: 20px; left: 20px; background: #10b981; color: white; padding: 8px 16px; border-radius: 20px; font-weight: bold; font-size: 12px; z-index: 999; }
-       @media print {
-        .no-print { display: none!important; }
-           body { background: white; }
-        .modal { display: none!important; }
-       }
+       .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); overflow-y: auto; }
+       .modal-content { background-color: white; margin: 5% auto; padding: 30px; border-radius: 20px; width: 90%; max-width: 600px; max-height: 85vh; overflow-y: auto; }
+       .input-label { display: block; color: #000; font-weight: 800; margin-bottom: 8px; font-size: 16px; }
+       .input-field { width: 100%; padding: 14px; border: 3px solid #2563eb; border-radius: 12px; font-size: 16px; background: #fff; color: #000; font-weight: 700; }
+       .input-field:focus { outline: none; border-color: #1e40af; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2); }
+       .preview-box { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 16px; text-align: center; }
+       .image-modal-content { margin: 5% auto; max-width: 90%; max-height: 80vh; position: relative; }
+       .image-modal-content img { width: 100%; height: auto; border-radius: 20px; }
+       .close-btn { position: absolute; top: 10px; left: 20px; color: white; font-size: 40px; font-weight: bold; cursor: pointer; line-height: 1; }
+       .realtime-badge { position: fixed; bottom: 20px; left: 20px; background: #10b981; color: white; padding: 8px 16px; border-radius: 20px; font-weight: bold; font-size: 12px; z-index: 999; }
+
+        @media print {
+           .no-print { display: none!important; }
+            body { background: white; }
+           .modal { display: none!important; }
+        }
+
+        /* تعديلات الموبايل */
+        @media (max-width: 640px) {
+           .modal-content { margin: 10px; padding: 20px; width: calc(100% - 20px); }
+           .close-btn { top: 5px; left: 15px; font-size: 32px; }
+           .realtime-badge { bottom: 10px; left: 10px; font-size: 11px; padding: 6px 12px; }
+            h1 { font-size: 1.25rem; }
+            h2 { font-size: 1.5rem; }
+            h3 { font-size: 1.75rem!important; }
+           .text-4xl { font-size: 2rem; }
+           .p-6 { padding: 1rem; }
+           .p-8 { padding: 1.25rem; }
+            table { font-size: 12px; }
+           .p-3 { padding: 0.5rem; }
+        }
     </style>
 </head>
 <body class="bg-gradient-to-br from-blue-50 to-purple-50 min-h-screen">
@@ -74,7 +90,7 @@
     <!-- نافذة تعديل السجل -->
     <div id="editModal" class="modal">
         <div class="modal-content">
-            <h2 class="text-2xl font-bold mb-6 text-gray-900">✏️ تعديل سجل الدوام</h2>
+            <h2 class="text-2xl font-bold mb-6 text-gray-900">✏ تعديل سجل الدوام</h2>
             <form id="editForm" class="space-y-4">
                 <input type="hidden" id="editRecordId">
                 <div>
@@ -234,7 +250,7 @@
                     <div class="max-w-7xl mx-auto flex justify-between items-center">
                         <button onclick="window.location.href='index.html'" class="bg-white text-blue-600 px-5 py-2 rounded-xl font-bold hover:bg-gray-100">← رجوع للقائمة</button>
                         <h1 class="text-2xl font-bold">ملف الموظف</h1>
-                        <button onclick="window.print()" class="bg-white text-blue-600 px-5 py-2 rounded-xl font-bold hover:bg-gray-100">🖨️ طباعة</button>
+                        <button onclick="window.print()" class="bg-white text-blue-600 px-5 py-2 rounded-xl font-bold hover:bg-gray-100">🖨 طباعة</button>
                     </div>
                 <div class="max-w-7xl mx-auto p-6">
                     <div class="bg-white rounded-2xl shadow-xl p-6 mb-6">
@@ -266,7 +282,7 @@
                     <div class="bg-gradient-to-br from-purple-500 to-pink-600 text-white rounded-2xl p-6 shadow-xl mb-6 no-print">
                         <div class="flex justify-center items-center gap-4">
                             <button onclick="openCommissionModal()" class="bg-white text-purple-600 px-8 py-3 rounded-xl font-bold hover:bg-gray-100">💰 إضافة عمولة</button>
-                            <button onclick="resetCommission()" class="bg-red-500 text-white px-8 py-3 rounded-xl font-bold hover:bg-red-600">🗑️ حذف العمولة</button>
+                            <button onclick="resetCommission()" class="bg-red-500 text-white px-8 py-3 rounded-xl font-bold hover:bg-red-600">🗑 حذف العمولة</button>
                         </div>
                     </div>
 
@@ -350,11 +366,11 @@
 
                         <div class="space-y-6">
                             <div class="bg-white rounded-2xl shadow-xl p-6 no-print">
-                                <h3 class="text-xl font-bold mb-4 text-gray-900">🖼️ الصورة الشخصية</h3>
+                                <h3 class="text-xl font-bold mb-4 text-gray-900">🖼 الصورة الشخصية</h3>
                                 <input type="file" id="profileImage" accept="image/*" class="w-full px-4 py-3 border-2 border-blue-300 rounded-xl mb-3 text-gray-900">
                                 <div class="flex gap-2">
                                     <button onclick="saveProfileImage()" class="flex-1 bg-gradient-to-r from-purple-500 to-purple-600 text-white py-3 rounded-xl font-bold hover:opacity-90">تحديث الصورة</button>
-                                    <button onclick="deleteProfileImage()" class="bg-red-500 text-white px-4 py-3 rounded-xl font-bold hover:opacity-90">🗑️</button>
+                                    <button onclick="deleteProfileImage()" class="bg-red-500 text-white px-4 py-3 rounded-xl font-bold hover:opacity-90">🗑</button>
                                 </div>
                             </div>
                             <div class="bg-white rounded-2xl shadow-xl p-6 no-print">
@@ -370,7 +386,7 @@
                                 ${employeeData.idImageUrlBack? `<img src="${employeeData.idImageUrlBack}" class="w-full rounded-xl border-2 border-gray-300 cursor-pointer mb-3" onclick="openImageModal('${employeeData.idImageUrlBack}')">` : ''}
 
                                 <button onclick="saveIdData()" class="w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-3 rounded-xl font-bold hover:opacity-90 mb-2">حفظ بيانات الهوية</button>
-                                <button onclick="deleteIdData()" class="w-full bg-red-500 text-white py-3 rounded-xl font-bold hover:opacity-90">🗑️ مسح بيانات الهوية</button>
+                                <button onclick="deleteIdData()" class="w-full bg-red-500 text-white py-3 rounded-xl font-bold hover:opacity-90">🗑 مسح بيانات الهوية</button>
                             </div>
                         </div>
                     </div>
