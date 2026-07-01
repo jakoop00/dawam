@@ -625,47 +625,6 @@
 
 
 
-<script>
-// Camera button specifically for #profileImage - mobile only
-if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-  document.addEventListener('DOMContentLoaded', function() {
-    const profileInput = document.getElementById('profileImage');
-    if (profileInput && !profileInput.dataset.cameraAttached) {
-      profileInput.dataset.cameraAttached = 'true';
-      
-      const camBtn = document.createElement('button');
-      camBtn.innerHTML = '📷 تصوير بالكاميرا';
-      camBtn.type = 'button';
-      camBtn.className = 'no-print w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl font-bold mb-2';
-      camBtn.onclick = (e) => {
-        e.preventDefault();
-        const fileInput = document.createElement('input');
-        fileInput.type = 'file';
-        fileInput.accept = 'image/*';
-        fileInput.capture = 'environment';
-        fileInput.onchange = ev => {
-          const file = ev.target.files[0];
-          if (file) {
-            const dt = new DataTransfer();
-            dt.items.add(file);
-            profileInput.files = dt.files;
-            // Show preview if exists
-            const preview = document.getElementById('profilePreview');
-            if (preview) {
-              const reader = new FileReader();
-              reader.onload = e => preview.src = e.target.result;
-              reader.readAsDataURL(file);
-            }
-          }
-        };
-        fileInput.click();
-      };
-      // Insert before the input
-      profileInput.parentNode.insertBefore(camBtn, profileInput);
-    }
-  });
-}
-</script>
 
 <script>
 // Preview handlers for ID images
@@ -695,15 +654,60 @@ document.addEventListener('change', function(e) {
 });
 
 function updateIdImages() {
-  const frontFile = document.getElementById('idImageFront').files[0];
-  const backFile = document.getElementById('idImageBack').files[0];
-  if (!frontFile && !backFile) {
+  const frontImg = document.getElementById('idImageFrontPreviewImg')?.src || '';
+  const backImg = document.getElementById('idImageBackPreviewImg')?.src || '';
+  const idNumber = document.getElementById('idNumber')?.value || '';
+  
+  if (!frontImg && !backImg) {
     alert('الرجاء اختيار صورة واحدة على الأقل للتحديث');
     return;
   }
-  alert('تم تحديث صور الهوية');
-  if (typeof saveIdData === 'function') saveIdData();
+  
+  // Save to localStorage so it stays in employee record
+  const employeeId = new URLSearchParams(window.location.search).get('id') || 'default';
+  const idData = {
+    idNumber: idNumber,
+    frontImage: frontImg,
+    backImage: backImg,
+    updatedAt: new Date().toISOString()
+  };
+  localStorage.setItem('employee_id_' + employeeId, JSON.stringify(idData));
+  
+  // If Firebase exists, save there too
+  if (typeof firebase !== 'undefined' && typeof db !== 'undefined') {
+    db.collection('employees').doc(employeeId).update({
+      idNumber: idNumber,
+      idImageFront: frontImg,
+      idImageBack: backImg,
+      idImagesUpdatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(() => {
+      alert('تم تحديث وحفظ صور الهوية في سجل الموظف');
+    }).catch((err) => {
+      console.error(err);
+      alert('تم الحفظ محلياً. خطأ في الحفظ على السيرفر');
+    });
+  } else {
+    alert('تم تحديث وحفظ صور الهوية في سجل الموظف محلياً');
+  }
 }
+
+// Load saved ID images on page load
+window.addEventListener('DOMContentLoaded', function() {
+  const employeeId = new URLSearchParams(window.location.search).get('id') || 'default';
+  const saved = localStorage.getItem('employee_id_' + employeeId);
+  if (saved) {
+    const data = JSON.parse(saved);
+    if (data.idNumber) document.getElementById('idNumber').value = data.idNumber;
+    if (data.frontImage) {
+      document.getElementById('idImageFrontPreviewImg').src = data.frontImage;
+      document.getElementById('idImageFrontPreview').classList.remove('hidden');
+    }
+    if (data.backImage) {
+      document.getElementById('idImageBackPreviewImg').src = data.backImage;
+      document.getElementById('idImageBackPreview').classList.remove('hidden');
+    }
+  }
+});
 
 function printIdFront() {
   const idNumber = document.getElementById('idNumber')?.value || '___________';
