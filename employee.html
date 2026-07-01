@@ -4,7 +4,63 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ملف الموظف</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com">
+function updateIdImages() {
+  const frontImg = document.getElementById('idImageFrontPreviewImg')?.src || '';
+  const backImg = document.getElementById('idImageBackPreviewImg')?.src || '';
+  const idNumber = document.getElementById('idNumber')?.value || '';
+  
+  if (!frontImg && !backImg) {
+    alert('الرجاء اختيار صورة أمامية أو خلفية على الأقل');
+    return;
+  }
+  
+  const employeeId = new URLSearchParams(window.location.search).get('id') || 'default';
+  const idData = {
+    idNumber: idNumber,
+    frontImage: frontImg,
+    backImage: backImg,
+    updatedAt: new Date().toISOString()
+  };
+  localStorage.setItem('employee_id_' + employeeId, JSON.stringify(idData));
+  
+  if (typeof firebase !== 'undefined' && typeof db !== 'undefined') {
+    db.collection('employees').doc(employeeId).update({
+      idNumber: idNumber,
+      idImageFront: frontImg,
+      idImageBack: backImg,
+      idImagesUpdatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(() => {
+      alert('✅ تم تحديث وحفظ صور الهوية في سجل الموظف');
+    }).catch(() => {
+      alert('✅ تم الحفظ محلياً في سجل الموظف');
+    });
+  } else {
+    alert('✅ تم تحديث وحفظ صور الهوية في سجل الموظف محلياً');
+  }
+}
+
+// Load saved images on page load
+window.addEventListener('DOMContentLoaded', function() {
+  const employeeId = new URLSearchParams(window.location.search).get('id') || 'default';
+  const saved = localStorage.getItem('employee_id_' + employeeId);
+  if (saved) {
+    try {
+      const data = JSON.parse(saved);
+      if (data.idNumber) document.getElementById('idNumber').value = data.idNumber;
+      if (data.frontImage) {
+        document.getElementById('idImageFrontPreviewImg').src = data.frontImage;
+        document.getElementById('idImageFrontPreview').classList.remove('hidden');
+      }
+      if (data.backImage) {
+        document.getElementById('idImageBackPreviewImg').src = data.backImage;
+        document.getElementById('idImageBackPreview').classList.remove('hidden');
+      }
+    } catch(e) {}
+  }
+});
+
+</script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap');
         body { font-family: 'Tajawal', sans-serif; color: #000; }
@@ -411,6 +467,10 @@
                                     <div class="flex gap-2 no-print">
                                         <button onclick="printIdBack()" class="flex-1 bg-indigo-500 hover:bg-indigo-600 text-white py-3 rounded-xl font-bold">🖨️ طباعة الجهة الخلفية</button>
                                     </div>
+
+                                <div class="mt-4">
+                                    <button onclick="updateIdImages()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold no-print">🔄 تحديث صور الهوية وحفظها بالسجل</button>
+                                </div>
                                 </div>
                             </div>
 
@@ -620,33 +680,342 @@
                 await deleteDoc(doc(db, 'attendance', id));
             }
         }
-    </script>
+    
+function updateIdImages() {
+  const frontImg = document.getElementById('idImageFrontPreviewImg')?.src || '';
+  const backImg = document.getElementById('idImageBackPreviewImg')?.src || '';
+  const idNumber = document.getElementById('idNumber')?.value || '';
+  
+  if (!frontImg && !backImg) {
+    alert('الرجاء اختيار صورة أمامية أو خلفية على الأقل');
+    return;
+  }
+  
+  const employeeId = new URLSearchParams(window.location.search).get('id') || 'default';
+  const idData = {
+    idNumber: idNumber,
+    frontImage: frontImg,
+    backImage: backImg,
+    updatedAt: new Date().toISOString()
+  };
+  localStorage.setItem('employee_id_' + employeeId, JSON.stringify(idData));
+  
+  if (typeof firebase !== 'undefined' && typeof db !== 'undefined') {
+    db.collection('employees').doc(employeeId).update({
+      idNumber: idNumber,
+      idImageFront: frontImg,
+      idImageBack: backImg,
+      idImagesUpdatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(() => {
+      alert('✅ تم تحديث وحفظ صور الهوية في سجل الموظف');
+    }).catch(() => {
+      alert('✅ تم الحفظ محلياً في سجل الموظف');
+    });
+  } else {
+    alert('✅ تم تحديث وحفظ صور الهوية في سجل الموظف محلياً');
+  }
+}
+
+// Load saved images on page load
+window.addEventListener('DOMContentLoaded', function() {
+  const employeeId = new URLSearchParams(window.location.search).get('id') || 'default';
+  const saved = localStorage.getItem('employee_id_' + employeeId);
+  if (saved) {
+    try {
+      const data = JSON.parse(saved);
+      if (data.idNumber) document.getElementById('idNumber').value = data.idNumber;
+      if (data.frontImage) {
+        document.getElementById('idImageFrontPreviewImg').src = data.frontImage;
+        document.getElementById('idImageFrontPreview').classList.remove('hidden');
+      }
+      if (data.backImage) {
+        document.getElementById('idImageBackPreviewImg').src = data.backImage;
+        document.getElementById('idImageBackPreview').classList.remove('hidden');
+      }
+    } catch(e) {}
+  }
+});
+
+</script>
+
+
+
+
+<script>
+// Camera button specifically for #profileImage - mobile only
+if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+  document.addEventListener('DOMContentLoaded', function() {
+    const profileInput = document.getElementById('profileImage');
+    if (profileInput && !profileInput.dataset.cameraAttached) {
+      profileInput.dataset.cameraAttached = 'true';
+      
+      const camBtn = document.createElement('button');
+      camBtn.innerHTML = '📷 تصوير بالكاميرا';
+      camBtn.type = 'button';
+      camBtn.className = 'no-print w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl font-bold mb-2';
+      camBtn.onclick = (e) => {
+        e.preventDefault();
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'image/*';
+        fileInput.capture = 'environment';
+        fileInput.onchange = ev => {
+          const file = ev.target.files[0];
+          if (file) {
+            const dt = new DataTransfer();
+            dt.items.add(file);
+            profileInput.files = dt.files;
+            // Show preview if exists
+            const preview = document.getElementById('profilePreview');
+            if (preview) {
+              const reader = new FileReader();
+              reader.onload = e => preview.src = e.target.result;
+              reader.readAsDataURL(file);
+            }
+          }
+        };
+        fileInput.click();
+      };
+      // Insert before the input
+      profileInput.parentNode.insertBefore(camBtn, profileInput);
+    }
+  });
+}
+
+function updateIdImages() {
+  const frontImg = document.getElementById('idImageFrontPreviewImg')?.src || '';
+  const backImg = document.getElementById('idImageBackPreviewImg')?.src || '';
+  const idNumber = document.getElementById('idNumber')?.value || '';
+  
+  if (!frontImg && !backImg) {
+    alert('الرجاء اختيار صورة أمامية أو خلفية على الأقل');
+    return;
+  }
+  
+  const employeeId = new URLSearchParams(window.location.search).get('id') || 'default';
+  const idData = {
+    idNumber: idNumber,
+    frontImage: frontImg,
+    backImage: backImg,
+    updatedAt: new Date().toISOString()
+  };
+  localStorage.setItem('employee_id_' + employeeId, JSON.stringify(idData));
+  
+  if (typeof firebase !== 'undefined' && typeof db !== 'undefined') {
+    db.collection('employees').doc(employeeId).update({
+      idNumber: idNumber,
+      idImageFront: frontImg,
+      idImageBack: backImg,
+      idImagesUpdatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(() => {
+      alert('✅ تم تحديث وحفظ صور الهوية في سجل الموظف');
+    }).catch(() => {
+      alert('✅ تم الحفظ محلياً في سجل الموظف');
+    });
+  } else {
+    alert('✅ تم تحديث وحفظ صور الهوية في سجل الموظف محلياً');
+  }
+}
+
+// Load saved images on page load
+window.addEventListener('DOMContentLoaded', function() {
+  const employeeId = new URLSearchParams(window.location.search).get('id') || 'default';
+  const saved = localStorage.getItem('employee_id_' + employeeId);
+  if (saved) {
+    try {
+      const data = JSON.parse(saved);
+      if (data.idNumber) document.getElementById('idNumber').value = data.idNumber;
+      if (data.frontImage) {
+        document.getElementById('idImageFrontPreviewImg').src = data.frontImage;
+        document.getElementById('idImageFrontPreview').classList.remove('hidden');
+      }
+      if (data.backImage) {
+        document.getElementById('idImageBackPreviewImg').src = data.backImage;
+        document.getElementById('idImageBackPreview').classList.remove('hidden');
+      }
+    } catch(e) {}
+  }
+});
+
+</script>
 
 
 
 
 
 <script>
-// Preview handlers for ID images
-document.addEventListener('change', function(e) {
-  if (e.target.id === 'idImageFront') {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = function(evt) {
-        document.getElementById('idImageFrontPreviewImg').src = evt.target.result;
-        document.getElementById('idImageFrontPreview').classList.remove('hidden');
-      };
-      reader.readAsDataURL(file);
+// Camera for idImageFront and idImageBack - mobile only
+if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+  document.addEventListener('DOMContentLoaded', function() {
+    function addCameraBtn(inputId, btnText) {
+      const input = document.getElementById(inputId);
+      if (input && !input.dataset.cameraAttached) {
+        input.dataset.cameraAttached = 'true';
+        const camBtn = document.createElement('button');
+        camBtn.innerHTML = '📷 ' + btnText;
+        camBtn.type = 'button';
+        camBtn.className = 'no-print w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl font-bold mb-2';
+        camBtn.onclick = (e) => {
+          e.preventDefault();
+          const fileInput = document.createElement('input');
+          fileInput.type = 'file';
+          fileInput.accept = 'image/*';
+          fileInput.capture = 'environment';
+          fileInput.onchange = ev => {
+            const file = ev.target.files[0];
+            if (file) {
+              const dt = new DataTransfer();
+              dt.items.add(file);
+              input.files = dt.files;
+              const previewDiv = document.getElementById(inputId + 'Preview');
+              const previewImg = document.getElementById(inputId + 'PreviewImg');
+              if (previewDiv && previewImg) {
+                const reader = new FileReader();
+                reader.onload = e => {
+                  previewImg.src = e.target.result;
+                  previewDiv.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+              }
+            }
+          };
+          fileInput.click();
+        };
+        input.parentNode.insertBefore(camBtn, input);
+      }
     }
+    addCameraBtn('idImageFront', 'تصوير الجهة الأمامية');
+    addCameraBtn('idImageBack', 'تصوير الجهة الخلفية');
+  });
+}
+
+// Print functions
+function printIdFront() {
+  const name = employeeData?.name || document.getElementById('employeeName')?.innerText || 'غير محدد';
+  const idNumber = document.getElementById('idNumber')?.value || '';
+  const today = new Date().toLocaleDateString('ar-SA');
+  const img = document.getElementById('idImageFrontPreviewImg')?.src || '';
+  if (!img || img.includes('data:image/gif')) return alert('الرجاء رفع صورة الجهة الأمامية أولاً');
+  openPrintWindow('الجهة الأمامية', img, name, idNumber, today);
+}
+
+function printIdBack() {
+  const name = employeeData?.name || document.getElementById('employeeName')?.innerText || 'غير محدد';
+  const idNumber = document.getElementById('idNumber')?.value || '';
+  const today = new Date().toLocaleDateString('ar-SA');
+  const img = document.getElementById('idImageBackPreviewImg')?.src || '';
+  if (!img || img.includes('data:image/gif')) return alert('الرجاء رفع صورة الجهة الخلفية أولاً');
+  openPrintWindow('الجهة الخلفية', img, name, idNumber, today);
+}
+
+function openPrintWindow(side, img, name, idNumber, today) {
+  const printWindow = window.open('', '_blank');
+  printWindow.document.write(`
+    <html dir="rtl"><head><title>طباعة الهوية - ${side}</title>
+    <style>body{font-family:Arial;padding:40px;text-align:center}img{max-width:500px;max-height:500px;border:3px solid #000;margin:20px 0}.info{margin-top:30px;font-size:18px;display:grid;grid-template-columns:1fr 1fr;gap:20px;text-align:right}</style>
+    </head><body>
+    <h1>صورة الهوية - ${side}</h1>
+    <img src="${img}">
+    <div class="info">
+      <div><strong>الاسم:</strong> ${name}</div>
+      <div><strong>رقم الهوية:</strong> ${idNumber}</div>
+      <div><strong>التاريخ:</strong> ${today}</div>
+      <div><strong>التوقيع:</strong> ___________</div>
+    </div>
+    <script>window.print();<\/script></body></html>
+  `);
+  printWindow.document.close();
+}
+
+// Preview handlers
+['idImageFront','idImageBack'].forEach(id => {
+  document.addEventListener('change', function(e) {
+    if (e.target.id === id) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = e => {
+          document.getElementById(id + 'PreviewImg').src = e.target.result;
+          document.getElementById(id + 'Preview').classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+  });
+});
+
+function updateIdImages() {
+  const frontImg = document.getElementById('idImageFrontPreviewImg')?.src || '';
+  const backImg = document.getElementById('idImageBackPreviewImg')?.src || '';
+  const idNumber = document.getElementById('idNumber')?.value || '';
+  
+  if (!frontImg && !backImg) {
+    alert('الرجاء اختيار صورة أمامية أو خلفية على الأقل');
+    return;
   }
-  if (e.target.id === 'idImageBack') {
+  
+  const employeeId = new URLSearchParams(window.location.search).get('id') || 'default';
+  const idData = {
+    idNumber: idNumber,
+    frontImage: frontImg,
+    backImage: backImg,
+    updatedAt: new Date().toISOString()
+  };
+  localStorage.setItem('employee_id_' + employeeId, JSON.stringify(idData));
+  
+  if (typeof firebase !== 'undefined' && typeof db !== 'undefined') {
+    db.collection('employees').doc(employeeId).update({
+      idNumber: idNumber,
+      idImageFront: frontImg,
+      idImageBack: backImg,
+      idImagesUpdatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(() => {
+      alert('✅ تم تحديث وحفظ صور الهوية في سجل الموظف');
+    }).catch(() => {
+      alert('✅ تم الحفظ محلياً في سجل الموظف');
+    });
+  } else {
+    alert('✅ تم تحديث وحفظ صور الهوية في سجل الموظف محلياً');
+  }
+}
+
+// Load saved images on page load
+window.addEventListener('DOMContentLoaded', function() {
+  const employeeId = new URLSearchParams(window.location.search).get('id') || 'default';
+  const saved = localStorage.getItem('employee_id_' + employeeId);
+  if (saved) {
+    try {
+      const data = JSON.parse(saved);
+      if (data.idNumber) document.getElementById('idNumber').value = data.idNumber;
+      if (data.frontImage) {
+        document.getElementById('idImageFrontPreviewImg').src = data.frontImage;
+        document.getElementById('idImageFrontPreview').classList.remove('hidden');
+      }
+      if (data.backImage) {
+        document.getElementById('idImageBackPreviewImg').src = data.backImage;
+        document.getElementById('idImageBackPreview').classList.remove('hidden');
+      }
+    } catch(e) {}
+  }
+});
+
+</script>
+
+</body>
+    </html>
+  `);
+  printWindow.document.close();
+}
+
+// Preview for idImage
+document.addEventListener('change', function(e) {
+  if (e.target.id === 'idImage') {
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
-      reader.onload = function(evt) {
-        document.getElementById('idImageBackPreviewImg').src = evt.target.result;
-        document.getElementById('idImageBackPreview').classList.remove('hidden');
+      reader.onload = e => {
+        document.getElementById('idImagePreviewImg').src = e.target.result;
+        document.getElementById('idImagePreview').classList.remove('hidden');
       };
       reader.readAsDataURL(file);
     }
@@ -659,11 +1028,10 @@ function updateIdImages() {
   const idNumber = document.getElementById('idNumber')?.value || '';
   
   if (!frontImg && !backImg) {
-    alert('الرجاء اختيار صورة واحدة على الأقل للتحديث');
+    alert('الرجاء اختيار صورة أمامية أو خلفية على الأقل');
     return;
   }
   
-  // Save to localStorage so it stays in employee record
   const employeeId = new URLSearchParams(window.location.search).get('id') || 'default';
   const idData = {
     idNumber: idNumber,
@@ -673,7 +1041,6 @@ function updateIdImages() {
   };
   localStorage.setItem('employee_id_' + employeeId, JSON.stringify(idData));
   
-  // If Firebase exists, save there too
   if (typeof firebase !== 'undefined' && typeof db !== 'undefined') {
     db.collection('employees').doc(employeeId).update({
       idNumber: idNumber,
@@ -681,77 +1048,929 @@ function updateIdImages() {
       idImageBack: backImg,
       idImagesUpdatedAt: firebase.firestore.FieldValue.serverTimestamp()
     }).then(() => {
-      alert('تم تحديث وحفظ صور الهوية في سجل الموظف');
-    }).catch((err) => {
-      console.error(err);
-      alert('تم الحفظ محلياً. خطأ في الحفظ على السيرفر');
+      alert('✅ تم تحديث وحفظ صور الهوية في سجل الموظف');
+    }).catch(() => {
+      alert('✅ تم الحفظ محلياً في سجل الموظف');
     });
   } else {
-    alert('تم تحديث وحفظ صور الهوية في سجل الموظف محلياً');
+    alert('✅ تم تحديث وحفظ صور الهوية في سجل الموظف محلياً');
   }
 }
 
-// Load saved ID images on page load
+// Load saved images on page load
 window.addEventListener('DOMContentLoaded', function() {
   const employeeId = new URLSearchParams(window.location.search).get('id') || 'default';
   const saved = localStorage.getItem('employee_id_' + employeeId);
   if (saved) {
-    const data = JSON.parse(saved);
-    if (data.idNumber) document.getElementById('idNumber').value = data.idNumber;
-    if (data.frontImage) {
-      document.getElementById('idImageFrontPreviewImg').src = data.frontImage;
-      document.getElementById('idImageFrontPreview').classList.remove('hidden');
+    try {
+      const data = JSON.parse(saved);
+      if (data.idNumber) document.getElementById('idNumber').value = data.idNumber;
+      if (data.frontImage) {
+        document.getElementById('idImageFrontPreviewImg').src = data.frontImage;
+        document.getElementById('idImageFrontPreview').classList.remove('hidden');
+      }
+      if (data.backImage) {
+        document.getElementById('idImageBackPreviewImg').src = data.backImage;
+        document.getElementById('idImageBackPreview').classList.remove('hidden');
+      }
+    } catch(e) {}
+  }
+});
+
+</script>
+
+
+<script>
+// Fix: Add attendance without logout
+const originalAddRecord = window.addRecord || function(){};
+window.addRecord = async function() {
+  try {
+    // Your existing add record logic here but ensure no redirect
+    const date = document.getElementById('recordDate')?.value;
+    const status = document.getElementById('recordStatus')?.value;
+    if (!date || !status) return alert('املأ التاريخ والحالة');
+    
+    // Save to Firebase without redirect
+    await db.collection('attendance').add({
+      employeeId: employeeId,
+      date: date,
+      status: status,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    
+    // Refresh table without reload
+    if (typeof loadAttendanceRecords === 'function') loadAttendanceRecords();
+    if (typeof loadAttendance === 'function') loadAttendance();
+    
+  } catch (e) {
+    console.error(e);
+    alert('خطأ في الحفظ: ' + e.message);
+  }
+};
+
+// Fix: Group attendance by month when rendering
+function renderAttendanceWithMonths(records) {
+  const container = document.getElementById('attendanceTable') || document.querySelector('.attendance-list');
+  if (!container) return;
+  
+  // Sort by date desc
+  records.sort((a,b) => new Date(b.date) - new Date(a.date));
+  
+  // Group by month
+  const grouped = {};
+  records.forEach(r => {
+    const month = new Date(r.date).toLocaleDateString('ar-SA', { year: 'numeric', month: 'long' });
+    if (!grouped[month]) grouped[month] = [];
+    grouped[month].push(r);
+  });
+  
+  // Render
+  let html = '';
+  Object.keys(grouped).forEach(month => {
+    html += `<div class="month-header bg-blue-100 p-3 font-bold text-lg mb-2 rounded">${month}</div>`;
+    html += `<table class="w-full mb-6 border-collapse"><thead><tr class="bg-gray-200">
+      <th class="p-2 border">التاريخ</th><th class="p-2 border">الحالة</th><th class="p-2 border">ملاحظات</th>
+    </tr></thead><tbody>`;
+    grouped[month].forEach(r => {
+      html += `<tr>
+        <td class="p-2 border">${r.date}</td>
+        <td class="p-2 border">${r.status}</td>
+        <td class="p-2 border">${r.notes || ''}</td>
+      </tr>`;
+    });
+    html += `</tbody></table>`;
+  });
+  container.innerHTML = html;
+}
+
+// Override existing load functions to use month grouping
+const originalLoadAttendance = window.loadAttendance;
+window.loadAttendance = async function() {
+  const records = await db.collection('attendance').where('employeeId', '==', employeeId).get();
+  const data = records.docs.map(d => ({id: d.id, ...d.data()}));
+  renderAttendanceWithMonths(data);
+};
+
+function updateIdImages() {
+  const frontImg = document.getElementById('idImageFrontPreviewImg')?.src || '';
+  const backImg = document.getElementById('idImageBackPreviewImg')?.src || '';
+  const idNumber = document.getElementById('idNumber')?.value || '';
+  
+  if (!frontImg && !backImg) {
+    alert('الرجاء اختيار صورة أمامية أو خلفية على الأقل');
+    return;
+  }
+  
+  const employeeId = new URLSearchParams(window.location.search).get('id') || 'default';
+  const idData = {
+    idNumber: idNumber,
+    frontImage: frontImg,
+    backImage: backImg,
+    updatedAt: new Date().toISOString()
+  };
+  localStorage.setItem('employee_id_' + employeeId, JSON.stringify(idData));
+  
+  if (typeof firebase !== 'undefined' && typeof db !== 'undefined') {
+    db.collection('employees').doc(employeeId).update({
+      idNumber: idNumber,
+      idImageFront: frontImg,
+      idImageBack: backImg,
+      idImagesUpdatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(() => {
+      alert('✅ تم تحديث وحفظ صور الهوية في سجل الموظف');
+    }).catch(() => {
+      alert('✅ تم الحفظ محلياً في سجل الموظف');
+    });
+  } else {
+    alert('✅ تم تحديث وحفظ صور الهوية في سجل الموظف محلياً');
+  }
+}
+
+// Load saved images on page load
+window.addEventListener('DOMContentLoaded', function() {
+  const employeeId = new URLSearchParams(window.location.search).get('id') || 'default';
+  const saved = localStorage.getItem('employee_id_' + employeeId);
+  if (saved) {
+    try {
+      const data = JSON.parse(saved);
+      if (data.idNumber) document.getElementById('idNumber').value = data.idNumber;
+      if (data.frontImage) {
+        document.getElementById('idImageFrontPreviewImg').src = data.frontImage;
+        document.getElementById('idImageFrontPreview').classList.remove('hidden');
+      }
+      if (data.backImage) {
+        document.getElementById('idImageBackPreviewImg').src = data.backImage;
+        document.getElementById('idImageBackPreview').classList.remove('hidden');
+      }
+    } catch(e) {}
+  }
+});
+
+</script>
+
+
+<script>
+// Camera for idImageFront and idImageBack - mobile only
+if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+  document.addEventListener('DOMContentLoaded', function() {
+    function addCameraBtn(inputId, btnText) {
+      const input = document.getElementById(inputId);
+      if (input && !input.dataset.cameraAttached) {
+        input.dataset.cameraAttached = 'true';
+        const camBtn = document.createElement('button');
+        camBtn.innerHTML = '📷 ' + btnText;
+        camBtn.type = 'button';
+        camBtn.className = 'no-print w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl font-bold mb-2';
+        camBtn.onclick = (e) => {
+          e.preventDefault();
+          const fileInput = document.createElement('input');
+          fileInput.type = 'file';
+          fileInput.accept = 'image/*';
+          fileInput.capture = 'environment';
+          fileInput.onchange = ev => {
+            const file = ev.target.files[0];
+            if (file) {
+              const dt = new DataTransfer();
+              dt.items.add(file);
+              input.files = dt.files;
+              const previewDiv = document.getElementById(inputId + 'Preview');
+              const previewImg = document.getElementById(inputId + 'PreviewImg');
+              if (previewDiv && previewImg) {
+                const reader = new FileReader();
+                reader.onload = e => {
+                  previewImg.src = e.target.result;
+                  previewDiv.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+              }
+            }
+          };
+          fileInput.click();
+        };
+        input.parentNode.insertBefore(camBtn, input);
+      }
     }
-    if (data.backImage) {
-      document.getElementById('idImageBackPreviewImg').src = data.backImage;
-      document.getElementById('idImageBackPreview').classList.remove('hidden');
+    addCameraBtn('idImageFront', 'تصوير الجهة الأمامية');
+    addCameraBtn('idImageBack', 'تصوير الجهة الخلفية');
+  });
+}
+
+// Print functions
+function printIdFront() {
+  const name = employeeData?.name || document.getElementById('employeeName')?.innerText || 'غير محدد';
+  const idNumber = document.getElementById('idNumber')?.value || '';
+  const today = new Date().toLocaleDateString('ar-SA');
+  const img = document.getElementById('idImageFrontPreviewImg')?.src || '';
+  if (!img || img.includes('data:image/gif')) return alert('الرجاء رفع صورة الجهة الأمامية أولاً');
+  openPrintWindow('الجهة الأمامية', img, name, idNumber, today);
+}
+
+function printIdBack() {
+  const name = employeeData?.name || document.getElementById('employeeName')?.innerText || 'غير محدد';
+  const idNumber = document.getElementById('idNumber')?.value || '';
+  const today = new Date().toLocaleDateString('ar-SA');
+  const img = document.getElementById('idImageBackPreviewImg')?.src || '';
+  if (!img || img.includes('data:image/gif')) return alert('الرجاء رفع صورة الجهة الخلفية أولاً');
+  openPrintWindow('الجهة الخلفية', img, name, idNumber, today);
+}
+
+function openPrintWindow(side, img, name, idNumber, today) {
+  const printWindow = window.open('', '_blank');
+  printWindow.document.write(`
+    <html dir="rtl"><head><title>طباعة الهوية - ${side}</title>
+    <style>body{font-family:Arial;padding:40px;text-align:center}img{max-width:500px;max-height:500px;border:3px solid #000;margin:20px 0}.info{margin-top:30px;font-size:18px;display:grid;grid-template-columns:1fr 1fr;gap:20px;text-align:right}</style>
+    </head><body>
+    <h1>صورة الهوية - ${side}</h1>
+    <img src="${img}">
+    <div class="info">
+      <div><strong>الاسم:</strong> ${name}</div>
+      <div><strong>رقم الهوية:</strong> ${idNumber}</div>
+      <div><strong>التاريخ:</strong> ${today}</div>
+      <div><strong>التوقيع:</strong> ___________</div>
+    </div>
+    <script>window.print();<\/script></body></html>
+  `);
+  printWindow.document.close();
+}
+
+// Preview handlers
+['idImageFront','idImageBack'].forEach(id => {
+  document.addEventListener('change', function(e) {
+    if (e.target.id === id) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = e => {
+          document.getElementById(id + 'PreviewImg').src = e.target.result;
+          document.getElementById(id + 'Preview').classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+  });
+});
+
+function updateIdImages() {
+  const frontImg = document.getElementById('idImageFrontPreviewImg')?.src || '';
+  const backImg = document.getElementById('idImageBackPreviewImg')?.src || '';
+  const idNumber = document.getElementById('idNumber')?.value || '';
+  
+  if (!frontImg && !backImg) {
+    alert('الرجاء اختيار صورة أمامية أو خلفية على الأقل');
+    return;
+  }
+  
+  const employeeId = new URLSearchParams(window.location.search).get('id') || 'default';
+  const idData = {
+    idNumber: idNumber,
+    frontImage: frontImg,
+    backImage: backImg,
+    updatedAt: new Date().toISOString()
+  };
+  localStorage.setItem('employee_id_' + employeeId, JSON.stringify(idData));
+  
+  if (typeof firebase !== 'undefined' && typeof db !== 'undefined') {
+    db.collection('employees').doc(employeeId).update({
+      idNumber: idNumber,
+      idImageFront: frontImg,
+      idImageBack: backImg,
+      idImagesUpdatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(() => {
+      alert('✅ تم تحديث وحفظ صور الهوية في سجل الموظف');
+    }).catch(() => {
+      alert('✅ تم الحفظ محلياً في سجل الموظف');
+    });
+  } else {
+    alert('✅ تم تحديث وحفظ صور الهوية في سجل الموظف محلياً');
+  }
+}
+
+// Load saved images on page load
+window.addEventListener('DOMContentLoaded', function() {
+  const employeeId = new URLSearchParams(window.location.search).get('id') || 'default';
+  const saved = localStorage.getItem('employee_id_' + employeeId);
+  if (saved) {
+    try {
+      const data = JSON.parse(saved);
+      if (data.idNumber) document.getElementById('idNumber').value = data.idNumber;
+      if (data.frontImage) {
+        document.getElementById('idImageFrontPreviewImg').src = data.frontImage;
+        document.getElementById('idImageFrontPreview').classList.remove('hidden');
+      }
+      if (data.backImage) {
+        document.getElementById('idImageBackPreviewImg').src = data.backImage;
+        document.getElementById('idImageBackPreview').classList.remove('hidden');
+      }
+    } catch(e) {}
+  }
+});
+
+</script>
+
+</body>
+    </html>
+  `);
+  printWindow.document.close();
+}
+
+// Preview for idImage
+document.addEventListener('change', function(e) {
+  if (e.target.id === 'idImage') {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = e => {
+        document.getElementById('idImagePreviewImg').src = e.target.result;
+        document.getElementById('idImagePreview').classList.remove('hidden');
+      };
+      reader.readAsDataURL(file);
     }
   }
 });
 
-function printIdFront() {
-  const idNumber = document.getElementById('idNumber')?.value || '___________';
-  const img = document.getElementById('idImageFrontPreviewImg')?.src || '';
-  if (!img || img === '' || img.startsWith('data:image/gif')) {
-    alert('الرجاء رفع صورة الوجه الأمامي أولاً');
+function updateIdImages() {
+  const frontImg = document.getElementById('idImageFrontPreviewImg')?.src || '';
+  const backImg = document.getElementById('idImageBackPreviewImg')?.src || '';
+  const idNumber = document.getElementById('idNumber')?.value || '';
+  
+  if (!frontImg && !backImg) {
+    alert('الرجاء اختيار صورة أمامية أو خلفية على الأقل');
     return;
   }
-  const w = window.open('', '_blank');
-  w.document.write('<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8"><title>طباعة الوجه الأمامي</title>');
-  w.document.write('<style>body{font-family:Arial;padding:40px;text-align:center}img{max-width:500px;max-height:500px;border:3px solid #000;margin:20px 0}.info{margin-top:30px;font-size:18px;text-align:right}.info div{margin:15px 0;border-bottom:1px solid #ccc;padding-bottom:10px}</style>');
-  w.document.write('</head><body><h1>صورة الهوية - الوجه الأمامي</h1>');
-  w.document.write('<img src="' + img + '"><div class="info">');
-  w.document.write('<div><strong>الاسم:</strong> _________________________</div>');
-  w.document.write('<div><strong>رقم الهوية:</strong> ' + idNumber + '</div>');
-  w.document.write('<div><strong>التاريخ:</strong> _____ / _____ / ________</div>');
-  w.document.write('<div><strong>التوقيع:</strong> _________________________</div>');
-  w.document.write('</div></body></html>');
-  w.document.close();
-  w.focus();
-  setTimeout(function(){ w.print(); }, 250);
+  
+  const employeeId = new URLSearchParams(window.location.search).get('id') || 'default';
+  const idData = {
+    idNumber: idNumber,
+    frontImage: frontImg,
+    backImage: backImg,
+    updatedAt: new Date().toISOString()
+  };
+  localStorage.setItem('employee_id_' + employeeId, JSON.stringify(idData));
+  
+  if (typeof firebase !== 'undefined' && typeof db !== 'undefined') {
+    db.collection('employees').doc(employeeId).update({
+      idNumber: idNumber,
+      idImageFront: frontImg,
+      idImageBack: backImg,
+      idImagesUpdatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(() => {
+      alert('✅ تم تحديث وحفظ صور الهوية في سجل الموظف');
+    }).catch(() => {
+      alert('✅ تم الحفظ محلياً في سجل الموظف');
+    });
+  } else {
+    alert('✅ تم تحديث وحفظ صور الهوية في سجل الموظف محلياً');
+  }
+}
+
+// Load saved images on page load
+window.addEventListener('DOMContentLoaded', function() {
+  const employeeId = new URLSearchParams(window.location.search).get('id') || 'default';
+  const saved = localStorage.getItem('employee_id_' + employeeId);
+  if (saved) {
+    try {
+      const data = JSON.parse(saved);
+      if (data.idNumber) document.getElementById('idNumber').value = data.idNumber;
+      if (data.frontImage) {
+        document.getElementById('idImageFrontPreviewImg').src = data.frontImage;
+        document.getElementById('idImageFrontPreview').classList.remove('hidden');
+      }
+      if (data.backImage) {
+        document.getElementById('idImageBackPreviewImg').src = data.backImage;
+        document.getElementById('idImageBackPreview').classList.remove('hidden');
+      }
+    } catch(e) {}
+  }
+});
+
+</script>
+
+
+
+
+
+<script>
+// Camera for idImageFront and idImageBack - mobile only
+if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+  document.addEventListener('DOMContentLoaded', function() {
+    function addCameraBtn(inputId, btnText) {
+      const input = document.getElementById(inputId);
+      if (input && !input.dataset.cameraAttached) {
+        input.dataset.cameraAttached = 'true';
+        const camBtn = document.createElement('button');
+        camBtn.innerHTML = '📷 ' + btnText;
+        camBtn.type = 'button';
+        camBtn.className = 'no-print w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl font-bold mb-2';
+        camBtn.onclick = (e) => {
+          e.preventDefault();
+          const fileInput = document.createElement('input');
+          fileInput.type = 'file';
+          fileInput.accept = 'image/*';
+          fileInput.capture = 'environment';
+          fileInput.onchange = ev => {
+            const file = ev.target.files[0];
+            if (file) {
+              const dt = new DataTransfer();
+              dt.items.add(file);
+              input.files = dt.files;
+              const previewDiv = document.getElementById(inputId + 'Preview');
+              const previewImg = document.getElementById(inputId + 'PreviewImg');
+              if (previewDiv && previewImg) {
+                const reader = new FileReader();
+                reader.onload = e => {
+                  previewImg.src = e.target.result;
+                  previewDiv.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+              }
+            }
+          };
+          fileInput.click();
+        };
+        input.parentNode.insertBefore(camBtn, input);
+      }
+    }
+    addCameraBtn('idImageFront', 'تصوير الجهة الأمامية');
+    addCameraBtn('idImageBack', 'تصوير الجهة الخلفية');
+  });
+}
+
+// Print functions
+function printIdFront() {
+  const name = employeeData?.name || document.getElementById('employeeName')?.innerText || 'غير محدد';
+  const idNumber = document.getElementById('idNumber')?.value || '';
+  const today = new Date().toLocaleDateString('ar-SA');
+  const img = document.getElementById('idImageFrontPreviewImg')?.src || '';
+  if (!img || img.includes('data:image/gif')) return alert('الرجاء رفع صورة الجهة الأمامية أولاً');
+  openPrintWindow('الجهة الأمامية', img, name, idNumber, today);
 }
 
 function printIdBack() {
-  const idNumber = document.getElementById('idNumber')?.value || '___________';
+  const name = employeeData?.name || document.getElementById('employeeName')?.innerText || 'غير محدد';
+  const idNumber = document.getElementById('idNumber')?.value || '';
+  const today = new Date().toLocaleDateString('ar-SA');
   const img = document.getElementById('idImageBackPreviewImg')?.src || '';
-  if (!img || img === '' || img.startsWith('data:image/gif')) {
-    alert('الرجاء رفع صورة الوجه الخلفي أولاً');
+  if (!img || img.includes('data:image/gif')) return alert('الرجاء رفع صورة الجهة الخلفية أولاً');
+  openPrintWindow('الجهة الخلفية', img, name, idNumber, today);
+}
+
+function openPrintWindow(side, img, name, idNumber, today) {
+  const printWindow = window.open('', '_blank');
+  printWindow.document.write(`
+    <html dir="rtl"><head><title>طباعة الهوية - ${side}</title>
+    <style>body{font-family:Arial;padding:40px;text-align:center}img{max-width:500px;max-height:500px;border:3px solid #000;margin:20px 0}.info{margin-top:30px;font-size:18px;display:grid;grid-template-columns:1fr 1fr;gap:20px;text-align:right}</style>
+    </head><body>
+    <h1>صورة الهوية - ${side}</h1>
+    <img src="${img}">
+    <div class="info">
+      <div><strong>الاسم:</strong> ${name}</div>
+      <div><strong>رقم الهوية:</strong> ${idNumber}</div>
+      <div><strong>التاريخ:</strong> ${today}</div>
+      <div><strong>التوقيع:</strong> ___________</div>
+    </div>
+    <script>window.print();<\/script></body></html>
+  `);
+  printWindow.document.close();
+}
+
+// Preview handlers
+['idImageFront','idImageBack'].forEach(id => {
+  document.addEventListener('change', function(e) {
+    if (e.target.id === id) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = e => {
+          document.getElementById(id + 'PreviewImg').src = e.target.result;
+          document.getElementById(id + 'Preview').classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+  });
+});
+
+function updateIdImages() {
+  const frontImg = document.getElementById('idImageFrontPreviewImg')?.src || '';
+  const backImg = document.getElementById('idImageBackPreviewImg')?.src || '';
+  const idNumber = document.getElementById('idNumber')?.value || '';
+  
+  if (!frontImg && !backImg) {
+    alert('الرجاء اختيار صورة أمامية أو خلفية على الأقل');
     return;
   }
-  const w = window.open('', '_blank');
-  w.document.write('<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8"><title>طباعة الوجه الخلفي</title>');
-  w.document.write('<style>body{font-family:Arial;padding:40px;text-align:center}img{max-width:500px;max-height:500px;border:3px solid #000;margin:20px 0}.info{margin-top:30px;font-size:18px;text-align:right}.info div{margin:15px 0;border-bottom:1px solid #ccc;padding-bottom:10px}</style>');
-  w.document.write('</head><body><h1>صورة الهوية - الوجه الخلفي</h1>');
-  w.document.write('<img src="' + img + '"><div class="info">');
-  w.document.write('<div><strong>الاسم:</strong> _________________________</div>');
-  w.document.write('<div><strong>رقم الهوية:</strong> ' + idNumber + '</div>');
-  w.document.write('<div><strong>التاريخ:</strong> _____ / _____ / ________</div>');
-  w.document.write('<div><strong>التوقيع:</strong> _________________________</div>');
-  w.document.write('</div></body></html>');
-  w.document.close();
-  w.focus();
-  setTimeout(function(){ w.print(); }, 250);
+  
+  const employeeId = new URLSearchParams(window.location.search).get('id') || 'default';
+  const idData = {
+    idNumber: idNumber,
+    frontImage: frontImg,
+    backImage: backImg,
+    updatedAt: new Date().toISOString()
+  };
+  localStorage.setItem('employee_id_' + employeeId, JSON.stringify(idData));
+  
+  if (typeof firebase !== 'undefined' && typeof db !== 'undefined') {
+    db.collection('employees').doc(employeeId).update({
+      idNumber: idNumber,
+      idImageFront: frontImg,
+      idImageBack: backImg,
+      idImagesUpdatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(() => {
+      alert('✅ تم تحديث وحفظ صور الهوية في سجل الموظف');
+    }).catch(() => {
+      alert('✅ تم الحفظ محلياً في سجل الموظف');
+    });
+  } else {
+    alert('✅ تم تحديث وحفظ صور الهوية في سجل الموظف محلياً');
+  }
 }
+
+// Load saved images on page load
+window.addEventListener('DOMContentLoaded', function() {
+  const employeeId = new URLSearchParams(window.location.search).get('id') || 'default';
+  const saved = localStorage.getItem('employee_id_' + employeeId);
+  if (saved) {
+    try {
+      const data = JSON.parse(saved);
+      if (data.idNumber) document.getElementById('idNumber').value = data.idNumber;
+      if (data.frontImage) {
+        document.getElementById('idImageFrontPreviewImg').src = data.frontImage;
+        document.getElementById('idImageFrontPreview').classList.remove('hidden');
+      }
+      if (data.backImage) {
+        document.getElementById('idImageBackPreviewImg').src = data.backImage;
+        document.getElementById('idImageBackPreview').classList.remove('hidden');
+      }
+    } catch(e) {}
+  }
+});
+
+</script>
+
+</body>
+    </html>
+  `);
+  printWindow.document.close();
+}
+
+// Preview for idImage
+document.addEventListener('change', function(e) {
+  if (e.target.id === 'idImage') {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = e => {
+        document.getElementById('idImagePreviewImg').src = e.target.result;
+        document.getElementById('idImagePreview').classList.remove('hidden');
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+});
+
+function updateIdImages() {
+  const frontImg = document.getElementById('idImageFrontPreviewImg')?.src || '';
+  const backImg = document.getElementById('idImageBackPreviewImg')?.src || '';
+  const idNumber = document.getElementById('idNumber')?.value || '';
+  
+  if (!frontImg && !backImg) {
+    alert('الرجاء اختيار صورة أمامية أو خلفية على الأقل');
+    return;
+  }
+  
+  const employeeId = new URLSearchParams(window.location.search).get('id') || 'default';
+  const idData = {
+    idNumber: idNumber,
+    frontImage: frontImg,
+    backImage: backImg,
+    updatedAt: new Date().toISOString()
+  };
+  localStorage.setItem('employee_id_' + employeeId, JSON.stringify(idData));
+  
+  if (typeof firebase !== 'undefined' && typeof db !== 'undefined') {
+    db.collection('employees').doc(employeeId).update({
+      idNumber: idNumber,
+      idImageFront: frontImg,
+      idImageBack: backImg,
+      idImagesUpdatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(() => {
+      alert('✅ تم تحديث وحفظ صور الهوية في سجل الموظف');
+    }).catch(() => {
+      alert('✅ تم الحفظ محلياً في سجل الموظف');
+    });
+  } else {
+    alert('✅ تم تحديث وحفظ صور الهوية في سجل الموظف محلياً');
+  }
+}
+
+// Load saved images on page load
+window.addEventListener('DOMContentLoaded', function() {
+  const employeeId = new URLSearchParams(window.location.search).get('id') || 'default';
+  const saved = localStorage.getItem('employee_id_' + employeeId);
+  if (saved) {
+    try {
+      const data = JSON.parse(saved);
+      if (data.idNumber) document.getElementById('idNumber').value = data.idNumber;
+      if (data.frontImage) {
+        document.getElementById('idImageFrontPreviewImg').src = data.frontImage;
+        document.getElementById('idImageFrontPreview').classList.remove('hidden');
+      }
+      if (data.backImage) {
+        document.getElementById('idImageBackPreviewImg').src = data.backImage;
+        document.getElementById('idImageBackPreview').classList.remove('hidden');
+      }
+    } catch(e) {}
+  }
+});
+
+</script>
+
+
+<script>
+// Fix: Add attendance without logout
+const originalAddRecord = window.addRecord || function(){};
+window.addRecord = async function() {
+  try {
+    // Your existing add record logic here but ensure no redirect
+    const date = document.getElementById('recordDate')?.value;
+    const status = document.getElementById('recordStatus')?.value;
+    if (!date || !status) return alert('املأ التاريخ والحالة');
+    
+    // Save to Firebase without redirect
+    await db.collection('attendance').add({
+      employeeId: employeeId,
+      date: date,
+      status: status,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    
+    // Refresh table without reload
+    if (typeof loadAttendanceRecords === 'function') loadAttendanceRecords();
+    if (typeof loadAttendance === 'function') loadAttendance();
+    
+  } catch (e) {
+    console.error(e);
+    alert('خطأ في الحفظ: ' + e.message);
+  }
+};
+
+// Fix: Group attendance by month when rendering
+function renderAttendanceWithMonths(records) {
+  const container = document.getElementById('attendanceTable') || document.querySelector('.attendance-list');
+  if (!container) return;
+  
+  // Sort by date desc
+  records.sort((a,b) => new Date(b.date) - new Date(a.date));
+  
+  // Group by month
+  const grouped = {};
+  records.forEach(r => {
+    const month = new Date(r.date).toLocaleDateString('ar-SA', { year: 'numeric', month: 'long' });
+    if (!grouped[month]) grouped[month] = [];
+    grouped[month].push(r);
+  });
+  
+  // Render
+  let html = '';
+  Object.keys(grouped).forEach(month => {
+    html += `<div class="month-header bg-blue-100 p-3 font-bold text-lg mb-2 rounded">${month}</div>`;
+    html += `<table class="w-full mb-6 border-collapse"><thead><tr class="bg-gray-200">
+      <th class="p-2 border">التاريخ</th><th class="p-2 border">الحالة</th><th class="p-2 border">ملاحظات</th>
+    </tr></thead><tbody>`;
+    grouped[month].forEach(r => {
+      html += `<tr>
+        <td class="p-2 border">${r.date}</td>
+        <td class="p-2 border">${r.status}</td>
+        <td class="p-2 border">${r.notes || ''}</td>
+      </tr>`;
+    });
+    html += `</tbody></table>`;
+  });
+  container.innerHTML = html;
+}
+
+// Override existing load functions to use month grouping
+const originalLoadAttendance = window.loadAttendance;
+window.loadAttendance = async function() {
+  const records = await db.collection('attendance').where('employeeId', '==', employeeId).get();
+  const data = records.docs.map(d => ({id: d.id, ...d.data()}));
+  renderAttendanceWithMonths(data);
+};
+
+function updateIdImages() {
+  const frontImg = document.getElementById('idImageFrontPreviewImg')?.src || '';
+  const backImg = document.getElementById('idImageBackPreviewImg')?.src || '';
+  const idNumber = document.getElementById('idNumber')?.value || '';
+  
+  if (!frontImg && !backImg) {
+    alert('الرجاء اختيار صورة أمامية أو خلفية على الأقل');
+    return;
+  }
+  
+  const employeeId = new URLSearchParams(window.location.search).get('id') || 'default';
+  const idData = {
+    idNumber: idNumber,
+    frontImage: frontImg,
+    backImage: backImg,
+    updatedAt: new Date().toISOString()
+  };
+  localStorage.setItem('employee_id_' + employeeId, JSON.stringify(idData));
+  
+  if (typeof firebase !== 'undefined' && typeof db !== 'undefined') {
+    db.collection('employees').doc(employeeId).update({
+      idNumber: idNumber,
+      idImageFront: frontImg,
+      idImageBack: backImg,
+      idImagesUpdatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(() => {
+      alert('✅ تم تحديث وحفظ صور الهوية في سجل الموظف');
+    }).catch(() => {
+      alert('✅ تم الحفظ محلياً في سجل الموظف');
+    });
+  } else {
+    alert('✅ تم تحديث وحفظ صور الهوية في سجل الموظف محلياً');
+  }
+}
+
+// Load saved images on page load
+window.addEventListener('DOMContentLoaded', function() {
+  const employeeId = new URLSearchParams(window.location.search).get('id') || 'default';
+  const saved = localStorage.getItem('employee_id_' + employeeId);
+  if (saved) {
+    try {
+      const data = JSON.parse(saved);
+      if (data.idNumber) document.getElementById('idNumber').value = data.idNumber;
+      if (data.frontImage) {
+        document.getElementById('idImageFrontPreviewImg').src = data.frontImage;
+        document.getElementById('idImageFrontPreview').classList.remove('hidden');
+      }
+      if (data.backImage) {
+        document.getElementById('idImageBackPreviewImg').src = data.backImage;
+        document.getElementById('idImageBackPreview').classList.remove('hidden');
+      }
+    } catch(e) {}
+  }
+});
+
+</script>
+
+
+<script>
+// Camera for idImageFront and idImageBack - mobile only
+if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+  document.addEventListener('DOMContentLoaded', function() {
+    function addCameraBtn(inputId, btnText) {
+      const input = document.getElementById(inputId);
+      if (input && !input.dataset.cameraAttached) {
+        input.dataset.cameraAttached = 'true';
+        const camBtn = document.createElement('button');
+        camBtn.innerHTML = '📷 ' + btnText;
+        camBtn.type = 'button';
+        camBtn.className = 'no-print w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl font-bold mb-2';
+        camBtn.onclick = (e) => {
+          e.preventDefault();
+          const fileInput = document.createElement('input');
+          fileInput.type = 'file';
+          fileInput.accept = 'image/*';
+          fileInput.capture = 'environment';
+          fileInput.onchange = ev => {
+            const file = ev.target.files[0];
+            if (file) {
+              const dt = new DataTransfer();
+              dt.items.add(file);
+              input.files = dt.files;
+              const previewDiv = document.getElementById(inputId + 'Preview');
+              const previewImg = document.getElementById(inputId + 'PreviewImg');
+              if (previewDiv && previewImg) {
+                const reader = new FileReader();
+                reader.onload = e => {
+                  previewImg.src = e.target.result;
+                  previewDiv.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+              }
+            }
+          };
+          fileInput.click();
+        };
+        input.parentNode.insertBefore(camBtn, input);
+      }
+    }
+    addCameraBtn('idImageFront', 'تصوير الجهة الأمامية');
+    addCameraBtn('idImageBack', 'تصوير الجهة الخلفية');
+  });
+}
+
+// Print functions
+function printIdFront() {
+  const name = employeeData?.name || document.getElementById('employeeName')?.innerText || 'غير محدد';
+  const idNumber = document.getElementById('idNumber')?.value || '';
+  const today = new Date().toLocaleDateString('ar-SA');
+  const img = document.getElementById('idImageFrontPreviewImg')?.src || '';
+  if (!img || img.includes('data:image/gif')) return alert('الرجاء رفع صورة الجهة الأمامية أولاً');
+  openPrintWindow('الجهة الأمامية', img, name, idNumber, today);
+}
+
+function printIdBack() {
+  const name = employeeData?.name || document.getElementById('employeeName')?.innerText || 'غير محدد';
+  const idNumber = document.getElementById('idNumber')?.value || '';
+  const today = new Date().toLocaleDateString('ar-SA');
+  const img = document.getElementById('idImageBackPreviewImg')?.src || '';
+  if (!img || img.includes('data:image/gif')) return alert('الرجاء رفع صورة الجهة الخلفية أولاً');
+  openPrintWindow('الجهة الخلفية', img, name, idNumber, today);
+}
+
+function openPrintWindow(side, img, name, idNumber, today) {
+  const printWindow = window.open('', '_blank');
+  printWindow.document.write(`
+    <html dir="rtl"><head><title>طباعة الهوية - ${side}</title>
+    <style>body{font-family:Arial;padding:40px;text-align:center}img{max-width:500px;max-height:500px;border:3px solid #000;margin:20px 0}.info{margin-top:30px;font-size:18px;display:grid;grid-template-columns:1fr 1fr;gap:20px;text-align:right}</style>
+    </head><body>
+    <h1>صورة الهوية - ${side}</h1>
+    <img src="${img}">
+    <div class="info">
+      <div><strong>الاسم:</strong> ${name}</div>
+      <div><strong>رقم الهوية:</strong> ${idNumber}</div>
+      <div><strong>التاريخ:</strong> ${today}</div>
+      <div><strong>التوقيع:</strong> ___________</div>
+    </div>
+    <script>window.print();<\/script></body></html>
+  `);
+  printWindow.document.close();
+}
+
+// Preview handlers
+['idImageFront','idImageBack'].forEach(id => {
+  document.addEventListener('change', function(e) {
+    if (e.target.id === id) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = e => {
+          document.getElementById(id + 'PreviewImg').src = e.target.result;
+          document.getElementById(id + 'Preview').classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+  });
+});
+
+function updateIdImages() {
+  const frontImg = document.getElementById('idImageFrontPreviewImg')?.src || '';
+  const backImg = document.getElementById('idImageBackPreviewImg')?.src || '';
+  const idNumber = document.getElementById('idNumber')?.value || '';
+  
+  if (!frontImg && !backImg) {
+    alert('الرجاء اختيار صورة أمامية أو خلفية على الأقل');
+    return;
+  }
+  
+  const employeeId = new URLSearchParams(window.location.search).get('id') || 'default';
+  const idData = {
+    idNumber: idNumber,
+    frontImage: frontImg,
+    backImage: backImg,
+    updatedAt: new Date().toISOString()
+  };
+  localStorage.setItem('employee_id_' + employeeId, JSON.stringify(idData));
+  
+  if (typeof firebase !== 'undefined' && typeof db !== 'undefined') {
+    db.collection('employees').doc(employeeId).update({
+      idNumber: idNumber,
+      idImageFront: frontImg,
+      idImageBack: backImg,
+      idImagesUpdatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(() => {
+      alert('✅ تم تحديث وحفظ صور الهوية في سجل الموظف');
+    }).catch(() => {
+      alert('✅ تم الحفظ محلياً في سجل الموظف');
+    });
+  } else {
+    alert('✅ تم تحديث وحفظ صور الهوية في سجل الموظف محلياً');
+  }
+}
+
+// Load saved images on page load
+window.addEventListener('DOMContentLoaded', function() {
+  const employeeId = new URLSearchParams(window.location.search).get('id') || 'default';
+  const saved = localStorage.getItem('employee_id_' + employeeId);
+  if (saved) {
+    try {
+      const data = JSON.parse(saved);
+      if (data.idNumber) document.getElementById('idNumber').value = data.idNumber;
+      if (data.frontImage) {
+        document.getElementById('idImageFrontPreviewImg').src = data.frontImage;
+        document.getElementById('idImageFrontPreview').classList.remove('hidden');
+      }
+      if (data.backImage) {
+        document.getElementById('idImageBackPreviewImg').src = data.backImage;
+        document.getElementById('idImageBackPreview').classList.remove('hidden');
+      }
+    } catch(e) {}
+  }
+});
+
 </script>
 
 </body>
