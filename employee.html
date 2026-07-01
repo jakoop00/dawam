@@ -384,22 +384,30 @@
                                     <button onclick="deleteProfileImage()" class="bg-red-500 text-white px-4 py-3 rounded-xl font-bold hover:opacity-90">🗑</button>
                                 </div>
                             </div>
+                            
                             <div class="bg-white rounded-2xl shadow-xl p-6 no-print">
                                 <h3 class="text-xl font-bold mb-4 text-gray-900">📋  بيانات الهوية / التصريح</h3>
-                                <input type="text" id="idNumber" placeholder="رقم الهوية / التصريح" value="${employeeData.idNumber || ''}" class="w-full px-4 py-3 border-2 border-blue-300 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 font-bold">
+                                <input type="text" id="idNumber" placeholder="رقم الهوية / التصريح" class="w-full px-4 py-3 border-2 border-blue-300 rounded-xl mb-4 outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 font-bold">
+                                
+                                <div class="mb-4">
+                                    <label class="block text-sm font-bold mb-2 text-gray-700">📷 صورة الهوية - الجهة الأمامية</label>
+                                    <input type="file" id="idImageFront" accept="image/*" class="w-full px-4 py-3 border-2 border-blue-300 rounded-xl mb-2 text-gray-900">
+                                    <div id="idImageFrontPreview" class="hidden mb-2">
+                                        <img id="idImageFrontPreviewImg" class="w-full h-48 object-cover rounded-xl border-2 border-gray-300">
+                                    </div>
+                                    <button onclick="printIdFront()" class="w-full bg-indigo-500 hover:bg-indigo-600 text-white py-3 rounded-xl font-bold no-print">🖨️ طباعة الجهة الأمامية</button>
+                                </div>
 
-                                <label class="input-label text-sm">📷 الوجه الأمامي</label>
-                                <input type="file" id="idImageFront" accept="image/*" class="w-full px-4 py-3 border-2 border-blue-300 rounded-xl mb-3 text-gray-900">
-                                ${employeeData.idImageUrlFront? `<img src="${employeeData.idImageUrlFront}" class="w-full rounded-xl border-2 border-gray-300 cursor-pointer mb-3" onclick="openImageModal('${employeeData.idImageUrlFront}')">` : ''}
-
-                                <label class="input-label text-sm">📷 الوجه الخلفي</label>
-                                <input type="file" id="idImageBack" accept="image/*" class="w-full px-4 py-3 border-2 border-blue-300 rounded-xl mb-3 text-gray-900">
-                                ${employeeData.idImageUrlBack? `<img src="${employeeData.idImageUrlBack}" class="w-full rounded-xl border-2 border-gray-300 cursor-pointer mb-3" onclick="openImageModal('${employeeData.idImageUrlBack}')">` : ''}
-
-                                <button onclick="saveIdData()" class="w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-3 rounded-xl font-bold hover:opacity-90 mb-2">حفظ بيانات الهوية</button>
-                                <button onclick="deleteIdData()" class="w-full bg-red-500 text-white py-3 rounded-xl font-bold hover:opacity-90">🗑 مسح بيانات الهوية</button>
+                                <div>
+                                    <label class="block text-sm font-bold mb-2 text-gray-700">📷 صورة الهوية - الجهة الخلفية</label>
+                                    <input type="file" id="idImageBack" accept="image/*" class="w-full px-4 py-3 border-2 border-blue-300 rounded-xl mb-2 text-gray-900">
+                                    <div id="idImageBackPreview" class="hidden mb-2">
+                                        <img id="idImageBackPreviewImg" class="w-full h-48 object-cover rounded-xl border-2 border-gray-300">
+                                    </div>
+                                    <button onclick="printIdBack()" class="w-full bg-indigo-500 hover:bg-indigo-600 text-white py-3 rounded-xl font-bold no-print">🖨️ طباعة الجهة الخلفية</button>
+                                </div>
                             </div>
-                        </div>
+
                     </div>
                 </div>
             `;
@@ -645,6 +653,89 @@ if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(naviga
       profileInput.parentNode.insertBefore(camBtn, profileInput);
     }
   });
+}
+</script>
+
+
+<script>
+// Preview for front and back ID images
+document.addEventListener('change', function(e) {
+  if (e.target.id === 'idImageFront') {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        document.getElementById('idImageFrontPreviewImg').src = evt.target.result;
+        document.getElementById('idImageFrontPreview').classList.remove('hidden');
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+  if (e.target.id === 'idImageBack') {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        document.getElementById('idImageBackPreviewImg').src = evt.target.result;
+        document.getElementById('idImageBackPreview').classList.remove('hidden');
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+});
+
+function printIdFront() {
+  const name = (typeof employeeData !== 'undefined' && employeeData.name) ? employeeData.name : 
+               document.getElementById('employeeName')?.innerText || document.querySelector('[data-name]')?.innerText || 'غير محدد';
+  const idNumber = document.getElementById('idNumber')?.value || '';
+  const today = new Date().toLocaleDateString('ar-SA');
+  const img = document.getElementById('idImageFrontPreviewImg')?.src || '';
+  
+  if (!img || img === '' || img.startsWith('data:image/gif')) {
+    alert('الرجاء رفع صورة الجهة الأمامية أولاً');
+    return;
+  }
+  
+  const w = window.open('', '_blank');
+  w.document.write('<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8"><title>طباعة الجهة الأمامية</title>');
+  w.document.write('<style>body{font-family:Arial;padding:40px;text-align:center}img{max-width:500px;max-height:500px;border:3px solid #000;margin:20px 0}.info{margin-top:30px;font-size:18px;display:grid;grid-template-columns:1fr 1fr;gap:20px;text-align:right}.info div{margin:10px 0}</style>');
+  w.document.write('</head><body><h1>صورة الهوية - الجهة الأمامية</h1>');
+  w.document.write('<img src="' + img + '"><div class="info">');
+  w.document.write('<div><strong>الاسم:</strong> ' + name + '</div>');
+  w.document.write('<div><strong>رقم الهوية:</strong> ' + idNumber + '</div>');
+  w.document.write('<div><strong>التاريخ:</strong> ' + today + '</div>');
+  w.document.write('<div><strong>التوقيع:</strong> ___________</div>');
+  w.document.write('</div></body></html>');
+  w.document.close();
+  w.focus();
+  setTimeout(function(){ w.print(); }, 250);
+}
+
+function printIdBack() {
+  const name = (typeof employeeData !== 'undefined' && employeeData.name) ? employeeData.name : 
+               document.getElementById('employeeName')?.innerText || document.querySelector('[data-name]')?.innerText || 'غير محدد';
+  const idNumber = document.getElementById('idNumber')?.value || '';
+  const today = new Date().toLocaleDateString('ar-SA');
+  const img = document.getElementById('idImageBackPreviewImg')?.src || '';
+  
+  if (!img || img === '' || img.startsWith('data:image/gif')) {
+    alert('الرجاء رفع صورة الجهة الخلفية أولاً');
+    return;
+  }
+  
+  const w = window.open('', '_blank');
+  w.document.write('<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8"><title>طباعة الجهة الخلفية</title>');
+  w.document.write('<style>body{font-family:Arial;padding:40px;text-align:center}img{max-width:500px;max-height:500px;border:3px solid #000;margin:20px 0}.info{margin-top:30px;font-size:18px;display:grid;grid-template-columns:1fr 1fr;gap:20px;text-align:right}.info div{margin:10px 0}</style>');
+  w.document.write('</head><body><h1>صورة الهوية - الجهة الخلفية</h1>');
+  w.document.write('<img src="' + img + '"><div class="info">');
+  w.document.write('<div><strong>الاسم:</strong> ' + name + '</div>');
+  w.document.write('<div><strong>رقم الهوية:</strong> ' + idNumber + '</div>');
+  w.document.write('<div><strong>التاريخ:</strong> ' + today + '</div>');
+  w.document.write('<div><strong>التوقيع:</strong> ___________</div>');
+  w.document.write('</div></body></html>');
+  w.document.close();
+  w.focus();
+  setTimeout(function(){ w.print(); }, 250);
 }
 </script>
 
