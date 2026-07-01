@@ -8,18 +8,23 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap');
         body { font-family: 'Tajawal', sans-serif; color: #000; }
-       .loader { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 20px auto; }
+      .loader { border: 4px solid #f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-       .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); }
-       .modal-content { background-color: white; margin: 5% auto; padding: 30px; border-radius: 20px; width: 90%; max-width: 600px; max-height: 80vh; overflow-y: auto; }
-       .input-label { display: block; color: #000; font-weight: 800; margin-bottom: 8px; font-size: 16px; }
-       .input-field { width: 100%; padding: 14px; border: 3px solid #2563eb; border-radius: 12px; font-size: 16px; background: #fff; color: #000; font-weight: 700; }
-       .input-field:focus { outline: none; border-color: #1e40af; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2); }
-       .preview-box { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 16px; text-align: center; }
-       .image-modal-content { margin: 5% auto; max-width: 90%; max-height: 80vh; }
-       .image-modal-content img { width: 100%; height: auto; border-radius: 20px; }
-       .close-btn { position: absolute; top: 20px; right: 40px; color: white; font-size: 40px; font-weight: bold; cursor: pointer; }
-       .realtime-badge { position: fixed; bottom: 20px; left: 20px; background: #10b981; color: white; padding: 8px 16px; border-radius: 20px; font-weight: bold; font-size: 12px; z-index: 999; }
+      .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); }
+      .modal-content { background-color: white; margin: 5% auto; padding: 30px; border-radius: 20px; width: 90%; max-width: 600px; max-height: 80vh; overflow-y: auto; }
+      .input-label { display: block; color: #000; font-weight: 800; margin-bottom: 8px; font-size: 16px; }
+      .input-field { width: 100%; padding: 14px; border: 3px solid #2563eb; border-radius: 12px; font-size: 16px; background: #fff; color: #000; font-weight: 700; }
+      .input-field:focus { outline: none; border-color: #1e40af; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2); }
+      .preview-box { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 16px; text-align: center; }
+      .image-modal-content { margin: 5% auto; max-width: 90%; max-height: 80vh; }
+      .image-modal-content img { width: 100%; height: auto; border-radius: 20px; }
+      .close-btn { position: absolute; top: 20px; right: 40px; color: white; font-size: 40px; font-weight: bold; cursor: pointer; }
+      .realtime-badge { position: fixed; bottom: 20px; left: 20px; background: #10b981; color: white; padding: 8px 16px; border-radius: 20px; font-weight: bold; font-size: 12px; z-index: 999; }
+       @media print {
+          .no-print { display: none!important; }
+           body { background: white; }
+          .modal { display: none!important; }
+       }
     </style>
 </head>
 <body class="bg-gradient-to-br from-blue-50 to-purple-50 min-h-screen">
@@ -34,10 +39,10 @@
     </div>
 
     <!-- نافذة الصورة المنبثقة -->
-    <div id="imageModal" class="modal" onclick="closeImageModal()">
+    <div id="imageModal" class="modal no-print" onclick="closeImageModal()">
         <span class="close-btn" onclick="closeImageModal()">&times;</span>
         <div class="image-modal-content">
-            <img id="popupImage" src="" alt="صورة الموظف">
+            <img id="popupImage" src="" alt="صورة">
         </div>
     </div>
 
@@ -159,9 +164,7 @@
             setupRealtimeListeners();
         });
 
-        // ✅ التحديث السحابي الفوري
         function setupRealtimeListeners() {
-            // استماع لبيانات الموظف
             unsubscribeEmployee = onSnapshot(doc(db, 'employees', employeeId), (docSnap) => {
                 if (docSnap.exists()) {
                     employeeData = docSnap.data();
@@ -169,7 +172,6 @@
                 }
             });
 
-            // استماع لسجلات الحضور
             const q = query(collection(db, 'attendance'), where('employeeId', '==', employeeId));
             unsubscribeAttendance = onSnapshot(q, (snapshot) => {
                 records = snapshot.docs.map(doc => ({ id: doc.id,...doc.data() }));
@@ -178,16 +180,12 @@
             });
         }
 
-        // ✅ مصلح: بحسب الدوام الليلي صح
         function calc(checkIn, checkOut, overtime, bonus, deduction) {
             let start = new Date(`2000-01-01T${checkIn}`);
             let end = new Date(`2000-01-01T${checkOut}`);
-
-            // اذا الخروج قبل الدخول، يعني دوام ليلي
             if (end < start) {
                 end = new Date(`2000-01-02T${checkOut}`);
             }
-
             const diffMinutes = (end - start) / 60000;
             const baseSalary = diffMinutes / 60;
             const over = parseFloat(overtime) || 0;
@@ -238,11 +236,11 @@
             const defaultImg = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(employeeData.name) + '&background=6c5ce7&color=fff&size=200';
 
             appDiv.innerHTML = `
-                <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-5 shadow-xl">
+                <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-5 shadow-xl no-print">
                     <div class="max-w-7xl mx-auto flex justify-between items-center">
                         <button onclick="window.location.href='index.html'" class="bg-white text-blue-600 px-5 py-2 rounded-xl font-bold hover:bg-gray-100">← رجوع للقائمة</button>
                         <h1 class="text-2xl font-bold">ملف الموظف</h1>
-                        <div class="w-32"></div>
+                        <button onclick="window.print()" class="bg-white text-blue-600 px-5 py-2 rounded-xl font-bold hover:bg-gray-100">🖨️ طباعة</button>
                     </div>
                 <div class="max-w-7xl mx-auto p-6">
                     <div class="bg-white rounded-2xl shadow-xl p-6 mb-6">
@@ -275,7 +273,7 @@
                         </div>
                     </div>
 
-                    <div class="bg-gradient-to-br from-purple-500 to-pink-600 text-white rounded-2xl p-6 shadow-xl mb-6">
+                    <div class="bg-gradient-to-br from-purple-500 to-pink-600 text-white rounded-2xl p-6 shadow-xl mb-6 no-print">
                         <div class="flex justify-center items-center gap-4">
                             <button onclick="openCommissionModal()" class="bg-white text-purple-600 px-8 py-3 rounded-xl font-bold hover:bg-gray-100">💰 إضافة عمولة</button>
                             <button onclick="resetCommission()" class="bg-red-500 text-white px-8 py-3 rounded-xl font-bold hover:bg-red-600">🗑️ حذف العمولة</button>
@@ -283,7 +281,7 @@
                     </div>
 
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <div class="lg:col-span-2 space-y-6">
+                        <div class="lg:col-span-2 space-y-6 no-print">
                             <div class="bg-white rounded-2xl shadow-xl p-6">
                                 <h3 class="text-xl font-bold mb-4 text-gray-900">➕ إضافة سجل عمل جديد</h3>
                                 <div class="preview-box mb-5">
@@ -333,8 +331,8 @@
                                                 <th class="p-3 font-bold text-gray-900">مكافآت</th>
                                                 <th class="p-3 font-bold text-gray-900">خصم</th>
                                                 <th class="p-3 font-bold text-gray-900">أجر اليوم</th>
-                                                <th class="p-3 font-bold text-gray-900">تعديل</th>
-                                                <th class="p-3 font-bold text-gray-900">حذف</th>
+                                                <th class="p-3 font-bold text-gray-900 no-print">تعديل</th>
+                                                <th class="p-3 font-bold text-gray-900 no-print">حذف</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -350,8 +348,8 @@
                                                     <td class="p-3 text-green-700 font-bold">${r.bonus.toFixed(3)}</td>
                                                     <td class="p-3 text-red-700 font-bold">${r.deduction.toFixed(3)}</td>
                                                     <td class="p-3 font-bold text-purple-700">${r.dailyWage.toFixed(3)} د.أ</td>
-                                                    <td class="p-3"><button onclick="openEditModal('${r.id}')" class="text-blue-600 hover:underline font-bold">تعديل</button></td>
-                                                    <td class="p-3"><button onclick="deleteRecord('${r.id}')" class="text-red-600 hover:underline font-bold">حذف</button></td>
+                                                    <td class="p-3 no-print"><button onclick="openEditModal('${r.id}')" class="text-blue-600 hover:underline font-bold">تعديل</button></td>
+                                                    <td class="p-3 no-print"><button onclick="deleteRecord('${r.id}')" class="text-red-600 hover:underline font-bold">حذف</button></td>
                                                 </tr>`;
                                             }).join('')}
                                         </tbody>
@@ -361,7 +359,7 @@
                         </div>
 
                         <div class="space-y-6">
-                            <div class="bg-white rounded-2xl shadow-xl p-6">
+                            <div class="bg-white rounded-2xl shadow-xl p-6 no-print">
                                 <h3 class="text-xl font-bold mb-4 text-gray-900">🖼️ الصورة الشخصية</h3>
                                 <input type="file" id="profileImage" accept="image/*" class="w-full px-4 py-3 border-2 border-blue-300 rounded-xl mb-3 text-gray-900">
                                 <div class="flex gap-2">
@@ -369,13 +367,20 @@
                                     <button onclick="deleteProfileImage()" class="bg-red-500 text-white px-4 py-3 rounded-xl font-bold hover:opacity-90">🗑️</button>
                                 </div>
                             </div>
-                            <div class="bg-white rounded-2xl shadow-xl p-6">
+                            <div class="bg-white rounded-2xl shadow-xl p-6 no-print">
                                 <h3 class="text-xl font-bold mb-4 text-gray-900">📋 بيانات الهوية</h3>
                                 <input type="text" id="idNumber" placeholder="رقم الهوية / التصريح" value="${employeeData.idNumber || ''}" class="w-full px-4 py-3 border-2 border-blue-300 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 font-bold">
-                                <input type="file" id="idImage" accept="image/*" class="w-full px-4 py-3 border-2 border-blue-300 rounded-xl mb-3 text-gray-900">
+
+                                <label class="input-label text-sm">📷 الوجه الأمامي</label>
+                                <input type="file" id="idImageFront" accept="image/*" class="w-full px-4 py-3 border-2 border-blue-300 rounded-xl mb-3 text-gray-900">
+                                ${employeeData.idImageUrlFront? `<img src="${employeeData.idImageUrlFront}" class="w-full rounded-xl border-2 border-gray-300 cursor-pointer mb-3" onclick="openImageModal('${employeeData.idImageUrlFront}')">` : ''}
+
+                                <label class="input-label text-sm">📷 الوجه الخلفي</label>
+                                <input type="file" id="idImageBack" accept="image/*" class="w-full px-4 py-3 border-2 border-blue-300 rounded-xl mb-3 text-gray-900">
+                                ${employeeData.idImageUrlBack? `<img src="${employeeData.idImageUrlBack}" class="w-full rounded-xl border-2 border-gray-300 cursor-pointer mb-3" onclick="openImageModal('${employeeData.idImageUrlBack}')">` : ''}
+
                                 <button onclick="saveIdData()" class="w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-3 rounded-xl font-bold hover:opacity-90 mb-2">حفظ بيانات الهوية</button>
                                 <button onclick="deleteIdData()" class="w-full bg-red-500 text-white py-3 rounded-xl font-bold hover:opacity-90">🗑️ مسح بيانات الهوية</button>
-                                ${employeeData.idImageUrl? `<div class="mt-3"><p class="text-sm font-bold text-gray-900 mb-2">صورة الهوية الحالية:</p><img src="${employeeData.idImageUrl}" class="w-full rounded-xl border-2 border-gray-300 cursor-pointer" onclick="openImageModal('${employeeData.idImageUrl}')"></div>` : ''}
                             </div>
                         </div>
                     </div>
@@ -390,7 +395,7 @@
             document.getElementById('addForm').addEventListener('submit', addRecord);
             document.getElementById('profitInput').addEventListener('input', updateModalCommission);
             document.getElementById('percentInput').addEventListener('input', updateModalCommission);
-            calcLive(); // ✅ تشغيل اول مرة
+            calcLive();
         }
 
         window.openImageModal = function(src) {
@@ -454,7 +459,6 @@
             }
         }
 
-        // ✅ جديد: مسح صورة الموظف
         window.deleteProfileImage = async function() {
             if (!confirm('متأكد بدك تمسح صورة الموظف؟')) return;
             try {
@@ -467,27 +471,32 @@
 
         window.saveIdData = async function() {
             const idNumber = document.getElementById('idNumber').value;
-            const file = document.getElementById('idImage').files[0];
+            const fileFront = document.getElementById('idImageFront').files[0];
+            const fileBack = document.getElementById('idImageBack').files[0];
             try {
                 let updateData = { idNumber };
-                if (file) {
-                    updateData.idImageUrl = await compressImage(file);
+                if (fileFront) {
+                    updateData.idImageUrlFront = await compressImage(fileFront);
+                }
+                if (fileBack) {
+                    updateData.idImageUrlBack = await compressImage(fileBack);
                 }
                 await updateDoc(doc(db, 'employees', employeeId), updateData);
                 alert('تم الحفظ ✅');
-                document.getElementById('idImage').value = '';
+                document.getElementById('idImageFront').value = '';
+                document.getElementById('idImageBack').value = '';
             } catch (error) {
                 alert('خطأ بالحفظ: ' + error.message);
             }
         }
 
-        // ✅ جديد: مسح بيانات الهوية
         window.deleteIdData = async function() {
-            if (!confirm('متأكد بدك تمسح رقم الهوية والصورة؟')) return;
+            if (!confirm('متأكد بدك تمسح رقم الهوية والصور؟')) return;
             try {
                 await updateDoc(doc(db, 'employees', employeeId), {
                     idNumber: deleteField(),
-                    idImageUrl: deleteField()
+                    idImageUrlFront: deleteField(),
+                    idImageUrlBack: deleteField()
                 });
                 alert('تم مسح بيانات الهوية ✅');
             } catch (error) {
