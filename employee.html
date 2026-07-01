@@ -805,7 +805,80 @@ function printIdOnly() {
         <div><strong>التوقيع:</strong> ___________</div>
       </div>
       <script>window.print();<\/script>
-    </body>
+    
+<script>
+// Fix: Add attendance without logout
+const originalAddRecord = window.addRecord || function(){};
+window.addRecord = async function() {
+  try {
+    // Your existing add record logic here but ensure no redirect
+    const date = document.getElementById('recordDate')?.value;
+    const status = document.getElementById('recordStatus')?.value;
+    if (!date || !status) return alert('املأ التاريخ والحالة');
+    
+    // Save to Firebase without redirect
+    await db.collection('attendance').add({
+      employeeId: employeeId,
+      date: date,
+      status: status,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    
+    // Refresh table without reload
+    if (typeof loadAttendanceRecords === 'function') loadAttendanceRecords();
+    if (typeof loadAttendance === 'function') loadAttendance();
+    
+  } catch (e) {
+    console.error(e);
+    alert('خطأ في الحفظ: ' + e.message);
+  }
+};
+
+// Fix: Group attendance by month when rendering
+function renderAttendanceWithMonths(records) {
+  const container = document.getElementById('attendanceTable') || document.querySelector('.attendance-list');
+  if (!container) return;
+  
+  // Sort by date desc
+  records.sort((a,b) => new Date(b.date) - new Date(a.date));
+  
+  // Group by month
+  const grouped = {};
+  records.forEach(r => {
+    const month = new Date(r.date).toLocaleDateString('ar-SA', { year: 'numeric', month: 'long' });
+    if (!grouped[month]) grouped[month] = [];
+    grouped[month].push(r);
+  });
+  
+  // Render
+  let html = '';
+  Object.keys(grouped).forEach(month => {
+    html += `<div class="month-header bg-blue-100 p-3 font-bold text-lg mb-2 rounded">${month}</div>`;
+    html += `<table class="w-full mb-6 border-collapse"><thead><tr class="bg-gray-200">
+      <th class="p-2 border">التاريخ</th><th class="p-2 border">الحالة</th><th class="p-2 border">ملاحظات</th>
+    </tr></thead><tbody>`;
+    grouped[month].forEach(r => {
+      html += `<tr>
+        <td class="p-2 border">${r.date}</td>
+        <td class="p-2 border">${r.status}</td>
+        <td class="p-2 border">${r.notes || ''}</td>
+      </tr>`;
+    });
+    html += `</tbody></table>`;
+  });
+  container.innerHTML = html;
+}
+
+// Override existing load functions to use month grouping
+const originalLoadAttendance = window.loadAttendance;
+window.loadAttendance = async function() {
+  const records = await db.collection('attendance').where('employeeId', '==', employeeId).get();
+  const data = records.docs.map(d => ({id: d.id, ...d.data()}));
+  renderAttendanceWithMonths(data);
+};
+</script>
+
+</body>
     </html>
   `);
   printWindow.document.close();
@@ -825,6 +898,79 @@ document.addEventListener('change', function(e) {
     }
   }
 });
+</script>
+
+
+<script>
+// Fix: Add attendance without logout
+const originalAddRecord = window.addRecord || function(){};
+window.addRecord = async function() {
+  try {
+    // Your existing add record logic here but ensure no redirect
+    const date = document.getElementById('recordDate')?.value;
+    const status = document.getElementById('recordStatus')?.value;
+    if (!date || !status) return alert('املأ التاريخ والحالة');
+    
+    // Save to Firebase without redirect
+    await db.collection('attendance').add({
+      employeeId: employeeId,
+      date: date,
+      status: status,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    
+    // Refresh table without reload
+    if (typeof loadAttendanceRecords === 'function') loadAttendanceRecords();
+    if (typeof loadAttendance === 'function') loadAttendance();
+    
+  } catch (e) {
+    console.error(e);
+    alert('خطأ في الحفظ: ' + e.message);
+  }
+};
+
+// Fix: Group attendance by month when rendering
+function renderAttendanceWithMonths(records) {
+  const container = document.getElementById('attendanceTable') || document.querySelector('.attendance-list');
+  if (!container) return;
+  
+  // Sort by date desc
+  records.sort((a,b) => new Date(b.date) - new Date(a.date));
+  
+  // Group by month
+  const grouped = {};
+  records.forEach(r => {
+    const month = new Date(r.date).toLocaleDateString('ar-SA', { year: 'numeric', month: 'long' });
+    if (!grouped[month]) grouped[month] = [];
+    grouped[month].push(r);
+  });
+  
+  // Render
+  let html = '';
+  Object.keys(grouped).forEach(month => {
+    html += `<div class="month-header bg-blue-100 p-3 font-bold text-lg mb-2 rounded">${month}</div>`;
+    html += `<table class="w-full mb-6 border-collapse"><thead><tr class="bg-gray-200">
+      <th class="p-2 border">التاريخ</th><th class="p-2 border">الحالة</th><th class="p-2 border">ملاحظات</th>
+    </tr></thead><tbody>`;
+    grouped[month].forEach(r => {
+      html += `<tr>
+        <td class="p-2 border">${r.date}</td>
+        <td class="p-2 border">${r.status}</td>
+        <td class="p-2 border">${r.notes || ''}</td>
+      </tr>`;
+    });
+    html += `</tbody></table>`;
+  });
+  container.innerHTML = html;
+}
+
+// Override existing load functions to use month grouping
+const originalLoadAttendance = window.loadAttendance;
+window.loadAttendance = async function() {
+  const records = await db.collection('attendance').where('employeeId', '==', employeeId).get();
+  const data = records.docs.map(d => ({id: d.id, ...d.data()}));
+  renderAttendanceWithMonths(data);
+};
 </script>
 
 </body>
@@ -925,7 +1071,80 @@ function printIdOnly() {
         <div><strong>التوقيع:</strong> ___________</div>
       </div>
       <script>window.print();<\/script>
-    </body>
+    
+<script>
+// Fix: Add attendance without logout
+const originalAddRecord = window.addRecord || function(){};
+window.addRecord = async function() {
+  try {
+    // Your existing add record logic here but ensure no redirect
+    const date = document.getElementById('recordDate')?.value;
+    const status = document.getElementById('recordStatus')?.value;
+    if (!date || !status) return alert('املأ التاريخ والحالة');
+    
+    // Save to Firebase without redirect
+    await db.collection('attendance').add({
+      employeeId: employeeId,
+      date: date,
+      status: status,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    
+    // Refresh table without reload
+    if (typeof loadAttendanceRecords === 'function') loadAttendanceRecords();
+    if (typeof loadAttendance === 'function') loadAttendance();
+    
+  } catch (e) {
+    console.error(e);
+    alert('خطأ في الحفظ: ' + e.message);
+  }
+};
+
+// Fix: Group attendance by month when rendering
+function renderAttendanceWithMonths(records) {
+  const container = document.getElementById('attendanceTable') || document.querySelector('.attendance-list');
+  if (!container) return;
+  
+  // Sort by date desc
+  records.sort((a,b) => new Date(b.date) - new Date(a.date));
+  
+  // Group by month
+  const grouped = {};
+  records.forEach(r => {
+    const month = new Date(r.date).toLocaleDateString('ar-SA', { year: 'numeric', month: 'long' });
+    if (!grouped[month]) grouped[month] = [];
+    grouped[month].push(r);
+  });
+  
+  // Render
+  let html = '';
+  Object.keys(grouped).forEach(month => {
+    html += `<div class="month-header bg-blue-100 p-3 font-bold text-lg mb-2 rounded">${month}</div>`;
+    html += `<table class="w-full mb-6 border-collapse"><thead><tr class="bg-gray-200">
+      <th class="p-2 border">التاريخ</th><th class="p-2 border">الحالة</th><th class="p-2 border">ملاحظات</th>
+    </tr></thead><tbody>`;
+    grouped[month].forEach(r => {
+      html += `<tr>
+        <td class="p-2 border">${r.date}</td>
+        <td class="p-2 border">${r.status}</td>
+        <td class="p-2 border">${r.notes || ''}</td>
+      </tr>`;
+    });
+    html += `</tbody></table>`;
+  });
+  container.innerHTML = html;
+}
+
+// Override existing load functions to use month grouping
+const originalLoadAttendance = window.loadAttendance;
+window.loadAttendance = async function() {
+  const records = await db.collection('attendance').where('employeeId', '==', employeeId).get();
+  const data = records.docs.map(d => ({id: d.id, ...d.data()}));
+  renderAttendanceWithMonths(data);
+};
+</script>
+
+</body>
     </html>
   `);
   printWindow.document.close();
@@ -945,6 +1164,79 @@ document.addEventListener('change', function(e) {
     }
   }
 });
+</script>
+
+
+<script>
+// Fix: Add attendance without logout
+const originalAddRecord = window.addRecord || function(){};
+window.addRecord = async function() {
+  try {
+    // Your existing add record logic here but ensure no redirect
+    const date = document.getElementById('recordDate')?.value;
+    const status = document.getElementById('recordStatus')?.value;
+    if (!date || !status) return alert('املأ التاريخ والحالة');
+    
+    // Save to Firebase without redirect
+    await db.collection('attendance').add({
+      employeeId: employeeId,
+      date: date,
+      status: status,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    
+    // Refresh table without reload
+    if (typeof loadAttendanceRecords === 'function') loadAttendanceRecords();
+    if (typeof loadAttendance === 'function') loadAttendance();
+    
+  } catch (e) {
+    console.error(e);
+    alert('خطأ في الحفظ: ' + e.message);
+  }
+};
+
+// Fix: Group attendance by month when rendering
+function renderAttendanceWithMonths(records) {
+  const container = document.getElementById('attendanceTable') || document.querySelector('.attendance-list');
+  if (!container) return;
+  
+  // Sort by date desc
+  records.sort((a,b) => new Date(b.date) - new Date(a.date));
+  
+  // Group by month
+  const grouped = {};
+  records.forEach(r => {
+    const month = new Date(r.date).toLocaleDateString('ar-SA', { year: 'numeric', month: 'long' });
+    if (!grouped[month]) grouped[month] = [];
+    grouped[month].push(r);
+  });
+  
+  // Render
+  let html = '';
+  Object.keys(grouped).forEach(month => {
+    html += `<div class="month-header bg-blue-100 p-3 font-bold text-lg mb-2 rounded">${month}</div>`;
+    html += `<table class="w-full mb-6 border-collapse"><thead><tr class="bg-gray-200">
+      <th class="p-2 border">التاريخ</th><th class="p-2 border">الحالة</th><th class="p-2 border">ملاحظات</th>
+    </tr></thead><tbody>`;
+    grouped[month].forEach(r => {
+      html += `<tr>
+        <td class="p-2 border">${r.date}</td>
+        <td class="p-2 border">${r.status}</td>
+        <td class="p-2 border">${r.notes || ''}</td>
+      </tr>`;
+    });
+    html += `</tbody></table>`;
+  });
+  container.innerHTML = html;
+}
+
+// Override existing load functions to use month grouping
+const originalLoadAttendance = window.loadAttendance;
+window.loadAttendance = async function() {
+  const records = await db.collection('attendance').where('employeeId', '==', employeeId).get();
+  const data = records.docs.map(d => ({id: d.id, ...d.data()}));
+  renderAttendanceWithMonths(data);
+};
 </script>
 
 </body>
