@@ -50,15 +50,6 @@
 }
 
 </style>
-
-  <style id="print-style-safe">
-    @media print {
-      body * { visibility: hidden; }
-      .print-area, .print-area * { visibility: visible; }
-      .print-area { position: absolute; left: 0; top: 0; width: 100%; padding: 20px; background: #fff; }
-      .no-print { display: none !important; }
-    }
-  </style>
 </head>
 <body class="bg-gradient-to-br from-blue-50 to-purple-50 min-h-screen">
     <div class="realtime-badge">🔥 تحديث مباشر jakoop.tech </div>
@@ -270,7 +261,17 @@
                     <div class="max-w-7xl mx-auto flex justify-between items-center">
                         <button onclick="window.location.href='index.html'" class="bg-white text-blue-600 px-5 py-2 rounded-xl font-bold hover:bg-gray-100">← رجوع للقائمة</button>
                         <h1 class="text-2xl font-bold">ملف الموظف</h1>
-                        <button onclick="window.print()" class="bg-white text-blue-600 px-5 py-2 rounded-xl font-bold hover:bg-gray-100">🖨 طباعة</button>
+                        <div class="relative inline-block no-print">
+    <button id="newPrintBtn" class="bg-white text-blue-600 px-5 py-2 rounded-xl font-bold hover:bg-gray-100 flex items-center gap-2">
+      🖨 طباعة
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+    </button>
+    <div id="newPrintMenu" class="hidden absolute left-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border z-50">
+      <button onclick="doPrintFinal('full')" class="block w-full text-right px-4 py-3 hover:bg-gray-50 text-gray-800 rounded-t-xl">طباعة سجل الموظف كامل</button>
+      <button onclick="doPrintFinal('front')" class="block w-full text-right px-4 py-3 hover:bg-gray-50 text-gray-800 border-t">طباعة الهوية - الوجه الأمامي</button>
+      <button onclick="doPrintFinal('back')" class="block w-full text-right px-4 py-3 hover:bg-gray-50 text-gray-800 border-t rounded-b-xl">طباعة الهوية - الوجه الخلفي</button>
+    </div>
+  </div>
                     </div>
                 <div class="max-w-7xl mx-auto p-6">
                     <div class="bg-white rounded-2xl shadow-xl p-6 mb-6">
@@ -657,42 +658,5 @@ if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(naviga
 }
 </script>
 
-
-<script>
-function togglePrintDropdownV3() {
-  document.getElementById('printDropdownV3').classList.toggle('hidden');
-}
-document.addEventListener('click', function(e) {
-  if (!e.target.closest('#printBtnV3')) {
-    const dd = document.getElementById('printDropdownV3');
-    if (dd) dd.classList.add('hidden');
-  }
-});
-
-function printNowV3(mode) {
-  document.querySelectorAll('.print-area').forEach(el => el.classList.remove('print-area'));
-  
-  if (mode === 'full') {
-    const main = document.querySelector('main') || document.querySelector('#mainContent') || document.body;
-    main.classList.add('print-area');
-  } else if (mode === 'front') {
-    // دور على الوجه الأمامي بأكثر من طريقة
-    const front = document.querySelector('.id-front') || 
-                  document.querySelector('[data-id="front"]') ||
-                  Array.from(document.querySelectorAll('div, section')).find(d => d.textContent.includes('الوجه الأمامي'));
-    if (front) front.classList.add('print-area');
-    else { alert('ما لقيت الوجه الأمامي. ضيف class="id-front" على الديف تبعه'); return; }
-  } else if (mode === 'back') {
-    const back = document.querySelector('.id-back') || 
-                 document.querySelector('[data-id="back"]') ||
-                 Array.from(document.querySelectorAll('div, section')).find(d => d.textContent.includes('الوجه الخلفي'));
-    if (back) back.classList.add('print-area');
-    else { alert('ما لقيت الوجه الخلفي. ضيف class="id-back" على الديف تبعه'); return; }
-  }
-  
-  document.getElementById('printDropdownV3').classList.add('hidden');
-  setTimeout(() => window.print(), 50);
-}
-</script>
 </body>
 </html>
