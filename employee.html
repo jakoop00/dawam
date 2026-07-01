@@ -51,19 +51,26 @@
 
 </style>
 
-  <style id="print-style">
+  <style id="print-style-v2">
     @media print {
       body * { visibility: hidden; }
       .print-section, .print-section * { visibility: visible; }
-      .print-section { position: absolute; left: 0; top: 0; width: 100%; }
+      .print-section { 
+        position: absolute; 
+        left: 0; 
+        top: 0; 
+        width: 100%; 
+        padding: 20px;
+        background: white;
+      }
       .no-print { display: none !important; }
     }
-    #printMenu { min-width: 220px; }
+    #newPrintMenu { min-width: 240px; }
   </style>
 
 </head>
 <body class="bg-gradient-to-br from-blue-50 to-purple-50 min-h-screen">
-    <div class="realtime-badge">🔥 تحديث مباشر jakoop.tech </div>
+    <div class="id-back"><div class="id-front"><div class="realtime-badge">🔥 تحديث مباشر jakoop.tech </div>
     <div id="app">
         <div class="flex items-center justify-center min-h-screen">
             <div class="text-center">
@@ -101,14 +108,14 @@
                 <div class="flex gap-3">
                     
   <div class="relative inline-block no-print">
-    <button id="newPrintBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2">
+    <button id="newPrintBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg flex items-center gap-2 shadow-md transition">
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
       طباعة
     </button>
-    <div id="printMenu" class="hidden absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl border z-50">
-      <button onclick="printSection('full')" class="block w-full text-right px-4 py-3 hover:bg-gray-100 rounded-t-lg">طباعة سجل الموظف كامل</button>
-      <button onclick="printSection('front')" class="block w-full text-right px-4 py-3 hover:bg-gray-100 border-t">طباعة الهوية - الوجه الأمامي</button>
-      <button onclick="printSection('back')" class="block w-full text-right px-4 py-3 hover:bg-gray-100 border-t rounded-b-lg">طباعة الهوية - الوجه الخلفي</button>
+    <div id="newPrintMenu" class="hidden absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl border z-50">
+      <button onclick="doPrintV2('full')" class="block w-full text-right px-4 py-3 hover:bg-gray-50 rounded-t-lg">طباعة سجل الموظف كامل</button>
+      <button onclick="doPrintV2('front')" class="block w-full text-right px-4 py-3 hover:bg-gray-50 border-t">طباعة الهوية - الوجه الأمامي</button>
+      <button onclick="doPrintV2('back')" class="block w-full text-right px-4 py-3 hover:bg-gray-50 border-t rounded-b-lg">طباعة الهوية - الوجه الخلفي</button>
     </div>
   </div>
 
@@ -248,7 +255,7 @@
 
                                 <button onclick="saveIdData()" class="w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-3 rounded-xl font-bold hover:opacity-90 mb-2">حفظ بيانات الهوية</button>
                                 <button onclick="deleteIdData()" class="w-full bg-red-500 text-white py-3 rounded-xl font-bold hover:opacity-90">🗑 مسح بيانات الهوية</button>
-                            </div>
+                            </div></div></div>
                         </div>
                     </div>
                 </div>
@@ -495,37 +502,6 @@ if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(naviga
       profileInput.parentNode.insertBefore(camBtn, profileInput);
     }
   });
-}
-</script>
-
-
-<script>
-document.getElementById('newPrintBtn').onclick = (e) => {
-  e.stopPropagation();
-  document.getElementById('printMenu').classList.toggle('hidden');
-};
-document.addEventListener('click', () => document.getElementById('printMenu').classList.add('hidden'));
-
-function printSection(type) {
-  // نحذف كل كلاسات الطباعة القديمة
-  document.querySelectorAll('.print-section').forEach(el => el.classList.remove('print-section'));
-  
-  if (type === 'full') {
-    // نطبع كل المحتوى الرئيسي ما عدا الشريط العلوي
-    document.querySelector('main')?.classList.add('print-section') || document.body.classList.add('print-section');
-  } else if (type === 'front') {
-    // دور على صورة الوجه الأمامي - عدل السلكتور حسب كودك
-    const frontImg = document.querySelector('img[alt*="أمامي"], .id-front, #idFrontImg, input[value*="أمامي"]')?.closest('div');
-    if (frontImg) frontImg.classList.add('print-section');
-    else alert('لم يتم العثور على صورة الوجه الأمامي. تأكد من وجود class="id-front"');
-  } else if (type === 'back') {
-    // دور على صورة الوجه الخلفي
-    const backImg = document.querySelector('img[alt*="خلفي"], .id-back, #idBackImg, input[value*="خلفي"]')?.closest('div');
-    if (backImg) backImg.classList.add('print-section');
-    else alert('لم يتم العثور على صورة الوجه الخلفي. تأكد من وجود class="id-back"');
-  }
-  
-  setTimeout(() => window.print(), 100);
 }
 </script>
 
