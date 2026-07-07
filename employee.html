@@ -5,51 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ملف الموظف</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap');
-        body { font-family: 'Tajawal', sans-serif; color: #000; }
-       .loader { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 20px auto; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-       .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); overflow-y: auto; }
-       .modal-content { background-color: white; margin: 5% auto; padding: 30px; border-radius: 20px; width: 90%; max-width: 600px; max-height: 85vh; overflow-y: auto; }
-       .input-label { display: block; color: #000; font-weight: 800; margin-bottom: 8px; font-size: 16px; }
-       .input-field { width: 100%; padding: 14px; border: 3px solid #2563eb; border-radius: 12px; font-size: 16px; background: #fff; color: #000; font-weight: 700; }
-       .input-field:focus { outline: none; border-color: #1e40af; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2); }
-       .preview-box { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 16px; text-align: center; }
-       .image-modal-content { margin: 5% auto; max-width: 90%; max-height: 80vh; position: relative; }
-       .image-modal-content img { width: 100%; height: auto; border-radius: 20px; }
-       .close-btn { position: absolute; top: 10px; left: 20px; color: white; font-size: 40px; font-weight: bold; cursor: pointer; line-height: 1; }
-       .realtime-badge { position: fixed; bottom: 20px; left: 20px; background: #10b981; color: white; padding: 8px 16px; border-radius: 20px; font-weight: bold; font-size: 12px; z-index: 999; }
-
-        @media print {
-           .no-print { display: none!important; }
-            body { background: white; }
-           .modal { display: none!important; }
-        }
-
-        /* تعديلات الموبايل */
-        @media (max-width: 640px) {
-           .modal-content { margin: 10px; padding: 20px; width: calc(100% - 20px); }
-           .close-btn { top: 5px; left: 15px; font-size: 32px; }
-           .realtime-badge { bottom: 10px; left: 10px; font-size: 11px; padding: 6px 12px; }
-            h1 { font-size: 1.25rem; }
-            h2 { font-size: 1.5rem; }
-            h3 { font-size: 1.75rem!important; }
-           .text-4xl { font-size: 2rem; }
-           .p-6 { padding: 1rem; }
-           .p-8 { padding: 1.25rem; }
-            table { font-size: 12px; }
-           .p-3 { padding: 0.5rem; }
-        }
     
-@media print {
-  body * { visibility: hidden; }
-  #print-section, #print-section * { visibility: visible; }
-  #print-section { position: absolute; left: 0; top: 0; width: 100%; }
-  .no-print { display: none !important; }
-}
 
-</style>
 
 <style>
    .action-bar {
@@ -701,47 +658,7 @@
 
 
 
-<script>
-// Camera button specifically for #profileImage - mobile only
-if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-  document.addEventListener('DOMContentLoaded', function() {
-    const profileInput = document.getElementById('profileImage');
-    if (profileInput && !profileInput.dataset.cameraAttached) {
-      profileInput.dataset.cameraAttached = 'true';
-      
-      const camBtn = document.createElement('button');
-      camBtn.innerHTML = '📷 تصوير بالكاميرا';
-      camBtn.type = 'button';
-      camBtn.className = 'no-print w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl font-bold mb-2';
-      camBtn.onclick = (e) => {
-        e.preventDefault();
-        const fileInput = document.createElement('input');
-        fileInput.type = 'file';
-        fileInput.accept = 'image/*';
-        fileInput.capture = 'environment';
-        fileInput.onchange = ev => {
-          const file = ev.target.files[0];
-          if (file) {
-            const dt = new DataTransfer();
-            dt.items.add(file);
-            profileInput.files = dt.files;
-            // Show preview if exists
-            const preview = document.getElementById('profilePreview');
-            if (preview) {
-              const reader = new FileReader();
-              reader.onload = e => preview.src = e.target.result;
-              reader.readAsDataURL(file);
-            }
-          }
-        };
-        fileInput.click();
-      };
-      // Insert before the input
-      profileInput.parentNode.insertBefore(camBtn, profileInput);
-    }
-  });
-}
-</script>
+
 
 
 <div class="action-bar">
@@ -813,37 +730,30 @@ function updateMonthlyData() {
     
     const dateIdx = getColIdx(table, ['التاريخ','تاريخ']);
     const durIdx = getColIdx(table, ['المدة','نهاري','ليلي','الوقت','24']);
-    const comIdx = getColIdx(table, ['العمولة','عمولة']);
     
     if (dateIdx===-1 || durIdx===-1) return;
     
-    let totalCom = 0;
     table.querySelectorAll('tbody tr').forEach(row => {
         const cells = row.querySelectorAll('td');
         if (cells.length > Math.max(dateIdx, durIdx)) {
             const d = cells[dateIdx].textContent.trim();
             if (d.startsWith(prefix)) {
                 totalMin += parseTimeToMinutes(cells[durIdx].textContent);
-                if (comIdx!==-1) totalCom += parseFloat(cells[comIdx].textContent.replace(/[^\d.]/g,''))||0;
             }
         }
     });
     
     document.getElementById('monthlyTotalHours').textContent = formatMinutes(totalMin);
-    const comSpan = document.getElementById('monthlyCommission');
-    if (comSpan) comSpan.textContent = totalCom.toFixed(2);
 }
 
 function exportBackup() {
     const table = document.querySelector('table');
-    if (!table) return alert('ما لقيت الجدول');
-    
     const headers = Array.from(table.querySelectorAll('thead th')).map(th=>th.textContent.trim());
     const data = Array.from(table.querySelectorAll('tbody tr')).map(row=>{
         const obj = {};
         row.querySelectorAll('td').forEach((td,i)=>{
-            if (!headers[i] || !headers[i].includes('ملاحظات')) {
-                obj[headers[i]||`col${i}`] = td.textContent.trim();
+            if (headers[i] && !headers[i].includes('ملاحظات')) {
+                obj[headers[i]] = td.textContent.trim();
             }
         });
         return obj;
@@ -876,7 +786,7 @@ function importBackup() {
                 const backup = JSON.parse(ev.target.result);
                 if (backup.notes) {
                     localStorage.setItem('dailyNotes', JSON.stringify(backup.notes));
-                    alert('تم استيراد الملاحظات! حدث الصفحة.');
+                    alert('تم استيراد الملاحظات!');
                     location.reload();
                 }
             } catch(err) {
@@ -920,6 +830,15 @@ function updateNoteButtons() {
     const dateIdx = getColIdx(table, ['التاريخ','تاريخ']);
     if (dateIdx === -1) return;
     
+    // نضيف header الملاحظات لو مش موجود
+    const thead = table.querySelector('thead tr');
+    if (thead && !thead.querySelector('.note-header')) {
+        const th = document.createElement('th');
+        th.className = 'note-header';
+        th.textContent = 'ملاحظات';
+        thead.appendChild(th);
+    }
+    
     table.querySelectorAll('tbody tr').forEach(row => {
         const cells = row.querySelectorAll('td');
         if (cells.length > dateIdx) {
@@ -932,24 +851,17 @@ function updateNoteButtons() {
                 row.appendChild(noteCell);
             }
             
-            const hasNote = notes[date] ? true : false;
+            const hasNote = notes[date]? true : false;
             noteCell.innerHTML = `<button class="note-btn ${hasNote?'has-note':''}" onclick="openNoteForDate('${date}')">${hasNote?'📝':'➕'}</button>`;
         }
     });
-    
-    // نضيف header للعمود لو مش موجود
-    const thead = table.querySelector('thead tr');
-    if (thead && !thead.querySelector('.note-header')) {
-        const th = document.createElement('th');
-        th.className = 'note-header';
-        th.textContent = 'ملاحظات';
-        thead.appendChild(th);
-    }
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('monthSelect').addEventListener('change', updateMonthlyData);
-    document.getElementById('yearSelect').addEventListener('change', updateMonthlyData);
+    const monthSel = document.getElementById('monthSelect');
+    const yearSel = document.getElementById('yearSelect');
+    if (monthSel) monthSel.addEventListener('change', updateMonthlyData);
+    if (yearSel) yearSel.addEventListener('change', updateMonthlyData);
     updateMonthlyData();
     updateNoteButtons();
 });
