@@ -1,37 +1,185 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>سجل الموظف</title>
 <style>
-.monthly-summary {
-    display: inline-flex;
-    align-items: center;
-    gap: 15px;
-    margin: 15px 10px;
-    padding: 10px 15px;
-    background: #f5f5f5;
-    border-radius: 8px;
-}
-.monthly-summary select,.monthly-summary input {
-    padding: 5px 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-.total-display {
-    color: #1976D2;
-    font-weight: bold;
-    font-size: 18px;
-}
+    body { font-family: Tahoma, sans-serif; padding: 20px; }
+    
+   .action-bar {
+        margin: 15px 0;
+        padding: 12px;
+        background: #e3f2fd;
+        border-radius: 8px;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+   .action-bar button {
+        padding: 8px 16px;
+        border: 1px solid #90caf9;
+        border-radius: 5px;
+        cursor: pointer;
+        background: #fff;
+        font-family: inherit;
+    }
+   .action-bar button:hover { background: #bbdefb; }
+
+   .monthly-summary {
+        display: inline-flex;
+        align-items: center;
+        gap: 15px;
+        margin: 15px 10px;
+        padding: 10px 15px;
+        background: #f5f5f5;
+        border-radius: 8px;
+        flex-wrap: wrap;
+    }
+   .monthly-summary select,.monthly-summary input {
+        padding: 5px 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+   .total-display {
+        color: #1976D2;
+        font-weight: bold;
+        font-size: 18px;
+    }
+
+    #notesModal {
+        display: none;
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+    }
+    #notesModal .modal-content {
+        background: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        width: 90%;
+        max-width: 500px;
+    }
+    #notesModal textarea {
+        width: 100%;
+        height: 200px;
+        margin: 10px 0;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-family: inherit;
+    }
+   .modal-actions {
+        text-align: left;
+        margin-top: 10px;
+    }
+   .modal-actions button {
+        padding: 8px 20px;
+        margin-left: 8px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+   .btn-save { background: #4caf50; color: white; }
+   .btn-close { background: #9e9e9e; color: white; }
+   
+   .note-btn {
+        padding: 4px 8px;
+        border: 1px solid #ff9800;
+        background: #fff3e0;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+   }
+   .note-btn.has-note {
+        background: #ff9800;
+        color: white;
+   }
+   
+   table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+   }
+   table th, table td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: center;
+   }
+   table thead {
+        background: #f5f5f5;
+        font-weight: bold;
+   }
 </style>
+</head>
+<body>
+
+<h2>سجل الدوام</h2>
+
+<div class="action-bar">
+    <button onclick="exportBackup()">📥 تصدير نسخة احتياطية</button>
+    <button onclick="importBackup()">📤 استيراد نسخة احتياطية</button>
+</div>
 
 <span class="monthly-summary">
-    <label>الشهر:</label>
-    <select id="monthSelect">
-        <option value="01">يناير</option><option value="02">فبراير</option><option value="03">مارس</option>
-        <option value="04">أبريل</option><option value="05">مايو</option><option value="06">يونيو</option>
-        <option value="07" selected>يوليو</option><option value="08">أغسطس</option><option value="09">سبتمبر</option>
-        <option value="10">أكتوبر</option><option value="11">نوفمبر</option><option value="12">ديسمبر</option>
-    </select>
-    <label>السنة:</label>
-    <input type="number" id="yearSelect" value="2026" min="2020" max="2030" style="width:70px;">
-    <b>مجموع الساعات:</b> <span id="monthlyTotalHours" class="total-display">0 ساعة</span>
+    <div><b>اجمالي الشهر مع العمولة:</b> <span id="monthlyCommission">0</span></div>
+    <div>
+        <label>الشهر:</label>
+        <select id="monthSelect">
+            <option value="01">يناير</option><option value="02">فبراير</option><option value="03">مارس</option>
+            <option value="04">أبريل</option><option value="05">مايو</option><option value="06">يونيو</option>
+            <option value="07" selected>يوليو</option><option value="08">أغسطس</option><option value="09">سبتمبر</option>
+            <option value="10">أكتوبر</option><option value="11">نوفمبر</option><option value="12">ديسمبر</option>
+        </select>
+        <label>السنة:</label>
+        <input type="number" id="yearSelect" value="2026" min="2020" max="2030" style="width:70px;">
+    </div>
+    <div><b>مجموع الساعات:</b> <span id="monthlyTotalHours" class="total-display">0 ساعة</span></div>
 </span>
+
+<table id="attendanceLog">
+    <thead>
+        <tr>
+            <th>التاريخ</th>
+            <th>المدة</th>
+            <th>العمولة</th>
+            <th class="note-header">ملاحظات</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>2026-07-01</td>
+            <td>8:30</td>
+            <td>25</td>
+            <td class="note-cell"></td>
+        </tr>
+        <tr>
+            <td>2026-07-02</td>
+            <td>7:45</td>
+            <td>20</td>
+            <td class="note-cell"></td>
+        </tr>
+        <tr>
+            <td>2026-06-15</td>
+            <td>8:00</td>
+            <td>30</td>
+            <td class="note-cell"></td>
+        </tr>
+    </tbody>
+</table>
+
+<div id="notesModal">
+    <div class="modal-content">
+        <h3>ملاحظات يوم: <span id="noteDateLabel"></span></h3>
+        <textarea id="noteTextArea" placeholder="اكتب ملاحظاتك هنا..."></textarea>
+        <div class="modal-actions">
+            <button class="btn-save" onclick="saveNote()">حفظ</button>
+            <button class="btn-close" onclick="closeNotesModal()">إغلاق</button>
+        </div>
+    </div>
+</div>
 
 <script>
 function parseTimeToMinutes(timeStr) {
@@ -67,31 +215,142 @@ function updateMonthlyData() {
     const year = document.getElementById('yearSelect').value;
     const prefix = `${year}-${month}`;
     let totalMin = 0;
-
-    const table = document.querySelector('table');
+    
+    const table = document.getElementById('attendanceLog');
     if (!table) return;
-
+    
     const dateIdx = getColIdx(table, ['التاريخ','تاريخ']);
     const durIdx = getColIdx(table, ['المدة','نهاري','ليلي','الوقت','24']);
-
+    const comIdx = getColIdx(table, ['العمولة','عمولة']);
+    
     if (dateIdx===-1 || durIdx===-1) return;
-
+    
+    let totalCom = 0;
     table.querySelectorAll('tbody tr').forEach(row => {
         const cells = row.querySelectorAll('td');
         if (cells.length > Math.max(dateIdx, durIdx)) {
             const d = cells[dateIdx].textContent.trim();
             if (d.startsWith(prefix)) {
                 totalMin += parseTimeToMinutes(cells[durIdx].textContent);
+                if (comIdx!==-1) totalCom += parseFloat(cells[comIdx].textContent.replace(/[^\d.]/g,''))||0;
             }
         }
     });
-
+    
     document.getElementById('monthlyTotalHours').textContent = formatMinutes(totalMin);
+    const comSpan = document.getElementById('monthlyCommission');
+    if (comSpan) comSpan.textContent = totalCom.toFixed(2);
+}
+
+function exportBackup() {
+    const table = document.getElementById('attendanceLog');
+    const headers = Array.from(table.querySelectorAll('thead th')).map(th=>th.textContent.trim());
+    const data = Array.from(table.querySelectorAll('tbody tr')).map(row=>{
+        const obj = {};
+        row.querySelectorAll('td').forEach((td,i)=>{
+            if (headers[i] && !headers[i].includes('ملاحظات')) {
+                obj[headers[i]] = td.textContent.trim();
+            }
+        });
+        return obj;
+    });
+    
+    const backup = {
+        date: new Date().toISOString(),
+        tableData: data,
+        notes: JSON.parse(localStorage.getItem('dailyNotes')||'{}')
+    };
+    
+    const blob = new Blob([JSON.stringify(backup,null,2)],{type:'application/json'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `نسخة_احتياطية_${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+}
+
+function importBackup() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = e => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = ev => {
+            try {
+                const backup = JSON.parse(ev.target.result);
+                if (backup.notes) {
+                    localStorage.setItem('dailyNotes', JSON.stringify(backup.notes));
+                    alert('تم استيراد الملاحظات!');
+                    location.reload();
+                }
+            } catch(err) {
+                alert('خطأ: ' + err.message);
+            }
+        };
+        reader.readAsText(file);
+    };
+    input.click();
+}
+
+let currentNoteDate = '';
+
+function openNoteForDate(date) {
+    currentNoteDate = date;
+    const notes = JSON.parse(localStorage.getItem('dailyNotes')||'{}');
+    document.getElementById('noteDateLabel').textContent = date;
+    document.getElementById('noteTextArea').value = notes[date]||'';
+    document.getElementById('notesModal').style.display = 'flex';
+}
+
+function saveNote() {
+    const text = document.getElementById('noteTextArea').value;
+    const notes = JSON.parse(localStorage.getItem('dailyNotes')||'{}');
+    if (text.trim()) notes[currentNoteDate] = text.trim();
+    else delete notes[currentNoteDate];
+    localStorage.setItem('dailyNotes', JSON.stringify(notes));
+    closeNotesModal();
+    updateNoteButtons();
+}
+
+function closeNotesModal() {
+    document.getElementById('notesModal').style.display = 'none';
+}
+
+function updateNoteButtons() {
+    const notes = JSON.parse(localStorage.getItem('dailyNotes')||'{}');
+    const table = document.getElementById('attendanceLog');
+    if (!table) return;
+    
+    const dateIdx = getColIdx(table, ['التاريخ','تاريخ']);
+    if (dateIdx === -1) return;
+    
+    table.querySelectorAll('tbody tr').forEach(row => {
+        const cells = row.querySelectorAll('td');
+        if (cells.length > dateIdx) {
+            const date = cells[dateIdx].textContent.trim();
+            let noteCell = row.querySelector('.note-cell');
+            
+            if (!noteCell) {
+                noteCell = document.createElement('td');
+                noteCell.className = 'note-cell';
+                row.appendChild(noteCell);
+            }
+            
+            const hasNote = notes[date]? true : false;
+            noteCell.innerHTML = `<button class="note-btn ${hasNote?'has-note':''}" onclick="openNoteForDate('${date}')">${hasNote?'📝':'➕'}</button>`;
+        }
+    });
 }
 
 document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('monthSelect').addEventListener('change', updateMonthlyData);
     document.getElementById('yearSelect').addEventListener('change', updateMonthlyData);
     updateMonthlyData();
+    updateNoteButtons();
 });
 </script>
+
+</body>
+</html>
