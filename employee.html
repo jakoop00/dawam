@@ -253,28 +253,6 @@
             const monthTotal = records.reduce((sum, r) => sum + r.dailyWage, 0);
             const totalCommission = employeeData.totalCommission || 0;
             const monthWithCommission = monthTotal + totalCommission;
-            const monthTotalHours = records.reduce((sum, r) => sum + (r.minutes/60) + (parseFloat(r.overtime)||0), 0);
-
-            // تهيئة حقل اختيار الشهر على الشهر الحالي
-            const now = new Date();
-            const currentMonth = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
-            document.getElementById('hoursMonthPicker').value = currentMonth;
-            
-            function updateMonthHours() {
-                const selectedMonth = document.getElementById('hoursMonthPicker').value;
-                if (!selectedMonth) return;
-                const [year, month] = selectedMonth.split('-').map(Number);
-                
-                const filteredRecords = records.filter(r => {
-                    const d = new Date(r.date);
-                    return d.getFullYear() === year && (d.getMonth() + 1) === month;
-                });
-                
-                const total = filteredRecords.reduce((sum, r) => sum + (r.minutes/60) + (parseFloat(r.overtime)||0), 0);
-                document.getElementById('monthHoursDisplay').innerText = total.toFixed(2) + ' ساعة';
-            }
-
-            updateMonthHours();
 
             const defaultImg = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(employeeData.name) + '&background=6c5ce7&color=fff&size=200';
 
@@ -309,14 +287,6 @@
                             <p class="text-base opacity-90 font-bold">الشهر مع العمولة</p>
                             <h3 class="text-4xl font-bold mt-3">${monthWithCommission.toFixed(3)} د.أ</h3>
                             <p class="text-xs opacity-75 mt-2">العمولة: ${totalCommission.toFixed(3)} د.أ</p>
-                        <div class="mt-4 pt-4 border-t border-white/20">
-                            <p class="text-base opacity-90 font-bold">مجموع ساعات الشهر</p>
-                            <h3 class="text-3xl font-bold mt-2"><span id="monthHoursDisplay">${monthTotalHours.toFixed(2)} ساعة</span></h3>
-                        </div>
-                        <div class="mt-4">
-                            <label class="text-sm opacity-90 block mb-2">اختر الشهر لحساب الساعات:</label>
-                            <input type="month" id="hoursMonthPicker" class="bg-white/20 text-white px-3 py-2 rounded-lg text-sm" value="" onchange="updateMonthHours()">
-                        </div>
                         </div>
                     </div>
 
@@ -678,5 +648,61 @@ if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(naviga
 }
 </script>
 
+
+    <!-- Monthly Hours Calculator -->
+    <div style="margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 8px;">
+        <label for="monthSelect"><b>اختر الشهر:</b></label>
+        <select id="monthSelect" onchange="calculateMonthlyTotal()">
+            <option value="">-- اختر شهر --</option>
+            <option value="01">يناير</option>
+            <option value="02">فبراير</option>
+            <option value="03">مارس</option>
+            <option value="04">أبريل</option>
+            <option value="05">مايو</option>
+            <option value="06">يونيو</option>
+            <option value="07">يوليو</option>
+            <option value="08">أغسطس</option>
+            <option value="09">سبتمبر</option>
+            <option value="10">أكتوبر</option>
+            <option value="11">نوفمبر</option>
+            <option value="12">ديسمبر</option>
+        </select>
+        
+        <label for="yearSelect" style="margin-right: 10px;"><b>السنة:</b></label>
+        <input type="number" id="yearSelect" value="2026" min="2020" max="2030" style="width: 80px;" onchange="calculateMonthlyTotal()">
+        
+        <div style="margin-top: 10px;">
+            <b>مجموع الساعات للشهر المحدد: </b>
+            <span id="monthlyTotal" style="color: #2196F3; font-size: 18px;">0</span> ساعة
+        </div>
+    </div>
+
+    <script>
+    function calculateMonthlyTotal() {
+        const month = document.getElementById('monthSelect').value;
+        const year = document.getElementById('yearSelect').value;
+        if (!month || !year) {
+            document.getElementById('monthlyTotal').textContent = '0';
+            return;
+        }
+        
+        // افتراض: الجدول فيه عمود تاريخ بصيغة YYYY-MM-DD و عمود ساعات بـ class="hours"
+        let total = 0;
+        const rows = document.querySelectorAll('table tbody tr');
+        rows.forEach(row => {
+            const dateCell = row.querySelector('.date, td[data-date], td:nth-child(1)');
+            const hoursCell = row.querySelector('.hours, td[data-hours], td:last-child');
+            if (dateCell && hoursCell) {
+                const dateText = dateCell.textContent.trim();
+                const hours = parseFloat(hoursCell.textContent) || 0;
+                if (dateText.startsWith(`${year}-${month}`)) {
+                    total += hours;
+                }
+            }
+        });
+        document.getElementById('monthlyTotal').textContent = total.toFixed(2);
+    }
+    </script>
+    
 </body>
 </html>
