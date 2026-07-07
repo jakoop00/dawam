@@ -52,7 +52,6 @@
 </style>
 
 <style>
-    /* شريط الأزرار */
    .action-bar {
         margin: 15px 0;
         padding: 12px;
@@ -72,7 +71,6 @@
     }
    .action-bar button:hover { background: #bbdefb; }
 
-    /* اختيار الشهر */
    .monthly-summary {
         display: inline-flex;
         align-items: center;
@@ -94,7 +92,6 @@
         font-size: 18px;
     }
 
-    /* نافذة الملاحظات */
     #notesModal {
         display: none;
         position: fixed;
@@ -104,7 +101,7 @@
         align-items: center;
         justify-content: center;
     }
-    #notesModal.modal-content {
+    #notesModal .modal-content {
         background: #fff;
         padding: 20px;
         border-radius: 8px;
@@ -133,6 +130,19 @@
     }
    .btn-save { background: #4caf50; color: white; }
    .btn-close { background: #9e9e9e; color: white; }
+   
+   .note-btn {
+        padding: 4px 8px;
+        border: 1px solid #ff9800;
+        background: #fff3e0;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+   }
+   .note-btn.has-note {
+        background: #ff9800;
+        color: white;
+   }
 </style>
 
 </head>
@@ -734,14 +744,11 @@ if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(naviga
 </script>
 
 
-<!-- شريط الأزرار -->
 <div class="action-bar">
     <button onclick="exportBackup()">📥 تصدير نسخة احتياطية</button>
     <button onclick="importBackup()">📤 استيراد نسخة احتياطية</button>
-    <button onclick="openNotesModal()">📝 ملاحظات اليوم</button>
 </div>
 
-<!-- اختيار الشهر جنب اجمالي الشهر مع العمولة -->
 <span class="monthly-summary">
     <label>الشهر:</label>
     <select id="monthSelect">
@@ -755,7 +762,6 @@ if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(naviga
     <b>مجموع الساعات:</b> <span id="monthlyTotalHours" class="total-display">0 ساعة</span>
 </span>
 
-<!-- نافذة الملاحظات -->
 <div id="notesModal">
     <div class="modal-content">
         <h3>ملاحظات يوم: <span id="noteDateLabel"></span></h3>
@@ -768,7 +774,6 @@ if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(naviga
 </div>
 
 <script>
-// ========== دوال الوقت ==========
 function parseTimeToMinutes(timeStr) {
     timeStr = String(timeStr).trim();
     if (!timeStr) return 0;
@@ -797,7 +802,6 @@ function getColIdx(table, keys) {
     return -1;
 }
 
-// ========== تحديث الساعات ==========
 function updateMonthlyData() {
     const month = document.getElementById('monthSelect').value;
     const year = document.getElementById('yearSelect').value;
@@ -830,7 +834,6 @@ function updateMonthlyData() {
     if (comSpan) comSpan.textContent = totalCom.toFixed(2);
 }
 
-// ========== نسخ احتياطي ==========
 function exportBackup() {
     const table = document.querySelector('table');
     if (!table) return alert('ما لقيت الجدول');
@@ -839,7 +842,9 @@ function exportBackup() {
     const data = Array.from(table.querySelectorAll('tbody tr')).map(row=>{
         const obj = {};
         row.querySelectorAll('td').forEach((td,i)=>{
-            if (headers[i]!=='ملاحظات') obj[headers[i]||`col${i}`] = td.textContent.trim();
+            if (!headers[i] || !headers[i].includes('ملاحظات')) {
+                obj[headers[i]||`col${i}`] = td.textContent.trim();
+            }
         });
         return obj;
     });
@@ -856,7 +861,6 @@ function exportBackup() {
     a.download = `نسخة_احتياطية_${new Date().toISOString().split('T')[0]}.json`;
     a.click();
     URL.revokeObjectURL(a.href);
-    alert('تم التصدير!');
 }
 
 function importBackup() {
@@ -873,6 +877,7 @@ function importBackup() {
                 if (backup.notes) {
                     localStorage.setItem('dailyNotes', JSON.stringify(backup.notes));
                     alert('تم استيراد الملاحظات! حدث الصفحة.');
+                    location.reload();
                 }
             } catch(err) {
                 alert('خطأ: ' + err.message);
@@ -883,16 +888,9 @@ function importBackup() {
     input.click();
 }
 
-// ========== الملاحظات ==========
 let currentNoteDate = '';
 
-function openNotesModal() {
-    const date = prompt('اكتب التاريخ YYYY-MM-DD:');
-    if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return alert('صيغة غلط');
-    showNote(date);
-}
-
-function showNote(date) {
+function openNoteForDate(date) {
     currentNoteDate = date;
     const notes = JSON.parse(localStorage.getItem('dailyNotes')||'{}');
     document.getElementById('noteDateLabel').textContent = date;
@@ -907,18 +905,53 @@ function saveNote() {
     else delete notes[currentNoteDate];
     localStorage.setItem('dailyNotes', JSON.stringify(notes));
     closeNotesModal();
-    alert('تم الحفظ');
+    updateNoteButtons();
 }
 
 function closeNotesModal() {
     document.getElementById('notesModal').style.display = 'none';
 }
 
-// ========== تشغيل ==========
+function updateNoteButtons() {
+    const notes = JSON.parse(localStorage.getItem('dailyNotes')||'{}');
+    const table = document.querySelector('table');
+    if (!table) return;
+    
+    const dateIdx = getColIdx(table, ['التاريخ','تاريخ']);
+    if (dateIdx === -1) return;
+    
+    table.querySelectorAll('tbody tr').forEach(row => {
+        const cells = row.querySelectorAll('td');
+        if (cells.length > dateIdx) {
+            const date = cells[dateIdx].textContent.trim();
+            let noteCell = row.querySelector('.note-cell');
+            
+            if (!noteCell) {
+                noteCell = document.createElement('td');
+                noteCell.className = 'note-cell';
+                row.appendChild(noteCell);
+            }
+            
+            const hasNote = notes[date] ? true : false;
+            noteCell.innerHTML = `<button class="note-btn ${hasNote?'has-note':''}" onclick="openNoteForDate('${date}')">${hasNote?'📝':'➕'}</button>`;
+        }
+    });
+    
+    // نضيف header للعمود لو مش موجود
+    const thead = table.querySelector('thead tr');
+    if (thead && !thead.querySelector('.note-header')) {
+        const th = document.createElement('th');
+        th.className = 'note-header';
+        th.textContent = 'ملاحظات';
+        thead.appendChild(th);
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('monthSelect').addEventListener('change', updateMonthlyData);
     document.getElementById('yearSelect').addEventListener('change', updateMonthlyData);
     updateMonthlyData();
+    updateNoteButtons();
 });
 </script>
 
