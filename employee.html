@@ -50,6 +50,29 @@
 }
 
 </style>
+
+<style>
+.monthly-summary {
+    display: inline-flex;
+    align-items: center;
+    gap: 15px;
+    margin-right: 20px;
+    padding: 8px 12px;
+    background: #f0f7ff;
+    border: 1px solid #bbdefb;
+    border-radius: 6px;
+}
+.monthly-summary select, .monthly-summary input {
+    padding: 4px 8px;
+    border: 1px solid #90caf9;
+    border-radius: 4px;
+}
+.total-display {
+    color: #1565c0;
+    font-weight: bold;
+}
+</style>
+
 </head>
 <body class="bg-gradient-to-br from-blue-50 to-purple-50 min-h-screen">
     <div class="realtime-badge">🔥 تحديث مباشر jakoop.tech </div>
@@ -253,28 +276,6 @@
             const monthTotal = records.reduce((sum, r) => sum + r.dailyWage, 0);
             const totalCommission = employeeData.totalCommission || 0;
             const monthWithCommission = monthTotal + totalCommission;
-            const monthTotalMinutes = records.reduce((sum, r) => sum + r.minutes + (parseFloat(r.overtime)||0)*60, 0);
-
-            // تهيئة حقل اختيار الشهر على الشهر الحالي
-            const now = new Date();
-            const currentMonth = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
-            document.getElementById('hoursMonthPicker').value = currentMonth;
-            
-            function updateMonthHours() {
-                const selectedMonth = document.getElementById('hoursMonthPicker').value;
-                if (!selectedMonth) return;
-                const [year, month] = selectedMonth.split('-').map(Number);
-                
-                const filteredRecords = records.filter(r => {
-                    const d = new Date(r.date);
-                    return d.getFullYear() === year && (d.getMonth() + 1) === month;
-                });
-                
-                const total = filteredRecords.reduce((sum, r) => sum + r.minutes + (parseFloat(r.overtime)||0)*60, 0);
-                document.getElementById('monthHoursDisplay').innerText = total.toFixed(0) + ' دقيقة';
-            }
-
-            updateMonthHours();
 
             const defaultImg = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(employeeData.name) + '&background=6c5ce7&color=fff&size=200';
 
@@ -309,14 +310,6 @@
                             <p class="text-base opacity-90 font-bold">الشهر مع العمولة</p>
                             <h3 class="text-4xl font-bold mt-3">${monthWithCommission.toFixed(3)} د.أ</h3>
                             <p class="text-xs opacity-75 mt-2">العمولة: ${totalCommission.toFixed(3)} د.أ</p>
-                        <div class="mt-4 pt-4 border-t border-white/20">
-                            <p class="text-base opacity-90 font-bold">مجموع دقائق الشهر</p>
-                            <h3 class="text-3xl font-bold mt-2"><span id="monthHoursDisplay">${monthTotalMinutes.toFixed(0)} دقيقة</span></h3>
-                        </div>
-                        <div class="mt-4">
-                            <label class="text-sm opacity-90 block mb-2">اختر الشهر لحساب الدقائق:</label>
-                            <input type="month" id="hoursMonthPicker" class="bg-white/20 text-white px-3 py-2 rounded-lg text-sm" value="" onchange="updateMonthHours()">
-                        </div>
                         </div>
                     </div>
 
@@ -677,6 +670,65 @@ if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(naviga
   });
 }
 </script>
+
+
+<script>
+function updateMonthlyData() {
+    const month = document.getElementById('monthSelect').value;
+    const year = document.getElementById('yearSelect').value;
+    const targetPrefix = `${year}-${month}`;
+    
+    let totalHours = 0;
+    let totalCommission = 0;
+    
+    // حاول تلاقي جدول الدوام - عدل الـ selector حسب ملفك
+    const table = document.querySelector('#attendanceLog, table.sجل-الدوام, table');
+    if (!table) return;
+    
+    const rows = table.querySelectorAll('tbody tr');
+    rows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        if (cells.length >= 2) {
+            const dateText = cells[0].textContent.trim();
+            const hours = parseFloat(cells[1].textContent.replace(/[^\d.]/g,'')) || 0;
+            const commission = cells[2] ? parseFloat(cells[2].textContent.replace(/[^\d.]/g,'')) || 0 : 0;
+            
+            if (dateText.startsWith(targetPrefix)) {
+                totalHours += hours;
+                totalCommission += commission;
+            }
+        }
+    });
+    
+    const hoursSpan = document.getElementById('monthlyTotalHours');
+    const commissionSpan = document.getElementById('monthlyCommission');
+    if (hoursSpan) hoursSpan.textContent = totalHours.toFixed(2);
+    if (commissionSpan) commissionSpan.textContent = totalCommission.toFixed(2);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const monthSel = document.getElementById('monthSelect');
+    const yearSel = document.getElementById('yearSelect');
+    if (monthSel) monthSel.addEventListener('change', updateMonthlyData);
+    if (yearSel) yearSel.addEventListener('change', updateMonthlyData);
+    updateMonthlyData();
+});
+</script>
+
+
+<span class="monthly-summary">
+    <label>الشهر:</label>
+    <select id="monthSelect">
+        <option value="01">يناير</option><option value="02">فبراير</option><option value="03">مارس</option>
+        <option value="04">أبريل</option><option value="05">مايو</option><option value="06">يونيو</option>
+        <option value="07" selected>يوليو</option><option value="08">أغسطس</option><option value="09">سبتمبر</option>
+        <option value="10">أكتوبر</option><option value="11">نوفمبر</option><option value="12">ديسمبر</option>
+    </select>
+    <label>السنة:</label>
+    <input type="number" id="yearSelect" value="2026" min="2020" max="2030" style="width:70px;">
+    <b>مجموع الساعات:</b> <span id="monthlyTotalHours" class="total-display">0</span>
+    <b>العمولة:</b> <span id="monthlyCommission" class="total-display">0</span>
+</span>
 
 </body>
 </html>
