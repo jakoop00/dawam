@@ -253,6 +253,28 @@
             const monthTotal = records.reduce((sum, r) => sum + r.dailyWage, 0);
             const totalCommission = employeeData.totalCommission || 0;
             const monthWithCommission = monthTotal + totalCommission;
+            const monthTotalHours = records.reduce((sum, r) => sum + (r.minutes/60) + (parseFloat(r.overtime)||0), 0);
+
+            // تهيئة حقل اختيار الشهر على الشهر الحالي
+            const now = new Date();
+            const currentMonth = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+            document.getElementById('hoursMonthPicker').value = currentMonth;
+            
+            function updateMonthHours() {
+                const selectedMonth = document.getElementById('hoursMonthPicker').value;
+                if (!selectedMonth) return;
+                const [year, month] = selectedMonth.split('-').map(Number);
+                
+                const filteredRecords = records.filter(r => {
+                    const d = new Date(r.date);
+                    return d.getFullYear() === year && (d.getMonth() + 1) === month;
+                });
+                
+                const total = filteredRecords.reduce((sum, r) => sum + (r.minutes/60) + (parseFloat(r.overtime)||0), 0);
+                document.getElementById('monthHoursDisplay').innerText = total.toFixed(2) + ' ساعة';
+            }
+
+            updateMonthHours();
 
             const defaultImg = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(employeeData.name) + '&background=6c5ce7&color=fff&size=200';
 
@@ -287,6 +309,14 @@
                             <p class="text-base opacity-90 font-bold">الشهر مع العمولة</p>
                             <h3 class="text-4xl font-bold mt-3">${monthWithCommission.toFixed(3)} د.أ</h3>
                             <p class="text-xs opacity-75 mt-2">العمولة: ${totalCommission.toFixed(3)} د.أ</p>
+                        <div class="mt-4 pt-4 border-t border-white/20">
+                            <p class="text-base opacity-90 font-bold">مجموع ساعات الشهر</p>
+                            <h3 class="text-3xl font-bold mt-2"><span id="monthHoursDisplay">${monthTotalHours.toFixed(2)} ساعة</span></h3>
+                        </div>
+                        <div class="mt-4">
+                            <label class="text-sm opacity-90 block mb-2">اختر الشهر لحساب الساعات:</label>
+                            <input type="month" id="hoursMonthPicker" class="bg-white/20 text-white px-3 py-2 rounded-lg text-sm" value="" onchange="updateMonthHours()">
+                        </div>
                         </div>
                     </div>
 
