@@ -18,7 +18,7 @@
 <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, query, orderBy, where, setDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
         const firebaseConfig = {
             apiKey: "AIzaSyDHbtLO5NbRoDddk7CH0u5jAxC5gOAl1iE",
@@ -97,9 +97,16 @@
                         </form>
                     </div>
                     <div class="bg-white rounded-2xl shadow-xl p-6">
-                        <div class="flex justify-between items-center mb-6">
+                        <div class="flex flex-wrap justify-between items-center mb-6 gap-3">
                             <h2 class="text-xl font-bold text-gray-800">👥 قائمة الموظفين: ${employees.length}</h2>
-                            <button id="exportBtn" class="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-2 rounded-xl hover:opacity-90 font-bold">تصدير Excel</button>
+                            <div class="flex gap-3 flex-wrap">
+                                <button id="backupBtn" class="bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-5 py-2 rounded-xl hover:opacity-90 font-bold">💾 تصدير نسخة احتياطية</button>
+                                <label class="bg-gradient-to-r from-amber-500 to-orange-600 text-white px-5 py-2 rounded-xl hover:opacity-90 font-bold cursor-pointer">
+                                    📥 استيراد نسخة احتياطية
+                                    <input type="file" id="restoreInput" accept=".json" class="hidden">
+                                </label>
+                                <button id="exportBtn" class="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-2 rounded-xl hover:opacity-90 font-bold">تصدير Excel</button>
+                            </div>
                         </div>
                         <div class="overflow-x-auto">
                             <table class="w-full">
@@ -134,6 +141,8 @@
             document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
             document.getElementById('addEmployeeForm').addEventListener('submit', handleAddEmployee);
             document.getElementById('exportBtn').addEventListener('click', exportToExcel);
+            document.getElementById('backupBtn').addEventListener('click', exportBackup);
+            document.getElementById('restoreInput').addEventListener('change', importBackup);
         }
 
         async function handleAddEmployee(e) {
@@ -180,6 +189,109 @@
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, 'الموظفين');
             XLSX.writeFile(wb, `employees_${Date.now()}.xlsx`);
+        }
+
+        // 1. تصدير نسخة احتياطية
+        async function exportBackup() {
+            const backupBtn = document.getElementById('backupBtn');
+            backupBtn.disabled = true;
+            backupBtn.innerHTML = '⏳ جاري تجهيز النسخة...';
+            
+            try {
+                // 1. جيب كل الموظفين
+                const empSnap = await getDocs(collection(db, 'employees'));
+                const employeesData = empSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+                // 2. جيب كل سجلات الدوام - عدل اسم الـ collection اذا مختلف
+                const attendanceSnap = await getDocs(collection(db, 'attendance'));
+                const attendanceData = attendanceSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+                // 3. جيب الملفات اذا عندك collection اسمه files
+                let filesData = [];
+                try {
+                    const filesSnap = await getDocs(collection(db, 'files'));
+                    filesData = filesSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+                } catch(e) { console.log('No files collection') }
+
+                const backup = {
+                    version: '1.0',
+                    exportDate: new Date().toISOString(),
+                    system: 'jakoop.tech',
+                    employees: employeesData,
+                    attendance: attendanceData,
+                    files: filesData
+                };
+
+                const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `backup_dawam_${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+                
+                alert('✅ تم تصدير النسخة الاحتياطية بنجاح');
+            } catch (error) {
+                alert('❌ صار خطأ بالتصدير: ' + error.message);
+            } finally {
+                backupBtn.disabled = false;
+                backupBtn.innerHTML = '💾 تصدير نسخة احتياطية';
+            }
+        }
+
+        // 2. استيراد نسخة احتياطية
+        async function importBackup(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            if (!confirm('⚠️ تنبيه: الاستيراد رح يضيف البيانات الموجودة بالملف. البيانات المتشابهة ممكن تتكرر. متأكد تكمل؟')) {
+                e.target.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = async (event) => {
+                try {
+                    const backup = JSON.parse(event.target.result);
+                    if (!backup.employees) throw new Error('الملف غير صالح');
+
+                    const loadingMsg = document.createElement('div');
+                    loadingMsg.className = 'fixed top-5 left-1/2 -translate-x-1/2 bg-blue-600 text-white px-6 py-3 rounded-xl shadow-2xl z-50';
+                    loadingMsg.innerHTML = '⏳ جاري الاستيراد... لا تسكر الصفحة';
+                    document.body.appendChild(loadingMsg);
+
+                    // 1. استيراد الموظفين
+                    for (const emp of backup.employees) {
+                        const { id, ...empData } = emp;
+                        await setDoc(doc(db, 'employees', id), empData);
+                    }
+
+                    // 2. استيراد سجلات الدوام
+                    if (backup.attendance) {
+                        for (const att of backup.attendance) {
+                            const { id, ...attData } = att;
+                            await setDoc(doc(db, 'attendance', id), attData);
+                        }
+                    }
+
+                    // 3. استيراد الملفات
+                    if (backup.files) {
+                        for (const f of backup.files) {
+                            const { id, ...fileData } = f;
+                            await setDoc(doc(db, 'files', id), fileData);
+                        }
+                    }
+
+                    document.body.removeChild(loadingMsg);
+                    alert(`✅ تم الاستيراد بنجاح!\nالموظفين: ${backup.employees.length}\nالسجلات: ${backup.attendance?.length || 0}`);
+                    await loadEmployees();
+                    renderDashboard();
+                } catch (error) {
+                    alert('❌ فشل الاستيراد: ' + error.message);
+                }
+                e.target.value = '';
+            };
+            reader.readAsText(file);
         }
     </script>
 </body>
