@@ -5,77 +5,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ملف الموظف</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap');
         body { font-family: 'Tajawal', sans-serif; color: #000; }
-       .loader { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 20px auto; }
+     .loader { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-       .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); overflow-y: auto; }
-       .modal-content { background-color: white; margin: 5% auto; padding: 30px; border-radius: 20px; width: 90%; max-width: 600px; max-height: 85vh; overflow-y: auto; }
-       .input-label { display: block; color: #000; font-weight: 800; margin-bottom: 8px; font-size: 16px; }
-       .input-field { width: 100%; padding: 14px; border: 3px solid #2563eb; border-radius: 12px; font-size: 16px; background: #fff; color: #000; font-weight: 700; }
-       .input-field:focus { outline: none; border-color: #1e40af; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2); }
-       .preview-box { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 16px; text-align: center; }
-       .image-modal-content { margin: 5% auto; max-width: 90%; max-height: 80vh; position: relative; }
-       .image-modal-content img { width: 100%; height: auto; border-radius: 20px; }
-       .close-btn { position: absolute; top: 10px; left: 20px; color: white; font-size: 40px; font-weight: bold; cursor: pointer; line-height: 1; }
-       .realtime-badge { position: fixed; bottom: 20px; left: 20px; background: #10b981; color: white; padding: 8px 16px; border-radius: 20px; font-weight: bold; font-size: 12px; z-index: 999; }
-
+     .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); overflow-y: auto; }
+     .modal-content { background-color: white; margin: 5% auto; padding: 30px; border-radius: 20px; width: 90%; max-width: 600px; max-height: 85vh; overflow-y: auto; }
+     .input-label { display: block; color: #000; font-weight: 800; margin-bottom: 8px; font-size: 16px; }
+     .input-field { width: 100%; padding: 14px; border: 3px solid #2563eb; border-radius: 12px; font-size: 16px; background: #fff; color: #000; font-weight: 700; }
+     .input-field:focus { outline: none; border-color: #1e40af; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2); }
+     .preview-box { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 16px; text-align: center; }
+     .image-modal-content { margin: 5% auto; max-width: 90%; max-height: 80vh; position: relative; }
+     .image-modal-content img { width: 100%; height: auto; border-radius: 20px; }
+     .close-btn { position: absolute; top: 10px; left: 20px; color: white; font-size: 40px; font-weight: bold; cursor: pointer; line-height: 1; }
+     .realtime-badge { position: fixed; bottom: 20px; left: 20px; background: #10b981; color: white; padding: 8px 16px; border-radius: 20px; font-weight: bold; font-size: 12px; z-index: 999; }
         @media print {
-           .no-print { display: none!important; }
+         .no-print { display: none!important; }
             body { background: white; }
-           .modal { display: none!important; }
+         .modal { display: none!important; }
         }
-
-        /* تعديلات الموبايل */
         @media (max-width: 640px) {
-           .modal-content { margin: 10px; padding: 20px; width: calc(100% - 20px); }
-           .close-btn { top: 5px; left: 15px; font-size: 32px; }
-           .realtime-badge { bottom: 10px; left: 10px; font-size: 11px; padding: 6px 12px; }
+         .modal-content { margin: 10px; padding: 20px; width: calc(100% - 20px); }
+         .close-btn { top: 5px; left: 15px; font-size: 32px; }
+         .realtime-badge { bottom: 10px; left: 10px; font-size: 11px; padding: 6px 12px; }
             h1 { font-size: 1.25rem; }
             h2 { font-size: 1.5rem; }
             h3 { font-size: 1.75rem!important; }
-           .text-4xl { font-size: 2rem; }
-           .p-6 { padding: 1rem; }
-           .p-8 { padding: 1.25rem; }
+         .text-4xl { font-size: 2rem; }
+         .p-6 { padding: 1rem; }
+         .p-8 { padding: 1.25rem; }
             table { font-size: 12px; }
-           .p-3 { padding: 0.5rem; }
+         .p-3 { padding: 0.5rem; }
         }
-    
-@media print {
-  body * { visibility: hidden; }
-  #print-section, #print-section * { visibility: visible; }
-  #print-section { position: absolute; left: 0; top: 0; width: 100%; }
-  .no-print { display: none !important; }
-}
-
-</style>
-
-<style>
-.monthly-summary {
-    display: inline-flex;
-    align-items: center;
-    gap: 15px;
-    margin-right: 20px;
-    padding: 8px 12px;
-    background: #f0f7ff;
-    border: 1px solid #bbdefb;
-    border-radius: 6px;
-}
-.monthly-summary select, .monthly-summary input {
-    padding: 4px 8px;
-    border: 1px solid #90caf9;
-    border-radius: 4px;
-}
-.total-display {
-    color: #1565c0;
-    font-weight: bold;
-}
-</style>
-
+    </style>
 </head>
 <body class="bg-gradient-to-br from-blue-50 to-purple-50 min-h-screen">
-    <div class="realtime-badge">🔥 تحديث مباشر jakoop.tech </div>
+    <div class="realtime-badge no-print">🔥 تحديث مباشر jakoop.tech </div>
     <div id="app">
         <div class="flex items-center justify-center min-h-screen">
             <div class="text-center">
@@ -85,16 +53,14 @@
         </div>
     </div>
 
-    <!-- نافذة الصورة المنبثقة -->
-    <div id="imageModal" class="modal" onclick="closeImageModal()">
+    <div id="imageModal" class="modal no-print" onclick="closeImageModal()">
         <span class="close-btn" onclick="closeImageModal()">&times;</span>
         <div class="image-modal-content">
             <img id="popupImage" src="" alt="صورة">
         </div>
     </div>
 
-    <!-- نافذة العمولة -->
-    <div id="commissionModal" class="modal">
+    <div id="commissionModal" class="modal no-print">
         <div class="modal-content">
             <h2 class="text-2xl font-bold mb-6 text-gray-900">💰 إضافة عمولة الشهر</h2>
             <div class="space-y-4">
@@ -118,8 +84,7 @@
         </div>
     </div>
 
-    <!-- نافذة تعديل السجل -->
-    <div id="editModal" class="modal">
+    <div id="editModal" class="modal no-print">
         <div class="modal-content">
             <h2 class="text-2xl font-bold mb-6 text-gray-900">✏ تعديل سجل الدوام</h2>
             <form id="editForm" class="space-y-4">
@@ -156,9 +121,6 @@
         </div>
     </div>
 
-    
-<!-- IMPORTANT: Move firebaseConfig to environment variables. Set Firestore rules: allow read, write: if request.auth != null; -->
-
 <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
@@ -181,8 +143,6 @@
         const employeeId = new URLSearchParams(window.location.search).get('id');
         let employeeData = {};
         let records = [];
-        let unsubscribeEmployee = null;
-        let unsubscribeAttendance = null;
 
         function compressImage(file, maxWidth = 800) {
             return new Promise((resolve) => {
@@ -215,34 +175,45 @@
         });
 
         function setupRealtimeListeners() {
-            unsubscribeEmployee = onSnapshot(doc(db, 'employees', employeeId), (docSnap) => {
+            onSnapshot(doc(db, 'employees', employeeId), (docSnap) => {
                 if (docSnap.exists()) {
-                    employeeData = docSnap.data();
+                    employeeData = { id: docSnap.id,...docSnap.data() };
                     renderPage();
                 }
             });
 
             const q = query(collection(db, 'attendance'), where('employeeId', '==', employeeId));
-            unsubscribeAttendance = onSnapshot(q, (snapshot) => {
+            onSnapshot(q, (snapshot) => {
                 records = snapshot.docs.map(doc => ({ id: doc.id,...doc.data() }));
                 records.sort((a, b) => new Date(b.date) - new Date(a.date));
                 renderPage();
             });
         }
 
+        // حساب المدة بالدقائق - مصلح 100%: 60 دقيقة = ساعة
+        function calcDurationMinutes(checkIn, checkOut) {
+            const [h1, m1] = checkIn.split(':').map(Number);
+            const [h2, m2] = checkOut.split(':').map(Number);
+            let startMinutes = h1 * 60 + m1;
+            let endMinutes = h2 * 60 + m2;
+            if (endMinutes < startMinutes) endMinutes += 24 * 60;
+            return endMinutes - startMinutes;
+        }
+
+        function minutesToHoursMinutes(totalMinutes) {
+            const hours = Math.floor(totalMinutes / 60);
+            const minutes = totalMinutes % 60;
+            return { hours, minutes, text: `${hours}:${minutes.toString().padStart(2,'0')}` };
+        }
+
         function calc(checkIn, checkOut, overtime, bonus, deduction) {
-            let start = new Date(`2000-01-01T${checkIn}`);
-            let end = new Date(`2000-01-01T${checkOut}`);
-            if (end < start) {
-                end = new Date(`2000-01-02T${checkOut}`);
-            }
-            const diffMinutes = (end - start) / 60000;
+            const diffMinutes = calcDurationMinutes(checkIn, checkOut);
             const baseSalary = diffMinutes / 60;
             const over = parseFloat(overtime) || 0;
             const bon = parseFloat(bonus) || 0;
             const ded = parseFloat(deduction) || 0;
             return {
-                baseSalary,
+                baseSalary: baseSalary,
                 dailyWage: baseSalary + over + bon - ded,
                 minutes: diffMinutes
             };
@@ -254,42 +225,81 @@
             const overtime = parseFloat(document.getElementById('overtime')?.value) || 0;
             const bonus = parseFloat(document.getElementById('bonus')?.value) || 0;
             const deduction = parseFloat(document.getElementById('deduction')?.value) || 0;
-
             const previewEl = document.getElementById('livePreview');
             if (!previewEl) return;
-
             if (!checkIn ||!checkOut) {
                 previewEl.innerText = '0.000 د.أ';
                 return;
             }
-
             const c = calc(checkIn, checkOut, overtime, bonus, deduction);
             previewEl.innerText = c.dailyWage.toFixed(3) + ' د.أ';
         }
 
+        // زر حساب مجموع الساعات من عامود المدة
+        window.calcTotalWorkHours = function() {
+            let totalMinutes = records.reduce((sum, r) => sum + (r.minutes || 0), 0);
+            const result = minutesToHoursMinutes(totalMinutes);
+            const decimal = (totalMinutes / 60).toFixed(2);
+            alert(`⏱️ مجموع ساعات العمل لكل السجلات:\n\n${result.text} ساعة\n= ${decimal} ساعة عشرية\n= ${totalMinutes} دقيقة`);
+        }
+
+        window.exportEmployeePDF = function() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.setFont('helvetica');
+            doc.setFontSize(16);
+            doc.text(`Employee Report: ${employeeData.name}`, 14, 20);
+            doc.setFontSize(11);
+            doc.text(`ID: ${employeeData.employeeId} | Department: ${employeeData.department}`, 14, 28);
+
+            const totalWork = calcTotalWorkHours();
+            doc.text(`Total Work Hours: ${totalWork.hours}:${totalWork.minutes.toString().padStart(2,'0')} = ${totalWork.decimal} hours`, 14, 36);
+
+            const tableData = records.map(r => {
+                const dur = minutesToHoursMinutes(r.minutes);
+                return [
+                    r.date,
+                    r.checkIn,
+                    r.checkOut,
+                    dur.text,
+                    r.overtime,
+                    r.bonus.toFixed(3),
+                    r.deduction.toFixed(3),
+                    r.dailyWage.toFixed(3)
+                ];
+            });
+
+            doc.autoTable({
+                startY: 42,
+                head: [['Date', 'In', 'Out', 'Duration', 'OT', 'Bonus', 'Ded.', 'Wage']],
+                body: tableData,
+                styles: { fontSize: 8 },
+                headStyles: { fillColor: [66, 139, 202] }
+            });
+
+            doc.save(`${employeeData.name}_report.pdf`);
+        }
+
         function renderPage() {
             const today = new Date().toISOString().split('T')[0];
-
             const todayRecords = records.filter(r => r.date === today);
             const todayTotal = todayRecords.reduce((sum, r) => sum + r.dailyWage, 0);
-
             const monthTotal = records.reduce((sum, r) => sum + r.dailyWage, 0);
             const totalCommission = employeeData.totalCommission || 0;
             const monthWithCommission = monthTotal + totalCommission;
-
+            const workHours = calcTotalWorkHours();
             const defaultImg = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(employeeData.name) + '&background=6c5ce7&color=fff&size=200';
 
             appDiv.innerHTML = `
-                <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-5 shadow-xl">
+                <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-5 shadow-xl no-print">
                     <div class="max-w-7xl mx-auto flex justify-between items-center">
                         <button onclick="window.location.href='index.html'" class="bg-white text-blue-600 px-5 py-2 rounded-xl font-bold hover:bg-gray-100">← رجوع للقائمة</button>
                         <h1 class="text-2xl font-bold">ملف الموظف</h1>
-                        
                     </div>
-                <div class="max-w-7xl mx-auto p-6">
+                <div class="max-w-7xl mx-auto p-6" id="print-section">
                     <div class="bg-white rounded-2xl shadow-xl p-6 mb-6">
                         <div class="flex items-center gap-6 justify-center">
-                            <img src="${employeeData.profileImageUrl || defaultImg}" class="w-24 h-24 rounded-full border-4 border-blue-500 object-cover cursor-pointer hover:opacity-80 transition" id="profileImg" onclick="openImageModal('${employeeData.profileImageUrl || defaultImg}')">
+                            <img src="${employeeData.profileImageUrl || defaultImg}" class="w-24 h-24 rounded-full border-4 border-blue-500 object-cover cursor-pointer hover:opacity-80 transition no-print" id="profileImg" onclick="openImageModal('${employeeData.profileImageUrl || defaultImg}')">
                             <div class="text-center">
                                 <h2 class="text-3xl font-bold text-gray-900 mb-2">👤 ${employeeData.name}</h2>
                                 <p class="text-gray-700 font-semibold">الرقم الوظيفي: ${employeeData.employeeId} | القسم: ${employeeData.department}</p>
@@ -297,7 +307,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
                         <div class="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-2xl p-8 text-center shadow-xl">
                             <p class="text-base opacity-90 font-bold">إجمالي اليوم</p>
                             <h3 class="text-4xl font-bold mt-3">${todayTotal.toFixed(3)} د.أ</h3>
@@ -311,18 +321,24 @@
                             <h3 class="text-4xl font-bold mt-3">${monthWithCommission.toFixed(3)} د.أ</h3>
                             <p class="text-xs opacity-75 mt-2">العمولة: ${totalCommission.toFixed(3)} د.أ</p>
                         </div>
+                        <div class="bg-gradient-to-br from-orange-500 to-red-600 text-white rounded-2xl p-8 text-center shadow-xl">
+                            <p class="text-base opacity-90 font-bold">⏱️ اجمالي ساعات العمل</p>
+                            <h3 class="text-4xl font-bold mt-3">${workHours.hours}:${workHours.minutes.toString().padStart(2,'0')}</h3>
+                            <p class="text-xs opacity-75 mt-2">${workHours.decimal} ساعة | ${workHours.totalMinutes} دقيقة</p>
+                        </div>
                     </div>
 
-                    <div class="bg-gradient-to-br from-purple-500 to-pink-600 text-white rounded-2xl p-6 shadow-xl mb-6">
-                        <div class="flex justify-center items-center gap-4">
+                    <div class="bg-gradient-to-br from-purple-500 to-pink-600 text-white rounded-2xl p-6 shadow-xl mb-6 no-print">
+                        <div class="flex justify-center items-center gap-4 flex-wrap">
                             <button onclick="openCommissionModal()" class="bg-white text-purple-600 px-8 py-3 rounded-xl font-bold hover:bg-gray-100">💰 إضافة عمولة</button>
                             <button onclick="resetCommission()" class="bg-red-500 text-white px-8 py-3 rounded-xl font-bold hover:bg-red-600">🗑 حذف العمولة</button>
+                            <button onclick="exportEmployeePDF()" class="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-8 py-3 rounded-xl font-bold hover:opacity-90">📄 تصدير كشف PDF</button>
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <div class="lg:col-span-2 space-y-6">
-                            <div class="bg-white rounded-2xl shadow-xl p-6">
+                            <div class="bg-white rounded-2xl shadow-xl p-6 no-print">
                                 <h3 class="text-xl font-bold mb-4 text-gray-900">➕ إضافة سجل عمل جديد</h3>
                                 <div class="preview-box mb-5">
                                     <p class="text-sm opacity-90 mb-2">اجمالي اليوم المتوقع</p>
@@ -358,7 +374,10 @@
                             </div>
 
                             <div class="bg-white rounded-2xl shadow-xl p-6">
-                                <h3 class="text-xl font-bold mb-4 text-gray-900">📊 سجلات العمل</h3>
+                                <div class="flex justify-between items-center mb-4">
+                                    <h3 class="text-xl font-bold text-gray-900">📊 سجلات العمل</h3>
+                                    <button onclick="calcTotalWorkHours()" class="no-print bg-gradient-to-r from-indigo-600 to-blue-600 text-white px-6 py-2 rounded-xl font-bold hover:opacity-90">⏱️ احسب مجموع الساعات</button>
+                                </div>
                                 <div class="overflow-x-auto">
                                     <table class="w-full text-sm">
                                         <thead class="bg-gradient-to-r from-gray-100 to-gray-200">
@@ -371,25 +390,24 @@
                                                 <th class="p-3 font-bold text-gray-900">مكافآت</th>
                                                 <th class="p-3 font-bold text-gray-900">سلفة</th>
                                                 <th class="p-3 font-bold text-gray-900">أجر اليوم</th>
-                                                <th class="p-3 font-bold text-gray-900">تعديل</th>
-                                                <th class="p-3 font-bold text-gray-900">حذف</th>
+                                                <th class="p-3 font-bold text-gray-900 no-print">تعديل</th>
+                                                <th class="p-3 font-bold text-gray-900 no-print">حذف</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             ${records.length === 0? '<tr><td colspan="10" class="p-8 text-center text-gray-500 font-bold">لا توجد سجلات بعد</td></tr>' : records.map(r => {
-                                                const h = Math.floor(r.minutes/60);
-                                                const m = Math.floor(r.minutes%60);
+                                                const dur = minutesToHoursMinutes(r.minutes);
                                                 return `<tr class="border-b hover:bg-blue-50">
                                                     <td class="p-3 font-bold text-gray-900">${r.date}</td>
                                                     <td class="p-3 text-gray-900">${r.checkIn}</td>
                                                     <td class="p-3 text-gray-900">${r.checkOut}</td>
-                                                    <td class="p-3 font-bold text-blue-700">${h}:${m.toString().padStart(2,'0')}</td>
+                                                    <td class="p-3 font-bold text-blue-700">${dur.text}</td>
                                                     <td class="p-3 text-gray-900">${r.overtime}</td>
                                                     <td class="p-3 text-green-700 font-bold">${r.bonus.toFixed(3)}</td>
                                                     <td class="p-3 text-red-700 font-bold">${r.deduction.toFixed(3)}</td>
                                                     <td class="p-3 font-bold text-purple-700">${r.dailyWage.toFixed(3)} د.أ</td>
-                                                    <td class="p-3"><button onclick="openEditModal('${r.id}')" class="text-blue-600 hover:underline font-bold">تعديل</button></td>
-                                                    <td class="p-3"><button onclick="deleteRecord('${r.id}')" class="text-red-600 hover:underline font-bold">حذف</button></td>
+                                                    <td class="p-3 no-print"><button onclick="openEditModal('${r.id}')" class="text-blue-600 hover:underline font-bold">تعديل</button></td>
+                                                    <td class="p-3 no-print"><button onclick="deleteRecord('${r.id}')" class="text-red-600 hover:underline font-bold">حذف</button></td>
                                                 </tr>`;
                                             }).join('')}
                                         </tbody>
@@ -398,7 +416,7 @@
                             </div>
                         </div>
 
-                        <div class="space-y-6">
+                        <div class="space-y-6 no-print">
                             <div class="bg-white rounded-2xl shadow-xl p-6">
                                 <h3 class="text-xl font-bold mb-4 text-gray-900">🖼 الصورة الشخصية</h3>
                                 <input type="file" id="profileImage" accept="image/*" class="w-full px-4 py-3 border-2 border-blue-300 rounded-xl mb-3 text-gray-900">
@@ -408,17 +426,14 @@
                                 </div>
                             </div>
                             <div class="bg-white rounded-2xl shadow-xl p-6">
-                                <h3 class="text-xl font-bold mb-4 text-gray-900">📋  بيانات الهوية / التصريح</h3>
+                                <h3 class="text-xl font-bold mb-4 text-gray-900">📋 بيانات الهوية / التصريح</h3>
                                 <input type="text" id="idNumber" placeholder="رقم الهوية / التصريح" value="${employeeData.idNumber || ''}" class="w-full px-4 py-3 border-2 border-blue-300 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 font-bold">
-
                                 <label class="input-label text-sm">📷 الوجه الأمامي</label>
                                 <input type="file" id="idImageFront" accept="image/*" class="w-full px-4 py-3 border-2 border-blue-300 rounded-xl mb-3 text-gray-900">
                                 ${employeeData.idImageUrlFront? `<img src="${employeeData.idImageUrlFront}" class="w-full rounded-xl border-2 border-gray-300 cursor-pointer mb-3" onclick="openImageModal('${employeeData.idImageUrlFront}')">` : ''}
-
                                 <label class="input-label text-sm">📷 الوجه الخلفي</label>
                                 <input type="file" id="idImageBack" accept="image/*" class="w-full px-4 py-3 border-2 border-blue-300 rounded-xl mb-3 text-gray-900">
                                 ${employeeData.idImageUrlBack? `<img src="${employeeData.idImageUrlBack}" class="w-full rounded-xl border-2 border-gray-300 cursor-pointer mb-3" onclick="openImageModal('${employeeData.idImageUrlBack}')">` : ''}
-
                                 <button onclick="saveIdData()" class="w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-3 rounded-xl font-bold hover:opacity-90 mb-2">حفظ بيانات الهوية</button>
                                 <button onclick="deleteIdData()" class="w-full bg-red-500 text-white py-3 rounded-xl font-bold hover:opacity-90">🗑 مسح بيانات الهوية</button>
                             </div>
@@ -471,7 +486,6 @@
             const commission = profit * (percent / 100);
             if (profit <= 0) return alert('اكتب قيمة الارباح');
             if (!confirm(`متأكد تضيف عمولة ${commission.toFixed(3)} د.أ؟`)) return;
-
             const currentCommission = employeeData.totalCommission || 0;
             await updateDoc(doc(db, 'employees', employeeId), {
                 totalCommission: currentCommission + commission
@@ -497,19 +511,7 @@
             } catch (error) {
                 alert('خطأ برفع الصورة: ' + error.message);
             }
-        }
-
-        window.deleteProfileImage = async function() {
-            if (!confirm('متأكد بدك تمسح صورة الموظف؟')) return;
-            try {
-                await updateDoc(doc(db, 'employees', employeeId), { profileImageUrl: deleteField() });
-                alert('تم مسح الصورة ✅');
-            } catch (error) {
-                alert('خطأ بالمسح: ' + error.message);
-            }
-        }
-
-        window.saveIdData = async function() {
+             window.saveIdData = async function() {
             const idNumber = document.getElementById('idNumber').value;
             const fileFront = document.getElementById('idImageFront').files[0];
             const fileBack = document.getElementById('idImageBack').files[0];
@@ -625,133 +627,5 @@
             }
         }
     </script>
-
-
-
-
-<script>
-// Camera button specifically for #profileImage - mobile only
-if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-  document.addEventListener('DOMContentLoaded', function() {
-    const profileInput = document.getElementById('profileImage');
-    if (profileInput && !profileInput.dataset.cameraAttached) {
-      profileInput.dataset.cameraAttached = 'true';
-      
-      const camBtn = document.createElement('button');
-      camBtn.innerHTML = '📷 تصوير بالكاميرا';
-      camBtn.type = 'button';
-      camBtn.className = 'no-print w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl font-bold mb-2';
-      camBtn.onclick = (e) => {
-        e.preventDefault();
-        const fileInput = document.createElement('input');
-        fileInput.type = 'file';
-        fileInput.accept = 'image/*';
-        fileInput.capture = 'environment';
-        fileInput.onchange = ev => {
-          const file = ev.target.files[0];
-          if (file) {
-            const dt = new DataTransfer();
-            dt.items.add(file);
-            profileInput.files = dt.files;
-            // Show preview if exists
-            const preview = document.getElementById('profilePreview');
-            if (preview) {
-              const reader = new FileReader();
-              reader.onload = e => preview.src = e.target.result;
-              reader.readAsDataURL(file);
-            }
-          }
-        };
-        fileInput.click();
-      };
-      // Insert before the input
-      profileInput.parentNode.insertBefore(camBtn, profileInput);
-    }
-  });
-}
-</script>
-
-
-<script>
-function parseTimeToMinutes(timeStr) {
-    timeStr = String(timeStr).trim();
-    if (!timeStr) return 0;
-    
-    if (timeStr.includes(':')) {
-        const parts = timeStr.split(':');
-        const h = parseInt(parts[0]) || 0;
-        const m = parseInt(parts[1]) || 0;
-        return h * 60 + m;
-    }
-    
-    const hourMatch = timeStr.match(/(\d+(?:\.\d+)?)\s*ساعة/);
-    const minMatch = timeStr.match(/(\d+)\s*دقيقة/);
-    if (hourMatch || minMatch) {
-        const h = hourMatch ? parseFloat(hourMatch[1]) : 0;
-        const m = minMatch ? parseInt(minMatch[1]) : 0;
-        return Math.round(h * 60 + m);
-    }
-    
-    const num = parseFloat(timeStr.replace(/[^\d.]/g,''));
-    if (isNaN(num)) return 0;
-    return Math.round(num * 60);
-}
-
-function formatMinutes(totalMinutes) {
-    const hours = Math.floor(totalMinutes / 60);
-    const minutes = totalMinutes % 60;
-    if (minutes === 0) return `${hours} ساعة`;
-    return `${hours} ساعة و ${minutes} دقيقة`;
-}
-
-function updateMonthlyData() {
-    const month = document.getElementById('monthSelect').value;
-    const year = document.getElementById('yearSelect').value;
-    const targetPrefix = `${year}-${month}`;
-    
-    let totalMinutes = 0;
-    
-    const table = document.querySelector('table tbody').closest('table');
-    if (!table) return;
-    
-    const rows = table.querySelectorAll('tbody tr');
-    rows.forEach(row => {
-        const cells = row.querySelectorAll('td');
-        if (cells.length >= 2) {
-            const dateText = cells[0].textContent.trim();
-            const hoursText = cells[1].textContent.trim();
-            
-            if (dateText.startsWith(targetPrefix)) {
-                totalMinutes += parseTimeToMinutes(hoursText);
-            }
-        }
-    });
-    
-    document.getElementById('monthlyTotalHours').textContent = formatMinutes(totalMinutes);
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-    const monthSel = document.getElementById('monthSelect');
-    const yearSel = document.getElementById('yearSelect');
-    if (monthSel) monthSel.addEventListener('change', updateMonthlyData);
-    if (yearSel) yearSel.addEventListener('change', updateMonthlyData);
-    updateMonthlyData();
-});
-</script>
-
-
-<span class="monthly-summary">
-    <label>الشهر:</label>
-    <select id="monthSelect">
-        <option value="01">يناير</option><option value="02">فبراير</option><option value="03">مارس</option>
-        <option value="04">أبريل</option><option value="05">مايو</option><option value="06">يونيو</option>
-        <option value="07" selected>يوليو</option><option value="08">أغسطس</option><option value="09">سبتمبر</option>
-        <option value="10">أكتوبر</option><option value="11">نوفمبر</option><option value="12">ديسمبر</option>
-    </select>
-    <label>السنة:</label>
-    <input type="number" id="yearSelect" value="2026" min="2020" max="2030" style="width:70px;">
-    <b>مجموع الساعات:</b> <span id="monthlyTotalHours" class="total-display">0 ساعة</span>
-</span>
-
 </body>
 </html>
