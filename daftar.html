@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>دفتر يوميات محمص زيتون</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -15,6 +16,7 @@
       .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
       .btn-success { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; }
       .btn-danger { background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%); color: white; }
+      .btn-warning { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; }
       .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(0,0,0,0.2); }
         input, select, textarea { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 12px; font-family: 'Cairo'; font-size: 16px; }
         input:focus, select:focus { outline: none; border-color: #667eea; }
@@ -32,6 +34,11 @@
       .badge { padding: 5px 12px; border-radius: 8px; font-weight: 700; font-size: 14px; }
         @media (max-width: 768px) {.grid-4,.grid-2 { grid-template-columns: 1fr; } }
         #toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #11998e; color: white; padding: 15px 30px; border-radius: 12px; font-weight: 700; z-index: 10000; display: none; }
+        @media print {
+            body { background: white; padding: 0; }
+          .no-print,.btn, #loginScreen { display: none!important; }
+          .card { box-shadow: none; page-break-inside: avoid; }
+        }
     </style>
 </head>
 <body>
@@ -60,14 +67,16 @@
 
     <div id="app" class="hidden">
         <div class="container">
-            <div class="card">
+            <div class="card no-print">
                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
                     <div>
                         <h1 style="font-size: 28px; font-weight: 900; color: #667eea;">دفتر يوميات محمص زيتون</h1>
                         <p style="color: #666; font-size: 14px;">مرحباً، <span id="userEmail"></span></p>
                     </div>
                     <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <button onclick="exportExcel()" class="btn btn-success"><i class="fas fa-file-excel"></i> تصدير Excel</button>
+                        <button onclick="showBackupModal()" class="btn btn-warning"><i class="fas fa-cloud"></i> نسخ احتياطي</button>
+                        <button onclick="window.print()" class="btn btn-primary"><i class="fas fa-print"></i> طباعة</button>
+                        <button onclick="exportExcel()" class="btn btn-success"><i class="fas fa-file-excel"></i> Excel</button>
                         <button onclick="logout()" class="btn btn-danger"><i class="fas fa-sign-out-alt"></i> خروج</button>
                     </div>
                 </div>
@@ -102,7 +111,7 @@
             <div class="card">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                     <h2 style="font-size: 22px; font-weight: 900;"><i class="fas fa-shopping-cart"></i> سجل المبيعات</h2>
-                    <button onclick="showSaleModal()" class="btn btn-success"><i class="fas fa-plus"></i> إضافة مبيعة</button>
+                    <button onclick="showSaleModal()" class="btn btn-success no-print"><i class="fas fa-plus"></i> إضافة مبيعة</button>
                 </div>
                 <div style="overflow-x: auto;">
                     <table>
@@ -115,7 +124,7 @@
                                 <th>الإجمالي</th>
                                 <th>نوع الدفع</th>
                                 <th>الزبون</th>
-                                <th>حذف</th>
+                                <th class="no-print">حذف</th>
                             </tr>
                         </thead>
                         <tbody id="salesBody"></tbody>
@@ -126,7 +135,7 @@
             <div class="card">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                     <h2 style="font-size: 22px; font-weight: 900;"><i class="fas fa-file-invoice"></i> سجل المشتريات</h2>
-                    <button onclick="addPurchase()" class="btn btn-success"><i class="fas fa-plus"></i> إضافة فاتورة</button>
+                    <button onclick="addPurchase()" class="btn btn-success no-print"><i class="fas fa-plus"></i> إضافة فاتورة</button>
                 </div>
                 <div id="purchasesDiv"></div>
             </div>
@@ -216,11 +225,29 @@
         </div>
     </div>
 
+    <div id="backupModal" class="modal hidden">
+        <div class="modal-content">
+            <h2 style="font-size: 24px; font-weight: 900; margin-bottom: 20px;"><i class="fas fa-cloud"></i> النسخ الاحتياطي</h2>
+            <div style="margin-bottom: 20px;">
+                <button onclick="exportBackup()" class="btn btn-success" style="width: 100%; margin-bottom: 10px;">
+                    <i class="fas fa-download"></i> تحميل نسخة احتياطية (JSON)
+                </button>
+                <p style="font-size: 14px; color: #666; text-align: center;">يحمل كل بياناتك لملف JSON</p>
+            </div>
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: 700;">استيراد نسخة احتياطية:</label>
+                <input type="file" id="importFile" accept=".json" onchange="importBackup(event)">
+                <p style="font-size: 14px; color: #eb3349; margin-top: 8px;"><i class="fas fa-exclamation-triangle"></i> تحذير: الاستيراد رح يستبدل كل البيانات الحالية!</p>
+            </div>
+            <button onclick="closeBackupModal()" class="btn btn-danger" style="width: 100%;">إغلاق</button>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        import { getFirestore, doc, setDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { getFirestore, doc, setDoc, onSnapshot, getDocs, collection, writeBatch } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
         const firebaseConfig = {
             apiKey: "AIzaSyDHbtLO5NbRoDddk7CH0u5jAxC5gOAl1iE",
@@ -243,9 +270,10 @@
 
         const fmt = (n) => parseFloat(n || 0).toFixed(2) + ' د.أ';
         const time = () => new Date().toLocaleTimeString('ar-JO', { hour: '2-digit', minute: '2-digit' });
-        const toast = (msg) => {
+        const toast = (msg, color = '#11998e') => {
             const t = document.getElementById('toast');
             t.textContent = msg;
+            t.style.background = color;
             t.style.display = 'block';
             setTimeout(() => t.style.display = 'none', 2000);
         };
@@ -329,7 +357,7 @@
                     <td style="font-weight: 900; color: #11998e;">${fmt(s.total)}</td>
                     <td><span class="badge" style="background: ${color};">${s.payment}</span></td>
                     <td>${s.customer || '-'}</td>
-                    <td><button onclick="delSale(${i})" class="btn btn-danger" style="padding: 5px 10px;"><i class="fas fa-trash"></i></button></td>
+                    <td class="no-print"><button onclick="delSale(${i})" class="btn btn-danger" style="padding: 5px 10px;"><i class="fas fa-trash"></i></button></td>
                 </tr>`;
             }).join('');
         }
@@ -376,10 +404,10 @@
                             <h3 style="font-weight: 900;">فاتورة #${p.no}</h3>
                             <p style="color: #666; font-size: 14px;">${p.supplier} - ${p.date}</p>
                         </div>
-                        <button onclick="delPurchase(${pIdx})" class="btn btn-danger"><i class="fas fa-trash"></i></button>
+                        <button onclick="delPurchase(${pIdx})" class="btn btn-danger no-print"><i class="fas fa-trash"></i></button>
                     </div>
                     <table style="margin-bottom: 10px;">
-                        <thead><tr><th>الصنف</th><th>الكمية</th><th>السعر</th><th>الإجمالي</th><th></th></tr></thead>
+                        <thead><tr><th>الصنف</th><th>الكمية</th><th>السعر</th><th>الإجمالي</th><th class="no-print"></th></tr></thead>
                         <tbody>
                             ${p.items.map((item, iIdx) => `
                                 <tr>
@@ -387,7 +415,7 @@
                                     <td>${item.qty}</td>
                                     <td>${fmt(item.price)}</td>
                                     <td style="font-weight: 900;">${fmt(item.total)}</td>
-                                    <td><button onclick="delItem(${pIdx}, ${iIdx})" class="btn btn-danger" style="padding: 3px 8px; font-size: 12px;"><i class="fas fa-times"></i></button></td>
+                                    <td class="no-print"><button onclick="delItem(${pIdx}, ${iIdx})" class="btn btn-danger" style="padding: 3px 8px; font-size: 12px;"><i class="fas fa-times"></i></button></td>
                                 </tr>
                             `).join('')}
                         </tbody>
@@ -463,12 +491,68 @@
             document.getElementById('cardSales').textContent = fmt(card);
         }
 
+        // النسخ الاحتياطي
+        window.showBackupModal = () => document.getElementById('backupModal').classList.remove('hidden');
+        window.closeBackupModal = () => document.getElementById('backupModal').classList.add('hidden');
+
+        window.exportBackup = async () => {
+            try {
+                const snapshot = await getDocs(collection(db, 'daftar_zaytoon'));
+                const allData = {};
+                snapshot.forEach(doc => { allData[doc.id] = doc.data(); });
+                const blob = new Blob([JSON.stringify(allData, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `daftar_backup_${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+                toast('تم تحميل النسخة الاحتياطية ✓');
+            } catch (e) {
+                toast('خطأ في التصدير', '#eb3349');
+            }
+        };
+
+        window.importBackup = async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            if (!confirm('تحذير: الاستيراد رح يستبدل كل البيانات الحالية! متأكد؟')) return;
+
+            try {
+                const text = await file.text();
+                const allData = JSON.parse(text);
+                const batch = writeBatch(db);
+
+                // حذف كل البيانات القديمة
+                const oldDocs = await getDocs(collection(db, 'daftar_zaytoon'));
+                oldDocs.forEach(doc => batch.delete(doc.ref));
+
+                // إضافة البيانات الجديدة
+                Object.keys(allData).forEach(date => {
+                    batch.set(doc(db, 'daftar_zaytoon', date), allData[date]);
+                });
+
+                await batch.commit();
+                toast('تم الاستيراد بنجاح ✓');
+                setTimeout(() => location.reload(), 1000);
+            } catch (err) {
+                toast('خطأ في الاستيراد: ' + err.message, '#eb3349');
+            }
+        };
+
         window.exportExcel = () => {
-            const ws = XLSX.utils.json_to_sheet(data.sales);
+            const ws = XLSX.utils.json_to_sheet(data.sales.map(s => ({
+                'الوقت': s.time,
+                'الصنف': s.item,
+                'الكمية': s.qty,
+                'سعر الوحدة': s.price,
+                'الإجمالي': s.total,
+                'نوع الدفع': s.payment,
+                'الزبون': s.customer || ''
+            })));
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, 'المبيعات');
             XLSX.writeFile(wb, `مبيعات_${currentDate}.xlsx`);
-            toast('تم تصدير الملف ✓');
+            toast('تم تصدير Excel ✓');
         };
     </script>
 </body>
