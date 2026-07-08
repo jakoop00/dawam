@@ -10,35 +10,35 @@
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;700;900&display=swap');
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Cairo', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
-        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
-        .card { background: white; border-radius: 20px; padding: 25px; margin-bottom: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
-        .btn { padding: 12px 24px; border-radius: 12px; font-weight: 700; cursor: pointer; border: none; transition: all 0.3s; }
-        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
-        .btn-success { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; }
-        .btn-danger { background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%); color: white; }
-        .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(0,0,0,0.2); }
+       .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+       .card { background: white; border-radius: 20px; padding: 25px; margin-bottom: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
+       .btn { padding: 12px 24px; border-radius: 12px; font-weight: 700; cursor: pointer; border: none; transition: all 0.3s; }
+       .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+       .btn-success { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; }
+       .btn-danger { background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%); color: white; }
+       .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(0,0,0,0.2); }
         input, select, textarea { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 12px; font-family: 'Cairo'; font-size: 16px; }
         input:focus, select:focus, textarea:focus { outline: none; border-color: #667eea; }
         table { width: 100%; border-collapse: collapse; }
         th { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px; text-align: right; }
         td { padding: 12px; border-bottom: 1px solid #f0f0f0; }
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
-        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
-        .stat-box { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 20px; border-radius: 15px; text-align: center; }
-        .stat-box h3 { font-size: 14px; opacity: 0.9; margin-bottom: 10px; }
-        .stat-box .value { font-size: 28px; font-weight: 900; }
-        @media (max-width: 768px) { .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; } }
-        .hidden { display: none !important; }
-        .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 9999; }
-        .modal-content { background: white; border-radius: 20px; padding: 30px; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto; }
+       .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+       .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
+       .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+       .stat-box { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 20px; border-radius: 15px; text-align: center; }
+       .stat-box h3 { font-size: 14px; opacity: 0.9; margin-bottom: 10px; }
+       .stat-box.value { font-size: 28px; font-weight: 900; }
+        @media (max-width: 768px) {.grid-2,.grid-3,.grid-4 { grid-template-columns: 1fr; } }
+       .hidden { display: none!important; }
+       .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 20px; }
+       .modal-content { background: white; border-radius: 20px; padding: 30px; max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto; }
     </style>
 </head>
 <body>
     <div id="loginScreen" class="container">
         <div class="card" style="max-width: 450px; margin: 100px auto;">
             <div style="text-align: center; margin-bottom: 30px;">
-                <img id="logoImg" src="data:image/webp;base64," style="width: 120px; height: 120px; border-radius: 50%; margin: 0 auto 20px; object-fit: cover;" alt="شعار">
+                <img id="logoImg" src="" style="width: 120px; height: 120px; border-radius: 50%; margin: 0 auto 20px; object-fit: cover; background: #f0f0f0;" alt="شعار">
                 <h1 style="font-size: 32px; font-weight: 900; color: #667eea;">دفتر يوميات محمص زيتون</h1>
                 <p style="color: #666; margin-top: 10px;">نظام إدارة المبيعات والمشتريات</p>
             </div>
@@ -59,11 +59,10 @@
 
     <div id="app" class="hidden">
         <div class="container">
-            <!-- الهيدر -->
             <div class="card">
                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
                     <div style="display: flex; align-items: center; gap: 15px;">
-                        <img id="headerLogo" src="data:image/webp;base64," style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover;" alt="شعار">
+                        <img id="headerLogo" src="" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; background: #f0f0f0;" alt="شعار">
                         <div>
                             <h1 style="font-size: 28px; font-weight: 900; color: #667eea;">دفتر يوميات محمص زيتون</h1>
                             <p style="color: #666; font-size: 14px;">مرحباً، <span id="userEmail"></span></p>
@@ -77,7 +76,6 @@
                 </div>
             </div>
 
-            <!-- اختيار التاريخ -->
             <div class="card">
                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
                     <h2 style="font-size: 24px; font-weight: 900;">اليومية: <span id="currentDate"></span></h2>
@@ -85,7 +83,6 @@
                 </div>
             </div>
 
-            <!-- الإحصائيات السريعة -->
             <div class="grid-4">
                 <div class="stat-box">
                     <h3>إجمالي المبيعات</h3>
@@ -105,7 +102,6 @@
                 </div>
             </div>
 
-            <!-- سجل المبيعات التفصيلي -->
             <div class="card">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                     <h2 style="font-size: 22px; font-weight: 900;"><i class="fas fa-shopping-cart"></i> سجل المبيعات التفصيلي</h2>
@@ -131,62 +127,113 @@
                 </div>
             </div>
 
-            <!-- سجل المشتريات التفصيلي -->
             <div class="card">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                     <h2 style="font-size: 22px; font-weight: 900;"><i class="fas fa-file-invoice"></i> سجل المشتريات - الفواتير</h2>
-                    <button onclick="showAddPurchaseModal()" class="btn btn-success"><i class="fas fa-plus"></i> إضافة فاتورة</button>
+                    <button onclick="addPurchase()" class="btn btn-success"><i class="fas fa-plus"></i> إضافة فاتورة</button>
                 </div>
                 <div id="purchasesContainer"></div>
             </div>
 
-            <!-- الدخل والمصاريف -->
             <div class="grid-2">
                 <div class="card">
                     <h2 style="font-size: 22px; font-weight: 900; margin-bottom: 20px;"><i class="fas fa-money-bill-wave"></i> الدخل</h2>
-                    <div style="space-y: 15px;">
-                        <div style="display: flex; justify-content: space-between; padding: 12px; background: #f8f9fa; border-radius: 10px; margin-bottom: 10px;">
-                            <span style="font-weight: 700;">مبيعات نقدي:</span>
-                            <span id="cashSalesDisplay" style="font-weight: 900; color: #11998e;">0.00 د.أ</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; padding: 12px; background: #f8f9fa; border-radius: 10px; margin-bottom: 10px;">
-                            <span style="font-weight: 700;">مبيعات كليك CliQ:</span>
-                            <span id="cliqSalesDisplay" style="font-weight: 900; color: #11998e;">0.00 د.أ</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; padding: 12px; background: #f8f9fa; border-radius: 10px; margin-bottom: 10px;">
-                            <span style="font-weight: 700;">مبيعات بطاقة:</span>
-                            <span id="cardSalesDisplay" style="font-weight: 900; color: #11998e;">0.00 د.أ</span>
-                        </div>
-                        <div style="margin-bottom: 15px;">
-                            <label style="display: block; margin-bottom: 8px; font-weight: 700;">مبيعات آجل:</label>
-                            <input type="number" id="creditSales" step="0.01" value="0" onchange="saveData()">
-                        </div>
-                        <div style="margin-bottom: 15px;">
-                            <label style="display: block; margin-bottom: 8px; font-weight: 700;">دخل إضافي:</label>
-                            <input type="number" id="extraIncome" step="0.01" value="0" onchange="saveData()">
-                        </div>
+                    <div style="display: flex; justify-content: space-between; padding: 12px; background: #f8f9fa; border-radius: 10px; margin-bottom: 10px;">
+                        <span style="font-weight: 700;">مبيعات نقدي:</span>
+                        <span id="cashSalesDisplay" style="font-weight: 900; color: #11998e;">0.00 د.أ</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 12px; background: #f8f9fa; border-radius: 10px; margin-bottom: 10px;">
+                        <span style="font-weight: 700;">مبيعات كليك CliQ:</span>
+                        <span id="cliqSalesDisplay" style="font-weight: 900; color: #11998e;">0.00 د.أ</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 12px; background: #f8f9fa; border-radius: 10px; margin-bottom: 10px;">
+                        <span style="font-weight: 700;">مبيعات بطاقة:</span>
+                        <span id="cardSalesDisplay" style="font-weight: 900; color: #11998e;">0.00 د.أ</span>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 700;">مبيعات آجل (د.أ):</label>
+                        <input type="number" id="creditSales" step="0.01" value="0" onchange="saveData()">
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 700;">دخل إضافي (د.أ):</label>
+                        <input type="number" id="extraIncome" step="0.01" value="0" onchange="saveData()">
                     </div>
                 </div>
 
                 <div class="card">
                     <h2 style="font-size: 22px; font-weight: 900; margin-bottom: 20px;"><i class="fas fa-receipt"></i> المصاريف والضيافة</h2>
                     <div style="margin-bottom: 15px;">
-                        <label style="display: block; margin-bottom: 8px; font-weight: 700;">مصاريف تشغيلية:</label>
+                        <label style="display: block; margin-bottom: 8px; font-weight: 700;">مصاريف تشغيلية (د.أ):</label>
                         <input type="number" id="expenses" step="0.01" value="0" onchange="saveData()">
                     </div>
                     <div style="margin-bottom: 15px;">
-                        <label style="display: block; margin-bottom: 8px; font-weight: 700;">ضيافة:</label>
+                        <label style="display: block; margin-bottom: 8px; font-weight: 700;">ضيافة (د.أ):</label>
                         <input type="number" id="hospitality" step="0.01" value="0" onchange="saveData()">
                     </div>
                     <div style="margin-bottom: 15px;">
-                        <label style="display: block; margin-bottom: 8px; font-weight: 700;">رواتب:</label>
+                        <label style="display: block; margin-bottom: 8px; font-weight: 700;">رواتب (د.أ):</label>
                         <input type="number" id="salaries" step="0.01" value="0" onchange="saveData()">
                     </div>
                     <div style="margin-bottom: 15px;">
-                        <label style="display: block; margin-bottom: 8px; font-weight: 700;">رصيد الصندوق:</label>
+                        <label style="display: block; margin-bottom: 8px; font-weight: 700;">رصيد الصندوق (د.أ):</label>
                         <input type="number" id="cashBox" step="0.01" value="0" onchange="saveData()">
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <div id="saleModal" class="modal hidden">
+        <div class="modal-content">
+            <h2 style="font-size: 24px; font-weight: 900; margin-bottom: 20px;">إضافة مبيعة جديدة</h2>
+            <form id="saleForm">
+                <div class="grid-2" style="margin-bottom: 15px;">
+                    <div>
+                        <label style="display: block; margin-bottom: 8px; font-weight: 700;">الصنف *</label>
+                        <input type="text" id="saleItem" required>
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 8px; font-weight: 700;">الكمية *</label>
+                        <input type="number" id="saleQty" step="0.01" required>
+                    </div>
+                </div>
+                <div class="grid-2" style="margin-bottom: 15px;">
+                    <div>
+                        <label style="display: block; margin-bottom: 8px; font-weight: 700;">سعر الوحدة (د.أ) *</label>
+                        <input type="number" id="salePrice" step="0.01" required>
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 8px; font-weight: 700;">نوع الدفع *</label>
+                        <select id="salePaymentType" required>
+                            <option value="نقدي">نقدي</option>
+                            <option value="كليك">كليك CliQ</option>
+                            <option value="بطاقة">بطاقة</option>
+                            <option value="آجل">آجل</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 700;">اسم الزبون</label>
+                    <input type="text" id="saleCustomer">
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 700;">ملاحظات</label>
+                    <textarea id="saleNotes" rows="3"></textarea>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button type="submit" class="btn btn-success" style="flex: 1;">حفظ</button>
+                    <button type="button" onclick="closeSaleModal()" class="btn btn-danger" style="flex: 1;">إلغاء</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    </tbody></table><div style="margin-top: 20px; padding: 20px; background: #f8f9fa; border-radius: 15px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;"><span style="font-weight: 700;">إجمالي المبيعات:</span><span style="font-weight: 900; color: #11998e;">${formatCurrency(totalSales)}</span></div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;"><span style="font-weight: 700;">إجمالي المشتريات:</span><span style="font-weight: 900; color: #eb3349;">${formatCurrency(totalPurchases)}</span></div>
+                <div style="display: flex; justify-content: space-between; padding-top: 10px; border-top: 2px solid #667eea;"><span style="font-weight: 900; font-size: 18px;">صافي الدخل الشهري:</span><span style="font-weight: 900; font-size: 18px; color: #667eea;">${formatCurrency(totalNet)}</span></div>
+            </div><button onclick="window.print()" class="btn btn-primary" style="width: 100%; margin-top: 20px;"><i class="fas fa-print"></i> طباعة</button><button onclick="this.closest('.modal').remove()" class="btn btn-danger" style="width: 100%; margin-top: 10px;">إغلاق</button></div></div>';
+            document.body.insertAdjacentHTML('beforeend', html);
+        };
+    </script>
+</body>
+</html>
