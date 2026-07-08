@@ -9,36 +9,41 @@
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Cairo', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
-    .container { max-width: 1400px; margin: 0 auto; }
-    .card { background: white; border-radius: 20px; padding: 25px; margin-bottom: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
-    .btn { padding: 10px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; border: none; transition: all 0.3s; font-family: 'Cairo'; font-size: 14px; }
-    .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
-    .btn-success { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; }
-    .btn-danger { background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%); color: white; }
-    .btn-warning { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; }
-    .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(0,0,0,0.2); }
-    .btn-sm { padding: 6px 12px; font-size: 12px; }
+.container { max-width: 1400px; margin: 0 auto; }
+.card { background: white; border-radius: 20px; padding: 25px; margin-bottom: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
+.btn { padding: 10px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; border: none; transition: all 0.3s; font-family: 'Cairo'; font-size: 14px; }
+.btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+.btn-success { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; }
+.btn-danger { background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%); color: white; }
+.btn-warning { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; }
+.btn-info { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; }
+.btn-dark { background: linear-gradient(135deg, #434343 0%, #000000 100%); color: white; }
+.btn:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(0,0,0,0.2); }
+.btn-sm { padding: 6px 12px; font-size: 12px; }
         input, select, textarea { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 12px; font-family: 'Cairo'; font-size: 16px; }
         input:focus, select:focus { outline: none; border-color: #667eea; }
         table { width: 100%; border-collapse: collapse; }
         th { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px; text-align: right; font-weight: 700; }
         td { padding: 12px; border-bottom: 1px solid #f0f0f0; }
-    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-    .stat-box { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 20px; border-radius: 15px; text-align: center; }
-    .stat-box h3 { font-size: 14px; opacity: 0.9; margin-bottom: 10px; }
-    .stat-box.value { font-size: 28px; font-weight: 900; }
-    .hidden { display: none!important; }
-    .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 20px; }
-    .modal-content { background: white; border-radius: 20px; padding: 30px; max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto; }
-    .badge { padding: 5px 12px; border-radius: 8px; font-weight: 700; font-size: 14px; display: inline-block; }
-        #toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #11998e; color: white; padding: 15px 30px; border-radius: 12px; font-weight: 700; z-index: 10000; display: none; }
-        @media (max-width: 768px) {.grid-4,.grid-2 { grid-template-columns: 1fr; } }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.stat-box { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 20px; border-radius: 15px; text-align: center; }
+.stat-box h3 { font-size: 14px; opacity: 0.9; margin-bottom: 10px; }
+.stat-box.value { font-size: 28px; font-weight: 900; }
+.hidden { display: none!important; }
+.modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 20px; }
+.modal-content { background: white; border-radius: 20px; padding: 30px; max-width: 900px; width: 100%; max-height: 90vh; overflow-y: auto; }
+.badge { padding: 5px 12px; border-radius: 8px; font-weight: 700; font-size: 14px; display: inline-block; }
+.logo { height: 60px; width: auto; }
+        #toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #11998e; color: white; padding: 15px 30px; border-radius: 12px; font-weight: 700; z-index: 10000; display: none; box-shadow: 0 5px 20px rgba(0,0,0,0.3); }
+.item-row { display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 10px; margin-bottom: 10px; align-items: end; }
+        @media (max-width: 768px) {.grid-4,.grid-2 { grid-template-columns: 1fr; }.item-row { grid-template-columns: 1fr; } }
         @media print {
             body { background: white; padding: 0; }
-        .no-print { display: none!important; }
-        .card { box-shadow: none; page-break-inside: avoid; }
-        .btn { display: none; }
+  .no-print { display: none!important; }
+  .card { box-shadow: none; page-break-inside: avoid; }
+  .btn { display: none; }
+  .logo { height: 50px; }
         }
     </style>
 </head>
@@ -48,6 +53,7 @@
     <div id="loginScreen" class="container">
         <div class="card" style="max-width: 450px; margin: 100px auto;">
             <div style="text-align: center; margin-bottom: 30px;">
+                <img src="1.webp" alt="Logo" class="logo" style="margin-bottom: 15px;">
                 <h1 style="font-size: 32px; font-weight: 900; color: #667eea;">دفتر يوميات محمص زيتون</h1>
                 <p style="color: #666; margin-top: 10px;">نظام إدارة المبيعات والمشتريات</p>
             </div>
@@ -70,12 +76,20 @@
         <div class="container">
             <div class="card no-print">
                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
-                    <div>
-                        <h1 style="font-size: 28px; font-weight: 900; color: #667eea;">دفتر يوميات محمص زيتون</h1>
-                        <p style="color: #666; font-size: 14px;">مرحباً، <span id="userEmail"></span></p>
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <img src="1.webp" alt="Logo" class="logo">
+                        <div>
+                            <h1 style="font-size: 28px; font-weight: 900; color: #667eea;">دفتر يوميات محمص زيتون</h1>
+                            <p style="color: #666; font-size: 14px;">مرحباً، <span id="userEmail"></span></p>
+                        </div>
                     </div>
                     <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button onclick="exportBackup()" class="btn btn-info"><i class="fas fa-download"></i> نسخة احتياطية</button>
+                        <input type="file" id="importFile" accept=".json" style="display:none;" onchange="importBackup(event)">
+                        <button onclick="document.getElementById('importFile').click()" class="btn btn-warning"><i class="fas fa-upload"></i> استيراد</button>
+                        <button onclick="printReport()" class="btn btn-dark"><i class="fas fa-file-pdf"></i> تقرير</button>
                         <button onclick="window.print()" class="btn btn-primary"><i class="fas fa-print"></i> طباعة</button>
+                        <button onclick="showSettings()" class="btn btn-warning"><i class="fas fa-cog"></i> إعدادات</button>
                         <button onclick="logout()" class="btn btn-danger"><i class="fas fa-sign-out-alt"></i> خروج</button>
                     </div>
                 </div>
@@ -134,7 +148,7 @@
             <div class="card">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                     <h2 style="font-size: 22px; font-weight: 900;"><i class="fas fa-file-invoice"></i> سجل المشتريات</h2>
-                    <button onclick="addPurchase()" class="btn btn-success no-print"><i class="fas fa-plus"></i> إضافة فاتورة</button>
+                    <button onclick="showPurchaseModal()" class="btn btn-success no-print"><i class="fas fa-plus"></i> إضافة فاتورة</button>
                 </div>
                 <div id="purchasesDiv"></div>
             </div>
@@ -224,10 +238,48 @@
         </div>
     </div>
 
+    <div id="purchaseModal" class="modal hidden">
+        <div class="modal-content">
+            <h2 style="font-size: 24px; font-weight: 900; margin-bottom: 20px;" id="purchaseModalTitle">إضافة فاتورة مشتريات</h2>
+            <form id="purchaseForm">
+                <input type="hidden" id="editPurchaseIndex" value="">
+                <div class="grid-2" style="margin-bottom: 15px;">
+                    <div>
+                        <label style="display: block; margin-bottom: 8px; font-weight: 700;">رقم الفاتورة *</label>
+                        <input type="text" id="invoiceNo" required>
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 8px; font-weight: 700;">المورد *</label>
+                        <input type="text" id="supplier" required>
+                    </div>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 700;">تاريخ الفاتورة *</label>
+                    <input type="date" id="invoiceDate" required>
+                </div>
+                <h3 style="font-weight: 900; margin: 20px 0 15px;">بنود الفاتورة</h3>
+                <div id="purchaseItems"></div>
+                <button type="button" onclick="addPurchaseItemRow()" class="btn btn-primary" style="width: 100%; margin-bottom: 20px;"><i class="fas fa-plus"></i> إضافة بند</button>
+                <div style="display: flex; gap: 10px;">
+                    <button type="submit" class="btn btn-success" style="flex: 1;">حفظ الفاتورة</button>
+                    <button type="button" onclick="closePurchaseModal()" class="btn btn-danger" style="flex: 1;">إلغاء</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="settingsModal" class="modal hidden">
+        <div class="modal-content">
+            <h2 style="font-size: 24px; font-weight: 900; margin-bottom: 20px;">الإعدادات</h2>
+            <p style="color: #666; margin-bottom: 20px;">إدارة المستخدمين والصلاحيات - قريباً</p>
+            <button type="button" onclick="closeSettings()" class="btn btn-danger" style="width: 100%;">إغلاق</button>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        import { getFirestore, doc, setDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { getFirestore, doc, setDoc, onSnapshot, collection, getDocs, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
         const firebaseConfig = {
             apiKey: "AIzaSyDHbtLO5NbRoDddk7CH0u5jAxC5gOAl1iE",
@@ -410,7 +462,7 @@
                             <p style="color: #666; font-size: 14px;">${p.supplier} - ${p.date}</p>
                         </div>
                         <div class="no-print">
-                            <button onclick="editPurchase(${pIdx})" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i></button>
+                            <button onclick="editPurchase(${pIdx})" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i> تعديل</button>
                             <button onclick="delPurchase(${pIdx})" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
                         </div>
                     </div>
@@ -434,40 +486,277 @@
             `).join('');
         }
 
-        window.addPurchase = async () => {
-            const no = prompt('رقم الفاتورة:');
-            if (!no) return;
-            const supplier = prompt('اسم المورد:');
-            if (!supplier) return;
-            const purchase = { no, supplier, date: currentDate, items: [], total: 0 };
-
-            while (true) {
-                const item = prompt('اسم الصنف (اتركه فاضي للإنهاء):');
-                if (!item) break;
-                const qty = parseFloat(prompt('الكمية:'));
-                const price = parseFloat(prompt('سعر الوحدة (د.أ):'));
-                if (qty && price) purchase.items.push({ item, qty, price, total: qty * price });
-            }
-
-            if (purchase.items.length > 0) {
-                purchase.total = purchase.items.reduce((sum, i) => sum + i.total, 0);
-                data.purchases.push(purchase);
-                await setDoc(doc(db, 'daftar_zaytoon', currentDate), data);
-                toast('تمت إضافة الفاتورة ✓');
-            }
+        window.showPurchaseModal = () => {
+            document.getElementById('purchaseModalTitle').textContent = 'إضافة فاتورة مشتريات';
+            document.getElementById('editPurchaseIndex').value = '';
+            document.getElementById('purchaseModal').classList.remove('hidden');
+            document.getElementById('purchaseForm').reset();
+            document.getElementById('invoiceDate').value = currentDate;
+            document.getElementById('purchaseItems').innerHTML = '';
+            addPurchaseItemRow();
         };
 
-        window.editPurchase = async (pIdx) => {
+        window.editPurchase = (pIdx) => {
             const p = data.purchases[pIdx];
-            const no = prompt('رقم الفاتورة:', p.no);
-            if (!no) return;
-            const supplier = prompt('اسم المورد:', p.supplier);
-            if (!supplier) return;
-            data.purchases[pIdx].no = no;
-            data.purchases[pIdx].supplier = supplier;
-            await setDoc(doc(db, 'daftar_zaytoon', currentDate), data);
-            toast('تم التعديل ✓');
+            document.getElementById('purchaseModalTitle').textContent = 'تعديل فاتورة مشتريات';
+            document.getElementById('editPurchaseIndex').value = pIdx;
+            document.getElementById('invoiceNo').value = p.no;
+            document.getElementById('supplier').value = p.supplier;
+            document.getElementById('invoiceDate').value = p.date;
+            document.getElementById('purchaseItems').innerHTML = '';
+            p.items.forEach(item => addPurchaseItemRow(item));
+            document.getElementById('purchaseModal').classList.remove('hidden');
         };
+
+        window.closePurchaseModal = () => document.getElementById('purchaseModal').classList.add('hidden');
+
+        window.addPurchaseItemRow = (item = null) => {
+            const div = document.createElement('div');
+            div.className = 'item-row';
+            div.innerHTML = `
+                <input type="text" placeholder="الصنف" class="item-name" value="${item?.item || ''}" required>
+                <input type="number" placeholder="الكمية" class="item-qty" step="0.01" value="${item?.qty || ''}" required>
+                <input type="number" placeholder="السعر" class="item-price" step="0.01" value="${item?.price || ''}" required>
+                <input type="text" class="item-total" placeholder="الإجمالي" readonly style="background: #f0f0f0;">
+                <button type="button" onclick="this.parentElement.remove()" class="btn btn-danger btn-sm"><i class="fas fa-times"></i></button>
+            `;
+            document.getElementById('purchaseItems').appendChild(div);
+
+            const qtyInput = div.querySelector('.item-qty');
+            const priceInput = div.querySelector('.item-price');
+            const totalInput = div.querySelector('.item-total');
+
+            const calcTotal = () => {
+                const qty = parseFloat(qtyInput.value) || 0;
+                const price = parseFloat(priceInput.value) || 0;
+                totalInput.value = (qty * price).toFixed(2) + ' د.أ';
+            };
+
+            qtyInput.addEventListener('input', calcTotal);
+            priceInput.addEventListener('input', calcTotal);
+            if (item) calcTotal();
+        };
+
+       document.getElementById('salesBody').innerHTML = tbody.map((s, i) => {
+                const realIndex = data.sales.length - 1 - i;
+                const color = s.payment === 'نقدي'? 'badge-cash' : s.payment === 'كليك'? 'badge-cliq' : s.payment === 'بطاقة'? 'badge-card' : 'badge-credit';
+                return `<tr>
+                    <td>${s.time}</td>
+                    <td>${s.item}</td>
+                    <td>${s.qty}</td>
+                    <td>${fmt(s.price)}</td>
+                    <td style="font-weight: 900; color: var(--success);">${fmt(s.total)}</td>
+                    <td><span class="badge ${color}">${s.payment}</span></td>
+                    <td>${s.customer || '-'}</td>
+                    <td class="no-print">
+                        <button onclick="editSale(${realIndex})" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i></button>
+                        <button onclick="delSale(${realIndex})" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        function renderSalesFull() {
+            const tbody = document.getElementById('salesBodyFull');
+            if (!tbody) return;
+            tbody.innerHTML = data.sales.map((s, i) => {
+                const color = s.payment === 'نقدي'? 'badge-cash' : s.payment === 'كليك'? 'badge-cliq' : s.payment === 'بطاقة'? 'badge-card' : 'badge-credit';
+                return `<tr>
+                    <td>${s.time}</td>
+                    <td>${s.item}</td>
+                    <td>${s.qty}</td>
+                    <td>${fmt(s.price)}</td>
+                    <td style="font-weight: 900; color: var(--success);">${fmt(s.total)}</td>
+                    <td><span class="badge ${color}">${s.payment}</span></td>
+                    <td>${s.customer || '-'}</td>
+                    <td class="no-print">
+                        <button onclick="editSale(${i})" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i></button>
+                        <button onclick="delSale(${i})" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        window.showSaleModal = () => {
+            document.getElementById('saleModalTitle').textContent = 'إضافة مبيعة جديدة';
+            document.getElementById('editSaleIndex').value = '';
+            document.getElementById('saleModal').classList.remove('hidden');
+            document.getElementById('saleForm').reset();
+        };
+        window.closeSaleModal = () => document.getElementById('saleModal').classList.add('hidden');
+
+        window.editSale = (i) => {
+            const s = data.sales[i];
+            document.getElementById('saleModalTitle').textContent = 'تعديل مبيعة';
+            document.getElementById('editSaleIndex').value = i;
+            document.getElementById('saleItem').value = s.item;
+            document.getElementById('saleQty').value = s.qty;
+            document.getElementById('salePrice').value = s.price;
+            document.getElementById('salePayment').value = s.payment;
+            document.getElementById('saleCustomer').value = s.customer || '';
+            document.getElementById('saleModal').classList.remove('hidden');
+        };
+
+        document.getElementById('saleForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const qty = parseFloat(document.getElementById('saleQty').value);
+            const price = parseFloat(document.getElementById('salePrice').value);
+            const saleData = {
+                time: time(),
+                item: document.getElementById('saleItem').value,
+                qty: qty,
+                price: price,
+                total: qty * price,
+                payment: document.getElementById('salePayment').value,
+                customer: document.getElementById('saleCustomer').value
+            };
+            const editIndex = document.getElementById('editSaleIndex').value;
+            if (editIndex!== '') {
+                saleData.time = data.sales[editIndex].time;
+                data.sales[editIndex] = saleData;
+            } else {
+                data.sales.push(saleData);
+            }
+            await setDoc(doc(db, 'daftar_zaytoon', currentDate), data);
+            closeSaleModal();
+            toast('تم الحفظ ✓');
+        });
+
+        window.delSale = async (i) => {
+            if (confirm('حذف المبيعة؟')) {
+                data.sales.splice(i, 1);
+                await setDoc(doc(db, 'daftar_zaytoon', currentDate), data);
+                toast('تم الحذف ✓');
+            }
+        };
+
+        function renderPurchases() {
+            const div = document.getElementById('purchasesDiv');
+            if (data.purchases.length === 0) {
+                div.innerHTML = '<p style="text-align: center; color: #94a3b8; padding: 40px;">لا توجد فواتير</p>';
+                return;
+            }
+            div.innerHTML = data.purchases.map((p, pIdx) => `
+                <div style="background: #f8fafc; padding: 20px; border-radius: 12px; margin-bottom: 15px; border: 2px solid var(--border);">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+                        <div>
+                            <h3 style="font-weight: 900; font-size: 18px;">فاتورة #${p.no}</h3>
+                            <p style="color: #64748b; font-size: 14px; margin-top: 4px;">${p.supplier} - ${p.date}</p>
+                        </div>
+                        <div class="no-print" style="display: flex; gap: 8px;">
+                            <button onclick="editPurchase(${pIdx})" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i> تعديل</button>
+                            <button onclick="delPurchase(${pIdx})" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                    <table style="margin-bottom: 10px;">
+                        <thead><tr><th>الصنف</th><th>الكمية</th><th>السعر</th><th>الإجمالي</th></tr></thead>
+                        <tbody>
+                            ${p.items.map(item => `
+                                <tr>
+                                    <td>${item.item}</td>
+                                    <td>${item.qty}</td>
+                                    <td>${fmt(item.price)}</td>
+                                    <td style="font-weight: 900;">${fmt(item.total)}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                    <div style="text-align: left; font-weight: 900; font-size: 18px; color: var(--primary); margin-top: 12px;">
+                        إجمالي الفاتورة: ${fmt(p.total)}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        window.showPurchaseModal = () => {
+            document.getElementById('purchaseModalTitle').textContent = 'إضافة فاتورة مشتريات';
+            document.getElementById('editPurchaseIndex').value = '';
+            document.getElementById('purchaseModal').classList.remove('hidden');
+            document.getElementById('purchaseForm').reset();
+            document.getElementById('invoiceDate').value = currentDate;
+            document.getElementById('purchaseItems').innerHTML = '';
+            addPurchaseItemRow();
+        };
+
+        window.editPurchase = (pIdx) => {
+            const p = data.purchases[pIdx];
+            document.getElementById('purchaseModalTitle').textContent = 'تعديل فاتورة مشتريات';
+            document.getElementById('editPurchaseIndex').value = pIdx;
+            document.getElementById('invoiceNo').value = p.no;
+            document.getElementById('supplier').value = p.supplier;
+            document.getElementById('invoiceDate').value = p.date;
+            document.getElementById('purchaseItems').innerHTML = '';
+            p.items.forEach(item => addPurchaseItemRow(item));
+            document.getElementById('purchaseModal').classList.remove('hidden');
+        };
+
+        window.closePurchaseModal = () => document.getElementById('purchaseModal').classList.add('hidden');
+
+        window.addPurchaseItemRow = (item = null) => {
+            const div = document.createElement('div');
+            div.className = 'item-row';
+            div.innerHTML = `
+                <input type="text" placeholder="الصنف" class="item-name" value="${item?.item || ''}" required>
+                <input type="number" placeholder="الكمية" class="item-qty" step="0.01" value="${item?.qty || ''}" required>
+                <input type="number" placeholder="السعر" class="item-price" step="0.01" value="${item?.price || ''}" required>
+                <input type="text" class="item-total" placeholder="الإجمالي" readonly style="background: #f1f5f9;">
+                <button type="button" onclick="this.parentElement.remove()" class="btn btn-danger btn-sm"><i class="fas fa-times"></i></button>
+            `;
+            document.getElementById('purchaseItems').appendChild(div);
+
+            const qtyInput = div.querySelector('.item-qty');
+            const priceInput = div.querySelector('.item-price');
+            const totalInput = div.querySelector('.item-total');
+
+            const calcTotal = () => {
+                const qty = parseFloat(qtyInput.value) || 0;
+                const price = parseFloat(priceInput.value) || 0;
+                totalInput.value = (qty * price).toFixed(2) + ' د.أ';
+            };
+
+            qtyInput.addEventListener('input', calcTotal);
+            priceInput.addEventListener('input', calcTotal);
+            if (item) calcTotal();
+        };
+
+        document.getElementById('purchaseForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const purchase = {
+                no: document.getElementById('invoiceNo').value,
+                supplier: document.getElementById('supplier').value,
+                date: document.getElementById('invoiceDate').value,
+                items: [],
+                total: 0
+            };
+
+            const items = document.querySelectorAll('#purchaseItems.item-row');
+            items.forEach(row => {
+                const name = row.querySelector('.item-name').value;
+                const qty = parseFloat(row.querySelector('.item-qty').value);
+                const price = parseFloat(row.querySelector('.item-price').value);
+                if (name && qty && price) {
+                    purchase.items.push({ item: name, qty, price, total: qty * price });
+                }
+            });
+
+            if (purchase.items.length === 0) {
+                alert('أضف بند واحد على الأقل');
+                return;
+            }
+
+            purchase.total = purchase.items.reduce((sum, i) => sum + i.total, 0);
+
+            const editIndex = document.getElementById('editPurchaseIndex').value;
+            if (editIndex!== '') {
+                data.purchases[editIndex] = purchase;
+            } else {
+                data.purchases.push(purchase);
+            }
+
+            await setDoc(doc(db, 'daftar_zaytoon', currentDate), data);
+            closePurchaseModal();
+            toast('تم الحفظ ✓');
+        });
 
         window.delPurchase = async (i) => {
             if (confirm('حذف الفاتورة؟')) {
@@ -502,6 +791,151 @@
             document.getElementById('cliqSales').textContent = fmt(cliq);
             document.getElementById('cardSales').textContent = fmt(card);
         }
+
+        function updateChart() {
+            const ctx = document.getElementById('paymentChart');
+            if (!ctx) return;
+
+            const cash = data.sales.filter(s => s.payment === 'نقدي').reduce((sum, s) => sum + s.total, 0);
+            const cliq = data.sales.filter(s => s.payment === 'كليك').reduce((sum, s) => sum + s.total, 0);
+            const card = data.sales.filter(s => s.payment === 'بطاقة').reduce((sum, s) => sum + s.total, 0);
+            const credit = data.sales.filter(s => s.payment === 'آجل').reduce((sum, s) => sum + s.total, 0);
+
+            if (paymentChart) paymentChart.destroy();
+            paymentChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['نقدي', 'كليك CliQ', 'بطاقة', 'آجل'],
+                    datasets: [{
+                        data: [cash, cliq, card, credit],
+                        backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#ef4444'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { font: { family: 'Cairo', size: 14 }, padding: 20 } }
+                    }
+                }
+            });
+        }
+
+        // Navigation
+        window.showPage = (page) => {
+            document.querySelectorAll('[id$="Page"]').forEach(p => p.classList.add('hidden'));
+            document.getElementById(page + 'Page').classList.remove('hidden');
+            document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+            event.target.closest('.sidebar-item').classList.add('active');
+            if (page === 'sales') renderSalesFull();
+            if (page === 'reports') generateReport();
+        };
+
+        // Backup/Export
+        window.exportBackup = async () => {
+            const allData = {};
+            const querySnapshot = await getDocs(collection(db, 'daftar_zaytoon'));
+            querySnapshot.forEach((doc) => {
+                allData[doc.id] = doc.data();
+            });
+            const blob = new Blob([JSON.stringify(allData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `daftar-zaytoon-backup-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            toast('تم تصدير النسخة الاحتياطية ✓');
+        };
+
+        window.importBackup = async (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            if (!confirm('هل أنت متأكد؟ سيتم استبدال كل البيانات الحالية!')) return;
+
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const allData = JSON.parse(e.target.result);
+                    for (const [date, dayData] of Object.entries(allData)) {
+                        await setDoc(doc(db, 'daftar_zaytoon', date), dayData);
+                    }
+                    toast('تم الاستيراد بنجاح ✓');
+                    loadData();
+                } catch (err) {
+                    alert('خطأ في الملف: ' + err.message);
+                }
+            };
+            reader.readAsText(file);
+        };
+
+        // Report
+        window.printReport = () => {
+            generateReport();
+            setTimeout(() => window.print(), 500);
+        };
+
+        function generateReport() {
+            const totalSales = data.sales.reduce((sum, s) => sum + s.total, 0);
+            const totalPurchases = data.purchases.reduce((sum, p) => sum + p.total, 0);
+            const cash = data.sales.filter(s => s.payment === 'نقدي').reduce((sum, s) => sum + s.total, 0);
+            const cliq = data.sales.filter(s => s.payment === 'كليك').reduce((sum, s) => sum + s.total, 0);
+            const card = data.sales.filter(s => s.payment === 'بطاقة').reduce((sum, s) => sum + s.total, 0);
+            const totalIncome = cash + cliq + card + (data.creditSales || 0) + (data.extraIncome || 0);
+            const netIncome = totalIncome - (data.expenses || 0) - (data.hospitality || 0) - (data.salaries || 0) - totalPurchases;
+
+            document.getElementById('reportContent').innerHTML = `
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <img src="1.webp" alt="Logo" style="height: 80px; margin-bottom: 15px;">
+                    <h1 style="font-size: 28px; font-weight: 900; color: var(--dark);">تقرير يومية محمص زيتون</h1>
+                    <p style="color: #64748b; font-size: 16px; margin-top: 8px;">${document.getElementById('currentDate').textContent}</p>
+                </div>
+
+                <div class="stats-grid" style="margin-bottom: 30px;">
+                    <div class="stat-card primary">
+                        <div class="stat-label">إجمالي المبيعات</div>
+                        <div class="stat-value">${fmt(totalSales)}</div>
+                    </div>
+                    <div class="stat-card info">
+                        <div class="stat-label">إجمالي المشتريات</div>
+                        <div class="stat-value">${fmt(totalPurchases)}</div>
+                    </div>
+                    <div class="stat-card success">
+                        <div class="stat-label">إجمالي الدخل</div>
+                        <div class="stat-value">${fmt(totalIncome)}</div>
+                    </div>
+                    <div class="stat-card warning">
+                        <div class="stat-label">صافي الربح</div>
+                        <div class="stat-value">${fmt(netIncome)}</div>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 30px;">
+                    <h3 style="font-weight: 900; font-size: 18px; margin-bottom: 15px;">تفاصيل الدخل</h3>
+                    <table>
+                        <tr><td>مبيعات نقدي</td><td style="text-align: left; font-weight: 700;">${fmt(cash)}</td></tr>
+                        <tr><td>مبيعات كليك</td><td style="text-align: left; font-weight: 700;">${fmt(cliq)}</td></tr>
+                        <tr><td>مبيعات بطاقة</td><td style="text-align: left; font-weight: 700;">${fmt(card)}</td></tr>
+                        <tr><td>مبيعات آجل</td><td style="text-align: left; font-weight: 700;">${fmt(data.creditSales || 0)}</td></tr>
+                        <tr><td>دخل إضافي</td><td style="text-align: left; font-weight: 700;">${fmt(data.extraIncome || 0)}</td></tr>
+                    </table>
+                </div>
+
+                <div style="margin-bottom: 30px;">
+                    <h3 style="font-weight: 900; font-size: 18px; margin-bottom: 15px;">المصاريف</h3>
+                    <table>
+                        <tr><td>مصاريف تشغيلية</td><td style="text-align: left; font-weight: 700;">${fmt(data.expenses || 0)}</td></tr>
+                        <tr><td>ضيافة</td><td style="text-align: left; font-weight: 700;">${fmt(data.hospitality || 0)}</td></tr>
+                        <tr><td>رواتب</td><td style="text-align: left; font-weight: 700;">${fmt(data.salaries || 0)}</td></tr>
+                        <tr><td>المشتريات</td><td style="text-align: left; font-weight: 700;">${fmt(totalPurchases)}</td></tr>
+                    </table>
+                </div>
+            `;
+        }
+
+        // Settings
+        window.showSettings = () => document.getElementById('settingsModal').classList.remove('hidden');
+        window.closeSettings = () => document.getElementById('settingsModal').classList.add('hidden');
     </script>
 </body>
 </html>
