@@ -3,1483 +3,190 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>دفتر يوميات محمص زيتون</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        'cairo': ['Cairo', 'sans-serif']
-                    },
-                    colors: {
-                        'zaytoon': {
-                            50: '#f7f8ec',
-                            100: '#eef1d2',
-                            200: '#dde3a9',
-                            300: '#c6d176',
-                            400: '#b0bd4f',
-                            500: '#94a034',
-                            600: '#738029',
-                            700: '#5a6424',
-                            800: '#495123',
-                            900: '#3e4521',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+    <title>دفتر يوميات محمص زيتون - نظام متكامل</title>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        * {
-            font-family: 'Cairo', sans-serif;
-        }
-        
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-        
-        ::-webkit-scrollbar-thumb {
-            background: #94a034;
-            border-radius: 4px;
-        }
-        
-        ::-webkit-scrollbar-thumb:hover {
-            background: #738029;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .fade-in {
-            animation: fadeIn 0.3s ease-out;
-        }
-        
-        @keyframes slideIn {
-            from { transform: translateX(100%); }
-            to { transform: translateX(0); }
-        }
-        
-        .slide-in {
-            animation: slideIn 0.3s ease-out;
-        }
-        
-        .glass {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-        }
-        
-        @media print {
-            .no-print { display: none !important; }
-            body { background: white; }
-        }
-        
-        input[type="date"]::-webkit-calendar-picker-indicator {
-            cursor: pointer;
-        }
-        
-        /* RTL Table fixes */
-        table {
-            direction: rtl;
-        }
-        
-        .modal-backdrop {
-            backdrop-filter: blur(4px);
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;700;900&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Cairo', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        .card { background: white; border-radius: 20px; padding: 25px; margin-bottom: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
+        .btn { padding: 12px 24px; border-radius: 12px; font-weight: 700; cursor: pointer; border: none; transition: all 0.3s; }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .btn-success { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; }
+        .btn-danger { background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%); color: white; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(0,0,0,0.2); }
+        input, select, textarea { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 12px; font-family: 'Cairo'; font-size: 16px; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: #667eea; }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px; text-align: right; }
+        td { padding: 12px; border-bottom: 1px solid #f0f0f0; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+        .stat-box { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 20px; border-radius: 15px; text-align: center; }
+        .stat-box h3 { font-size: 14px; opacity: 0.9; margin-bottom: 10px; }
+        .stat-box .value { font-size: 28px; font-weight: 900; }
+        @media (max-width: 768px) { .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; } }
+        .hidden { display: none !important; }
+        .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 9999; }
+        .modal-content { background: white; border-radius: 20px; padding: 30px; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto; }
     </style>
 </head>
-<body class="bg-gradient-to-br from-zaytoon-50 to-zaytoon-100 min-h-screen font-cairo">
-    
-    <!-- Login Screen -->
-    <div id="loginScreen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gradient-to-br from-zaytoon-600 to-zaytoon-800">
-        <div class="w-full max-w-md fade-in">
-            <div class="glass rounded-3xl shadow-2xl p-8 border border-white/20">
-                <div class="text-center mb-8">
-                    <div class="w-24 h-24 mx-auto mb-4 rounded-full bg-white/20 backdrop-blur flex items-center justify-center shadow-lg">
-                        <svg class="w-16 h-16 text-white" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
-                        </svg>
-                    </div>
-                    <h1 class="text-3xl font-bold text-white mb-2">محمص زيتون</h1>
-                    <p class="text-white/80 text-sm">نظام إدارة الدفتر اليومي</p>
-                </div>
-                
-                <form id="loginForm" class="space-y-4">
-                    <div>
-                        <input type="email" id="loginEmail" required
-                            class="w-full px-4 py-3 rounded-xl bg-white/90 border border-white/30 focus:outline-none focus:ring-2 focus:ring-zaytoon-400 transition-all"
-                            placeholder="البريد الإلكتروني">
-                    </div>
-                    <div>
-                        <input type="password" id="loginPassword" required
-                            class="w-full px-4 py-3 rounded-xl bg-white/90 border border-white/30 focus:outline-none focus:ring-2 focus:ring-zaytoon-400 transition-all"
-                            placeholder="كلمة المرور">
-                    </div>
-                    <button type="submit"
-                        class="w-full bg-white text-zaytoon-700 font-bold py-3 rounded-xl hover:bg-zaytoon-50 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
-                        تسجيل الدخول
-                    </button>
-                </form>
-                
-                <div id="loginError" class="mt-4 text-red-100 text-sm text-center hidden"></div>
+<body>
+    <div id="loginScreen" class="container">
+        <div class="card" style="max-width: 450px; margin: 100px auto;">
+            <div style="text-align: center; margin-bottom: 30px;">
+                <img id="logoImg" src="data:image/webp;base64," style="width: 120px; height: 120px; border-radius: 50%; margin: 0 auto 20px; object-fit: cover;" alt="شعار">
+                <h1 style="font-size: 32px; font-weight: 900; color: #667eea;">دفتر يوميات محمص زيتون</h1>
+                <p style="color: #666; margin-top: 10px;">نظام إدارة المبيعات والمشتريات</p>
             </div>
-        </div>
-    </div>
-
-    <!-- Main App -->
-    <div id="mainApp" class="hidden min-h-screen pb-20">
-        <!-- Header -->
-        <header class="glass sticky top-0 z-40 shadow-md no-print">
-            <div class="max-w-7xl mx-auto px-4 py-3">
-                <div class="flex items-center justify-between flex-wrap gap-3">
-                    <div class="flex items-center gap-3">
-                        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-zaytoon-500 to-zaytoon-700 flex items-center justify-center shadow-lg">
-                            <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <h1 class="text-xl font-bold text-zaytoon-900">محمص زيتون</h1>
-                            <p class="text-xs text-gray-600" id="currentUserEmail"></p>
-                        </div>
-                    </div>
-                    
-                    <div class="flex items-center gap-2">
-                        <input type="date" id="selectedDate"
-                            class="px-3 py-2 rounded-lg border border-zaytoon-300 focus:outline-none focus:ring-2 focus:ring-zaytoon-500 text-sm">
-                        <button id="settingsBtn" class="p-2 rounded-lg bg-zaytoon-100 hover:bg-zaytoon-200 transition-colors">
-                            <svg class="w-5 h-5 text-zaytoon-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                            </svg>
-                        </button>
-                        <button id="logoutBtn" class="p-2 rounded-lg bg-red-100 hover:bg-red-200 transition-colors">
-                            <svg class="w-5 h-5 text-red-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-                            </svg>
-                        </button>
-                    </div>
+            <form id="loginForm">
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 700;">الإيميل</label>
+                    <input type="email" id="email" required placeholder="example@jakoop.tech">
                 </div>
-            </div>
-        </header>
-
-        <!-- Main Content -->
-        <main class="max-w-7xl mx-auto px-4 py-6 space-y-6">
-            
-            <!-- Dashboard Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 fade-in">
-                <div class="glass rounded-2xl p-5 shadow-lg border border-zaytoon-200/50">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm text-gray-600 mb-1">إجمالي المبيعات</p>
-                            <p class="text-2xl font-bold text-zaytoon-900" id="totalSales">0.00</p>
-                            <p class="text-xs text-gray-500 mt-1">ريال سعودي</p>
-                        </div>
-                        <div class="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center">
-                            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
-                            </svg>
-                        </div>
-                    </div>
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 700;">كلمة المرور</label>
+                    <input type="password" id="password" required placeholder="••••••••">
                 </div>
-                
-                <div class="glass rounded-2xl p-5 shadow-lg border border-zaytoon-200/50">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm text-gray-600 mb-1">إجمالي المشتريات</p>
-                            <p class="text-2xl font-bold text-zaytoon-900" id="totalPurchases">0.00</p>
-                            <p class="text-xs text-gray-500 mt-1">ريال سعودي</p>
-                        </div>
-                        <div class="w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center">
-                            <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="glass rounded-2xl p-5 shadow-lg border border-zaytoon-200/50">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm text-gray-600 mb-1">المصاريف + الضيافة</p>
-                            <p class="text-2xl font-bold text-zaytoon-900" id="totalExpenses">0.00</p>
-                            <p class="text-xs text-gray-500 mt-1">ريال سعودي</p>
-                        </div>
-                        <div class="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center">
-                            <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="glass rounded-2xl p-5 shadow-lg border border-zaytoon-200/50">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm text-gray-600 mb-1">صافي الدخل اليومي</p>
-                            <p class="text-2xl font-bold text-zaytoon-900" id="netIncome">0.00</p>
-                            <p class="text-xs text-gray-500 mt-1">ريال سعودي</p>
-                        </div>
-                        <div class="w-12 h-12 rounded-xl bg-zaytoon-100 flex items-center justify-center">
-                            <svg class="w-6 h-6 text-zaytoon-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Sales Section -->
-            <div class="glass rounded-2xl p-6 shadow-lg border border-zaytoon-200/50">
-                <div class="flex items-center justify-between mb-4 flex-wrap gap-3">
-                    <h2 class="text-xl font-bold text-zaytoon-900 flex items-center gap-2">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                        </svg>
-                        سجل المبيعات التفصيلي
-                    </h2>
-                    <button id="addSaleBtn" class="px-4 py-2 bg-zaytoon-600 hover:bg-zaytoon-700 text-white rounded-lg transition-all shadow-md hover:shadow-lg text-sm flex items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                        </svg>
-                        إضافة مبيعة
-                    </button>
-                </div>
-                
-                <div class="overflow-x-auto">
-                    <table class="w-full text-sm">
-                        <thead class="bg-zaytoon-100/50">
-                            <tr>
-                                <th class="px-3 py-2 text-right font-semibold">الوقت</th>
-                                <th class="px-3 py-2 text-right font-semibold">الصنف</th>
-                                <th class="px-3 py-2 text-right font-semibold">الكمية</th>
-                                <th class="px-3 py-2 text-right font-semibold">السعر</th>
-                                <th class="px-3 py-2 text-right font-semibold">الإجمالي</th>
-                                <th class="px-3 py-2 text-right font-semibold">الدفع</th>
-                                <th class="px-3 py-2 text-right font-semibold">الزبون</th>
-                                <th class="px-3 py-2 text-right font-semibold no-print">إجراءات</th>
-                            </tr>
-                        </thead>
-                        <tbody id="salesTableBody" class="divide-y divide-gray-200">
-                            <tr>
-                                <td colspan="8" class="px-3 py-8 text-center text-gray-500">لا توجد مبيعات مسجلة</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Purchases Section -->
-            <div class="glass rounded-2xl p-6 shadow-lg border border-zaytoon-200/50">
-                <div class="flex items-center justify-between mb-4 flex-wrap gap-3">
-                    <h2 class="text-xl font-bold text-zaytoon-900 flex items-center gap-2">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
-                        </svg>
-                        سجل المشتريات التفصيلي
-                    </h2>
-                    <button id="addPurchaseBtn" class="px-4 py-2 bg-zaytoon-600 hover:bg-zaytoon-700 text-white rounded-lg transition-all shadow-md hover:shadow-lg text-sm flex items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                        </svg>
-                        إضافة فاتورة
-                    </button>
-                </div>
-                
-                <div id="purchasesContainer" class="space-y-3">
-                    <div class="text-center text-gray-500 py-8">لا توجد مشتريات مسجلة</div>
-                </div>
-            </div>
-
-            <!-- Income & Expenses Grid -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Income Section -->
-                <div class="glass rounded-2xl p-6 shadow-lg border border-zaytoon-200/50">
-                    <h2 class="text-xl font-bold text-zaytoon-900 mb-4 flex items-center gap-2">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                        قسم الدخل
-                    </h2>
-                    
-                    <div class="space-y-3">
-                        <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-                            <span class="text-sm font-medium text-gray-700">مبيعات نقدي</span>
-                            <span class="text-lg font-bold text-green-700" id="cashSales">0.00</span>
-                        </div>
-                        
-                        <div>
-                            <label class="text-sm font-medium text-gray-700 block mb-1">مبيعات بطاقة</label>
-                            <input type="number" id="cardSales" step="0.01" min="0"
-                                class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-zaytoon-500"
-                                placeholder="0.00">
-                        </div>
-                        
-                        <div>
-                            <label class="text-sm font-medium text-gray-700 block mb-1">مبيعات آجل</label>
-                            <input type="number" id="creditSales" step="0.01" min="0"
-                                class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-zaytoon-500"
-                                placeholder="0.00">
-                        </div>
-                        
-                        <div>
-                            <label class="text-sm font-medium text-gray-700 block mb-1">دخل إضافي</label>
-                            <input type="number" id="otherIncome" step="0.01" min="0"
-                                class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-zaytoon-500"
-                                placeholder="0.00">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Expenses Section -->
-                <div class="glass rounded-2xl p-6 shadow-lg border border-zaytoon-200/50">
-                    <h2 class="text-xl font-bold text-zaytoon-900 mb-4 flex items-center gap-2">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
-                        </svg>
-                        المصاريف + الضيافة + الصندوق
-                    </h2>
-                    
-                    <div class="space-y-3">
-                        <div>
-                            <label class="text-sm font-medium text-gray-700 block mb-1">مصاريف التشغيل</label>
-                            <input type="number" id="operatingExpenses" step="0.01" min="0"
-                                class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-zaytoon-500"
-                                placeholder="0.00">
-                        </div>
-                        
-                        <div>
-                            <label class="text-sm font-medium text-gray-700 block mb-1">مصاريف الضيافة</label>
-                            <input type="number" id="hospitalityExpenses" step="0.01" min="0"
-                                class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-zaytoon-500"
-                                placeholder="0.00">
-                        </div>
-                        
-                        <div>
-                            <label class="text-sm font-medium text-gray-700 block mb-1">تحويل كليك</label>
-                            <input type="number" id="clickTransfer" step="0.01" min="0"
-                                class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-zaytoon-500"
-                                placeholder="0.00">
-                        </div>
-                        
-                        <div>
-                            <label class="text-sm font-medium text-gray-700 block mb-1">رصيد الصندوق</label>
-                            <input type="number" id="cashBalance" step="0.01"
-                                class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-zaytoon-500"
-                                placeholder="0.00">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="flex flex-wrap gap-3 no-print">
-                <button id="saveDayBtn" class="px-6 py-3 bg-gradient-to-r from-zaytoon-600 to-zaytoon-700 hover:from-zaytoon-700 hover:to-zaytoon-800 text-white rounded-xl shadow-lg hover:shadow-xl transition-all font-semibold flex items-center gap-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/>
-                    </svg>
-                    حفظ اليوم
-                </button>
-                
-                <button id="monthlyReportBtn" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-lg hover:shadow-xl transition-all font-semibold flex items-center gap-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                    </svg>
-                    التقرير الشهري
-                </button>
-                
-                <button id="backupBtn" class="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl shadow-lg hover:shadow-xl transition-all font-semibold flex items-center gap-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                    </svg>
-                    نسخة احتياطية
-                </button>
-                
-                <button id="restoreBtn" class="px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white rounded-xl shadow-lg hover:shadow-xl transition-all font-semibold flex items-center gap-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
-                    </svg>
-                    استرداد
-                </button>
-                
-                <input type="file" id="restoreFileInput" accept=".json" class="hidden">
-            </div>
-        </main>
-    </div>
-
-    <!-- Settings Modal -->
-    <div id="settingsModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 modal-backdrop bg-black/50">
-        <div class="glass rounded-2xl shadow-2xl max-w-md w-full p-6 fade-in">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-xl font-bold text-zaytoon-900">الإعدادات</h3>
-                <button id="closeSettingsBtn" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                </button>
-            </div>
-            
-            <div class="space-y-4">
-                <div>
-                    <h4 class="font-semibold text-gray-800 mb-2">تغيير كلمة المرور</h4>
-                    <form id="changePasswordForm" class="space-y-3">
-                        <input type="password" id="newPassword" required minlength="6"
-                            class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-zaytoon-500"
-                            placeholder="كلمة المرور الجديدة">
-                        <input type="password" id="confirmPassword" required minlength="6"
-                            class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-zaytoon-500"
-                            placeholder="تأكيد كلمة المرور">
-                        <button type="submit"
-                            class="w-full bg-zaytoon-600 hover:bg-zaytoon-700 text-white py-2 rounded-lg transition-colors font-semibold">
-                            تحديث كلمة المرور
-                        </button>
-                    </form>
-                    <div id="passwordMessage" class="text-sm mt-2 hidden"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Add Sale Modal -->
-    <div id="saleModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 modal-backdrop bg-black/50">
-        <div class="glass rounded-2xl shadow-2xl max-w-lg w-full p-6 fade-in max-h-[90vh] overflow-y-auto">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-xl font-bold text-zaytoon-900" id="saleModalTitle">إضافة مبيعة جديدة</h3>
-                <button class="closeSaleBtn p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                </button>
-            </div>
-            
-            <form id="saleForm" class="space-y-3">
-                <input type="hidden" id="saleId">
-                <div>
-                    <label class="text-sm font-medium text-gray-700 block mb-1">الصنف *</label>
-                    <input type="text" id="saleItem" required
-                        class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-zaytoon-500"
-                        placeholder="اسم المنتج">
-                </div>
-                
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="text-sm font-medium text-gray-700 block mb-1">الكمية *</label>
-                        <input type="number" id="saleQuantity" required step="0.01" min="0"
-                            class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-zaytoon-500"
-                            placeholder="0">
-                    </div>
-                    <div>
-                        <label class="text-sm font-medium text-gray-700 block mb-1">سعر الوحدة *</label>
-                        <input type="number" id="saleUnitPrice" required step="0.01" min="0"
-                            class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-zaytoon-500"
-                            placeholder="0.00">
-                    </div>
-                </div>
-                
-                <div>
-                    <label class="text-sm font-medium text-gray-700 block mb-1">نوع الدفع *</label>
-                    <select id="salePaymentType" required
-                        class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-zaytoon-500">
-                        <option value="نقدي">نقدي</option>
-                        <option value="بطاقة">بطاقة</option>
-                        <option value="آجل">آجل</option>
-                        <option value="كليك">كليك</option>
-                    </select>
-                </div>
-                
-                <div>
-                    <label class="text-sm font-medium text-gray-700 block mb-1">اسم الزبون</label>
-                    <input type="text" id="saleCustomer"
-                        class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-zaytoon-500"
-                        placeholder="اختياري">
-                </div>
-                
-                <div>
-                    <label class="text-sm font-medium text-gray-700 block mb-1">ملاحظات</label>
-                    <textarea id="saleNotes" rows="2"
-                        class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-zaytoon-500"
-                        placeholder="اختياري"></textarea>
-                </div>
-                
-                <div class="flex gap-3 pt-2">
-                    <button type="submit"
-                        class="flex-1 bg-zaytoon-600 hover:bg-zaytoon-700 text-white py-2 rounded-lg transition-colors font-semibold">
-                        حفظ
-                    </button>
-                    <button type="button" class="closeSaleBtn px-6 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg transition-colors font-semibold">
-                        إلغاء
-                    </button>
-                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">تسجيل دخول</button>
+                <div id="loginError" style="color: #eb3349; text-align: center; margin-top: 15px; font-weight: 700;"></div>
             </form>
         </div>
     </div>
 
-    <!-- Add Purchase Modal -->
-    <div id="purchaseModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 modal-backdrop bg-black/50">
-        <div class="glass rounded-2xl shadow-2xl max-w-2xl w-full p-6 fade-in max-h-[90vh] overflow-y-auto">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-xl font-bold text-zaytoon-900">إضافة فاتورة مشتريات</h3>
-                <button class="closePurchaseBtn p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                </button>
-            </div>
-            
-            <form id="purchaseForm" class="space-y-4">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <div>
-                        <label class="text-sm font-medium text-gray-700 block mb-1">رقم الفاتورة *</label>
-                        <input type="text" id="invoiceNumber" required
-                            class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-zaytoon-500"
-                            placeholder="INV-001">
-                    </div>
-                    <div>
-                        <label class="text-sm font-medium text-gray-700 block mb-1">التاريخ *</label>
-                        <input type="date" id="invoiceDate" required
-                            class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-zaytoon-500">
-                    </div>
-                    <div>
-                        <label class="text-sm font-medium text-gray-700 block mb-1">المورد *</label>
-                        <input type="text" id="supplierName" required
-                            class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-zaytoon-500"
-                            placeholder="اسم المورد">
-                    </div>
-                </div>
-                
-                <div class="border-t pt-4">
-                    <div class="flex items-center justify-between mb-3">
-                        <h4 class="font-semibold text-gray-800">بنود الفاتورة</h4>
-                        <button type="button" id="addPurchaseItemBtn" class="px-3 py-1 bg-zaytoon-100 hover:bg-zaytoon-200 text-zaytoon-700 rounded-lg text-sm transition-colors">
-                            + إضافة بند
-                        </button>
-                    </div>
-                    
-                    <div id="purchaseItemsContainer" class="space-y-2">
-                        <!-- Items will be added here dynamically -->
-                    </div>
-                </div>
-                
-                <div class="flex gap-3 pt-2">
-                    <button type="submit"
-                        class="flex-1 bg-zaytoon-600 hover:bg-zaytoon-700 text-white py-2 rounded-lg transition-colors font-semibold">
-                        حفظ الفاتورة
-                    </button>
-                    <button type="button" class="closePurchaseBtn px-6 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg transition-colors font-semibold">
-                        إلغاء
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Monthly Report Modal -->
-    <div id="reportModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 modal-backdrop bg-black/50">
-        <div class="glass rounded-2xl shadow-2xl max-w-6xl w-full p-6 fade-in max-h-[90vh] overflow-y-auto">
-            <div class="flex items-center justify-between mb-4 no-print">
-                <h3 class="text-xl font-bold text-zaytoon-900">التقرير الشهري</h3>
-                <div class="flex gap-2">
-                    <button id="printReportBtn" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors text-sm">
-                        طباعة
-                    </button>
-                    <button id="exportExcelBtn" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors text-sm">
-                        تصدير Excel
-                    </button>
-                    <button id="closeReportBtn" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-            
-            <div class="mb-4 no-print">
-                <label class="text-sm font-medium text-gray-700 block mb-1">اختر الشهر</label>
-                <input type="month" id="reportMonth"
-                    class="px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-zaytoon-500">
-            </div>
-            
-            <div id="reportContent" class="space-y-4">
-                <div class="text-center text-gray-500 py-8">اختر شهر لعرض التقرير</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Notification Toast -->
-    <div id="toast" class="fixed bottom-4 left-4 right-4 md:left-auto md:w-96 z-[60] hidden">
-        <div class="glass rounded-xl shadow-2xl p-4 flex items-center gap-3 slide-in">
-            <div id="toastIcon"></div>
-            <div class="flex-1">
-                <p id="toastMessage" class="text-sm font-medium"></p>
-            </div>
-            <button id="closeToastBtn" class="p-1 hover:bg-gray-100 rounded-lg transition-colors">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-            </button>
-        </div>
-    </div>
-
-    <!-- Firebase SDK -->
-    <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
-        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
-        import { getFirestore, doc, setDoc, getDoc, onSnapshot, collection, getDocs, writeBatch, query, where } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
-
-        // Firebase Config
-        const firebaseConfig = {
-            apiKey: "AIzaSyDHbtLO5NbRoDddk7CH0u5jAxC5gOAl1iE",
-            authDomain: "employee-dawam.firebaseapp.com",
-            projectId: "employee-dawam",
-            storageBucket: "employee-dawam.appspot.com",
-            messagingSenderId: "682981065867",
-            appId: "1:682981065867:web:508227cb2dd596dad6808e"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        // State
-        let currentUser = null;
-        let currentDate = new Date().toISOString().split('T')[0];
-        let currentData = null;
-        let unsubscribeSnapshot = null;
-        let editingSaleId = null;
-
-        // Utils
-        const formatDate = (dateStr) => {
-            const date = new Date(dateStr + 'T00:00:00');
-            return date.toLocaleDateString('ar-SA', { year: 'numeric', month: 'long', day: 'numeric' });
-        };
-
-        const formatTime = (timestamp) => {
-            return new Date(timestamp).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
-        };
-
-        const formatCurrency = (num) => {
-            return parseFloat(num || 0).toFixed(2);
-        };
-
-        const showToast = (message, type = 'success') => {
-            const toast = document.getElementById('toast');
-            const toastMessage = document.getElementById('toastMessage');
-            const toastIcon = document.getElementById('toastIcon');
-            
-            toastMessage.textContent = message;
-            
-            if (type === 'success') {
-                toastIcon.innerHTML = '<div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center"><svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg></div>';
-            } else if (type === 'error') {
-                toastIcon.innerHTML = '<div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center"><svg class="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg></div>';
-            } else {
-                toastIcon.innerHTML = '<div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center"><svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg></div>';
-            }
-            
-            toast.classList.remove('hidden');
-            setTimeout(() => toast.classList.add('hidden'), 4000);
-        };
-
-        // Auth
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-            const errorDiv = document.getElementById('loginError');
-            
-            try {
-                await signInWithEmailAndPassword(auth, email, password);
-                errorDiv.classList.add('hidden');
-            } catch (error) {
-                errorDiv.textContent = 'خطأ في تسجيل الدخول: ' + error.message;
-                errorDiv.classList.remove('hidden');
-            }
-        });
-
-        document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
-
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                currentUser = user;
-                document.getElementById('loginScreen').classList.add('hidden');
-                document.getElementById('mainApp').classList.remove('hidden');
-                document.getElementById('currentUserEmail').textContent = user.email;
-                initApp();
-            } else {
-                currentUser = null;
-                document.getElementById('loginScreen').classList.remove('hidden');
-                document.getElementById('mainApp').classList.add('hidden');
-                if (unsubscribeSnapshot) unsubscribeSnapshot();
-            }
-        });
-
-        // Init
-        function initApp() {
-            document.getElementById('selectedDate').value = currentDate;
-            loadDayData(currentDate);
-            
-            // Date change
-            document.getElementById('selectedDate').addEventListener('change', (e) => {
-                currentDate = e.target.value;
-                loadDayData(currentDate);
-            });
-
-            // Auto-save on input change
-            ['cardSales', 'creditSales', 'otherIncome', 'operatingExpenses', 'hospitalityExpenses', 'clickTransfer', 'cashBalance'].forEach(id => {
-                document.getElementById(id).addEventListener('input', debounce(autoSave, 1000));
-            });
-        }
-
-        // Load Day Data with Realtime
-        function loadDayData(date) {
-            if (unsubscribeSnapshot) unsubscribeSnapshot();
-            
-            const docRef = doc(db, 'daftar_zaytoon', date);
-            
-            unsubscribeSnapshot = onSnapshot(docRef, (docSnap) => {
-                if (docSnap.exists()) {
-                    currentData = docSnap.data();
-                } else {
-                    currentData = getDefaultDayData();
-                }
-                renderDayData();
-            }, (error) => {
-                console.error('Error loading data:', error);
-                showToast('خطأ في تحميل البيانات', 'error');
-            });
-        }
-
-        function getDefaultDayData() {
-            return {
-                date: currentDate,
-                sales: [],
-                purchases: [],
-                cardSales: 0,
-                creditSales: 0,
-                otherIncome: 0,
-                operatingExpenses: 0,
-                hospitalityExpenses: 0,
-                clickTransfer: 0,
-                cashBalance: 0,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString()
-            };
-        }
-
-        function renderDayData() {
-            const data = currentData || getDefaultDayData();
-            
-            // Sales
-            renderSalesTable(data.sales || []);
-            
-            // Purchases
-            renderPurchases(data.purchases || []);
-            
-            // Income & Expenses
-            document.getElementById('cardSales').value = data.cardSales || 0;
-            document.getElementById('creditSales').value = data.creditSales || 0;
-            document.getElementById('otherIncome').value = data.otherIncome || 0;
-            document.getElementById('operatingExpenses').value = data.operatingExpenses || 0;
-            document.getElementById('hospitalityExpenses').value = data.hospitalityExpenses || 0;
-            document.getElementById('clickTransfer').value = data.clickTransfer || 0;
-            document.getElementById('cashBalance').value = data.cashBalance || 0;
-            
-            // Calculate totals
-            updateTotals();
-        }
-
-        function updateTotals() {
-            const data = currentData || getDefaultDayData();
-            
-            // Total Sales
-            const totalSales = (data.sales || []).reduce((sum, sale) => sum + (sale.total || 0), 0);
-            
-            // Cash Sales
-            const cashSales = (data.sales || [])
-                .filter(s => s.paymentType === 'نقدي')
-                .reduce((sum, sale) => sum + (sale.total || 0), 0);
-            
-            // Total Purchases
-            const totalPurchases = (data.purchases || []).reduce((sum, purchase) => {
-                return sum + (purchase.items || []).reduce((itemSum, item) => itemSum + (item.total || 0), 0);
-            }, 0);
-            
-            // Total Expenses
-            const totalExpenses = (parseFloat(data.operatingExpenses) || 0) + (parseFloat(data.hospitalityExpenses) || 0);
-            
-            // Total Income
-            const totalIncome = cashSales + (parseFloat(data.cardSales) || 0) + (parseFloat(data.creditSales) || 0) + (parseFloat(data.otherIncome) || 0);
-            
-            // Net Income
-            const netIncome = totalIncome - totalPurchases - totalExpenses;
-            
-            document.getElementById('totalSales').textContent = formatCurrency(totalSales);
-            document.getElementById('cashSales').textContent = formatCurrency(cashSales);
-            document.getElementById('totalPurchases').textContent = formatCurrency(totalPurchases);
-            document.getElementById('totalExpenses').textContent = formatCurrency(totalExpenses);
-            document.getElementById('netIncome').textContent = formatCurrency(netIncome);
-            
-            const netElement = document.getElementById('netIncome');
-            netElement.className = netIncome >= 0 ? 'text-2xl font-bold text-green-700' : 'text-2xl font-bold text-red-700';
-        }
-
-        // Sales
-        function renderSalesTable(sales) {
-            const tbody = document.getElementById('salesTableBody');
-            
-            if (sales.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" class="px-3 py-8 text-center text-gray-500">لا توجد مبيعات مسجلة</td></tr>';
-                return;
-            }
-            
-            tbody.innerHTML = sales.map((sale, index) => `
-                <tr class="hover:bg-gray-50 transition-colors">
-                    <td class="px-3 py-2">${formatTime(sale.timestamp)}</td>
-                    <td class="px-3 py-2 font-medium">${sale.item}</td>
-                    <td class="px-3 py-2">${sale.quantity}</td>
-                    <td class="px-3 py-2">${formatCurrency(sale.unitPrice)}</td>
-                    <td class="px-3 py-2 font-semibold">${formatCurrency(sale.total)}</td>
-                    <td class="px-3 py-2">
-                        <span class="px-2 py-1 rounded-full text-xs ${getPaymentTypeColor(sale.paymentType)}">${sale.paymentType}</span>
-                    </td>
-                    <td class="px-3 py-2">${sale.customer || '-'}</td>
-                    <td class="px-3 py-2 no-print">
-                        <div class="flex gap-2">
-                            <button onclick="editSale(${index})" class="text-blue-600 hover:text-blue-800">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                </svg>
-                            </button>
-                            <button onclick="deleteSale(${index})" class="text-red-600 hover:text-red-800">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                </svg>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        function getPaymentTypeColor(type) {
-            const colors = {
-                'نقدي': 'bg-green-100 text-green-800',
-                'بطاقة': 'bg-blue-100 text-blue-800',
-                'آجل': 'bg-orange-100 text-orange-800',
-                'كليك': 'bg-purple-100 text-purple-800'
-            };
-            return colors[type] || 'bg-gray-100 text-gray-800';
-        }
-
-        // Purchases
-        function renderPurchases(purchases) {
-            const container = document.getElementById('purchasesContainer');
-            
-            if (purchases.length === 0) {
-                container.innerHTML = '<div class="text-center text-gray-500 py-8">لا توجد مشتريات مسجلة</div>';
-                return;
-            }
-            
-            container.innerHTML = purchases.map((purchase, index) => `
-                <div class="bg-white/50 rounded-xl p-4 border border-gray-200">
-                    <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
+    <div id="app" class="hidden">
+        <div class="container">
+            <!-- الهيدر -->
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <img id="headerLogo" src="data:image/webp;base64," style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover;" alt="شعار">
                         <div>
-                            <h4 class="font-semibold text-gray-800">فاتورة ${purchase.invoiceNumber}</h4>
-                            <p class="text-sm text-gray-600">${purchase.supplier} - ${formatDate(purchase.date)}</p>
-                        </div>
-                        <button onclick="deletePurchase(${index})" class="text-red-600 hover:text-red-800 no-print">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                            </svg>
-                        </button>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm">
-                            <thead class="bg-gray-100">
-                                <tr>
-                                    <th class="px-2 py-1 text-right font-semibold">الصنف</th>
-                                    <th class="px-2 py-1 text-right font-semibold">الكمية</th>
-                                    <th class="px-2 py-1 text-right font-semibold">السعر</th>
-                                    <th class="px-2 py-1 text-right font-semibold">الإجمالي</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-200">
-                                ${(purchase.items || []).map(item => `
-                                    <tr>
-                                        <td class="px-2 py-1">${item.item}</td>
-                                        <td class="px-2 py-1">${item.quantity}</td>
-                                        <td class="px-2 py-1">${formatCurrency(item.unitPrice)}</td>
-                                        <td class="px-2 py-1 font-semibold">${formatCurrency(item.total)}</td>
-                                    </tr>
-                                `).join('')}
-                                <tr class="bg-zaytoon-50 font-bold">
-                                    <td colspan="3" class="px-2 py-2">الإجمالي</td>
-                                    <td class="px-2 py-2">${formatCurrency((purchase.items || []).reduce((sum, item) => sum + item.total, 0))}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // Sale Modal
-        document.getElementById('addSaleBtn').addEventListener('click', () => {
-            editingSaleId = null;
-            document.getElementById('saleModalTitle').textContent = 'إضافة مبيعة جديدة';
-            document.getElementById('saleForm').reset();
-            document.getElementById('saleModal').classList.remove('hidden');
-            document.getElementById('saleModal').classList.add('flex');
-        });
-
-        document.querySelectorAll('.closeSaleBtn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.getElementById('saleModal').classList.add('hidden');
-                document.getElementById('saleModal').classList.remove('flex');
-            });
-        });
-
-        document.getElementById('saleForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const quantity = parseFloat(document.getElementById('saleQuantity').value);
-            const unitPrice = parseFloat(document.getElementById('saleUnitPrice').value);
-            const total = quantity * unitPrice;
-            
-            const saleData = {
-                id: editingSaleId || Date.now(),
-                timestamp: editingSaleId ? currentData.sales.find(s => s.id === editingSaleId).timestamp : new Date().toISOString(),
-                item: document.getElementById('saleItem').value,
-                quantity: quantity,
-                unitPrice: unitPrice,
-                total: total,
-                paymentType: document.getElementById('salePaymentType').value,
-                customer: document.getElementById('saleCustomer').value,
-                notes: document.getElementById('saleNotes').value
-            };
-            
-            const data = currentData || getDefaultDayData();
-            data.sales = data.sales || [];
-            
-            if (editingSaleId) {
-                const index = data.sales.findIndex(s => s.id === editingSaleId);
-                data.sales[index] = saleData;
-            } else {
-                data.sales.push(saleData);
-            }
-            
-            data.updatedAt = new Date().toISOString();
-            
-            try {
-                await setDoc(doc(db, 'daftar_zaytoon', currentDate), data);
-                showToast(editingSaleId ? 'تم تحديث المبيعة' : 'تمت إضافة المبيعة');
-                document.getElementById('saleModal').classList.add('hidden');
-                document.getElementById('saleModal').classList.remove('flex');
-            } catch (error) {
-                console.error(error);
-                showToast('خطأ في الحفظ', 'error');
-            }
-        });
-
-        window.editSale = (index) => {
-            const sale = currentData.sales[index];
-            editingSaleId = sale.id;
-            document.getElementById('saleModalTitle').textContent = 'تعديل مبيعة';
-            document.getElementById('saleItem').value = sale.item;
-            document.getElementById('saleQuantity').value = sale.quantity;
-            document.getElementById('saleUnitPrice').value = sale.unitPrice;
-            document.getElementById('salePaymentType').value = sale.paymentType;
-            document.getElementById('saleCustomer').value = sale.customer || '';
-            document.getElementById('saleNotes').value = sale.notes || '';
-            document.getElementById('saleModal').classList.remove('hidden');
-            document.getElementById('saleModal').classList.add('flex');
-        };
-
-        window.deleteSale = async (index) => {
-            if (!confirm('هل أنت متأكد من حذف هذه المبيعة؟')) return;
-            
-            const data = { ...currentData };
-            data.sales.splice(index, 1);
-            data.updatedAt = new Date().toISOString();
-            
-            try {
-                await setDoc(doc(db, 'daftar_zaytoon', currentDate), data);
-                showToast('تم حذف المبيعة');
-            } catch (error) {
-                console.error(error);
-                showToast('خطأ في الحذف', 'error');
-            }
-        };
-
-        // Purchase Modal
-        let purchaseItemsCount = 0;
-        
-        document.getElementById('addPurchaseBtn').addEventListener('click', () => {
-            document.getElementById('purchaseForm').reset();
-            document.getElementById('purchaseItemsContainer').innerHTML = '';
-            purchaseItemsCount = 0;
-            addPurchaseItemRow();
-            document.getElementById('invoiceDate').value = currentDate;
-            document.getElementById('purchaseModal').classList.remove('hidden');
-            document.getElementById('purchaseModal').classList.add('flex');
-        });
-
-        document.querySelectorAll('.closePurchaseBtn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.getElementById('purchaseModal').classList.add('hidden');
-                document.getElementById('purchaseModal').classList.remove('flex');
-            });
-        });
-
-        document.getElementById('addPurchaseItemBtn').addEventListener('click', addPurchaseItemRow);
-
-        function addPurchaseItemRow() {
-            const container = document.getElementById('purchaseItemsContainer');
-            const itemId = purchaseItemsCount++;
-            
-            const row = document.createElement('div');
-            row.className = 'grid grid-cols-12 gap-2 items-end';
-            row.innerHTML = `
-                <div class="col-span-5">
-                    <input type="text" required placeholder="الصنف" 
-                        class="purchase-item w-full px-2 py-1 rounded border border-gray-300 text-sm focus:outline-none focus:ring-1 focus:ring-zaytoon-500">
-                </div>
-                <div class="col-span-2">
-                    <input type="number" required step="0.01" min="0" placeholder="الكمية"
-                        class="purchase-qty w-full px-2 py-1 rounded border border-gray-300 text-sm focus:outline-none focus:ring-1 focus:ring-zaytoon-500">
-                </div>
-                <div class="col-span-2">
-                    <input type="number" required step="0.01" min="0" placeholder="السعر"
-                        class="purchase-price w-full px-2 py-1 rounded border border-gray-300 text-sm focus:outline-none focus:ring-1 focus:ring-zaytoon-500">
-                </div>
-                <div class="col-span-2">
-                    <input type="text" readonly placeholder="الإجمالي"
-                        class="purchase-total w-full px-2 py-1 rounded border border-gray-200 bg-gray-50 text-sm">
-                </div>
-                <div class="col-span-1">
-                    <button type="button" onclick="this.parentElement.parentElement.remove()" 
-                        class="w-full p-1 text-red-600 hover:bg-red-50 rounded transition-colors">
-                        <svg class="w-4 h-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                        </svg>
-                    </button>
-                </div>
-            `;
-            
-            container.appendChild(row);
-            
-            const qtyInput = row.querySelector('.purchase-qty');
-            const priceInput = row.querySelector('.purchase-price');
-            const totalInput = row.querySelector('.purchase-total');
-            
-            const updateTotal = () => {
-                const qty = parseFloat(qtyInput.value) || 0;
-                const price = parseFloat(priceInput.value) || 0;
-                totalInput.value = formatCurrency(qty * price);
-            };
-            
-            qtyInput.addEventListener('input', updateTotal);
-            priceInput.addEventListener('input', updateTotal);
-        }
-
-        document.getElementById('purchaseForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const items = [];
-            const rows = document.getElementById('purchaseItemsContainer').children;
-            
-            for (let row of rows) {
-                const item = row.querySelector('.purchase-item').value;
-                const quantity = parseFloat(row.querySelector('.purchase-qty').value);
-                const unitPrice = parseFloat(row.querySelector('.purchase-price').value);
-                
-                if (item && quantity && unitPrice) {
-                    items.push({
-                        item,
-                        quantity,
-                        unitPrice,
-                        total: quantity * unitPrice
-                    });
-                }
-            }
-            
-            if (items.length === 0) {
-                showToast('أضف بند واحد على الأقل', 'error');
-                return;
-            }
-            
-            const purchaseData = {
-                id: Date.now(),
-                invoiceNumber: document.getElementById('invoiceNumber').value,
-                date: document.getElementById('invoiceDate').value,
-                supplier: document.getElementById('supplierName').value,
-                items: items,
-                timestamp: new Date().toISOString()
-            };
-            
-            const data = currentData || getDefaultDayData();
-            data.purchases = data.purchases || [];
-            data.purchases.push(purchaseData);
-            data.updatedAt = new Date().toISOString();
-            
-            try {
-                await setDoc(doc(db, 'daftar_zaytoon', currentDate), data);
-                showToast('تمت إضافة الفاتورة');
-                document.getElementById('purchaseModal').classList.add('hidden');
-                document.getElementById('purchaseModal').classList.remove('flex');
-            } catch (error) {
-                console.error(error);
-                showToast('خطأ في الحفظ', 'error');
-            }
-        });
-
-        window.deletePurchase = async (index) => {
-            if (!confirm('هل أنت متأكد من حذف هذه الفاتورة؟')) return;
-            
-            const data = { ...currentData };
-            data.purchases.splice(index, 1);
-            data.updatedAt = new Date().toISOString();
-            
-            try {
-                await setDoc(doc(db, 'daftar_zaytoon', currentDate), data);
-                showToast('تم حذف الفاتورة');
-            } catch (error) {
-                console.error(error);
-                showToast('خطأ في الحذف', 'error');
-            }
-        };
-
-        // Auto Save
-        function debounce(func, wait) {
-            let timeout;
-            return function executedFunction(...args) {
-                const later = () => {
-                    clearTimeout(timeout);
-                    func(...args);
-                };
-                clearTimeout(timeout);
-                timeout = setTimeout(later, wait);
-            };
-        }
-
-        async function autoSave() {
-            const data = currentData || getDefaultDayData();
-            data.cardSales = parseFloat(document.getElementById('cardSales').value) || 0;
-            data.creditSales = parseFloat(document.getElementById('creditSales').value) || 0;
-            data.otherIncome = parseFloat(document.getElementById('otherIncome').value) || 0;
-            data.operatingExpenses = parseFloat(document.getElementById('operatingExpenses').value) || 0;
-            data.hospitalityExpenses = parseFloat(document.getElementById('hospitalityExpenses').value) || 0;
-            data.clickTransfer = parseFloat(document.getElementById('clickTransfer').value) || 0;
-            data.cashBalance = parseFloat(document.getElementById('cashBalance').value) || 0;
-            data.updatedAt = new Date().toISOString();
-            
-            try {
-                await setDoc(doc(db, 'daftar_zaytoon', currentDate), data, { merge: true });
-                updateTotals();
-            } catch (error) {
-                console.error(error);
-            }
-        }
-
-        document.getElementById('saveDayBtn').addEventListener('click', async () => {
-            await autoSave();
-            showToast('تم حفظ بيانات اليوم بنجاح');
-        });
-
-        // Settings
-        document.getElementById('settingsBtn').addEventListener('click', () => {
-            document.getElementById('settingsModal').classList.remove('hidden');
-            document.getElementById('settingsModal').classList.add('flex');
-        });
-
-        document.getElementById('closeSettingsBtn').addEventListener('click', () => {
-            document.getElementById('settingsModal').classList.add('hidden');
-            document.getElementById('settingsModal').classList.remove('flex');
-        });
-
-        document.getElementById('changePasswordForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const newPassword = document.getElementById('newPassword').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            const messageDiv = document.getElementById('passwordMessage');
-            
-            if (newPassword !== confirmPassword) {
-                messageDiv.textContent = 'كلمات المرور غير متطابقة';
-                messageDiv.className = 'text-sm mt-2 text-red-600';
-                messageDiv.classList.remove('hidden');
-                return;
-            }
-            
-            try {
-                await updatePassword(auth.currentUser, newPassword);
-                messageDiv.textContent = 'تم تحديث كلمة المرور بنجاح';
-                messageDiv.className = 'text-sm mt-2 text-green-600';
-                messageDiv.classList.remove('hidden');
-                document.getElementById('changePasswordForm').reset();
-                setTimeout(() => {
-                    document.getElementById('settingsModal').classList.add('hidden');
-                    document.getElementById('settingsModal').classList.remove('flex');
-                }, 2000);
-            } catch (error) {
-                messageDiv.textContent = 'خطأ: ' + error.message;
-                messageDiv.className = 'text-sm mt-2 text-red-600';
-                messageDiv.classList.remove('hidden');
-            }
-        });
-
-        // Monthly Report
-        document.getElementById('monthlyReportBtn').addEventListener('click', () => {
-            const now = new Date();
-            document.getElementById('reportMonth').value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-            document.getElementById('reportModal').classList.remove('hidden');
-            document.getElementById('reportModal').classList.add('flex');
-        });
-
-        document.getElementById('closeReportBtn').addEventListener('click', () => {
-            document.getElementById('reportModal').classList.add('hidden');
-            document.getElementById('reportModal').classList.remove('flex');
-        });
-
-        document.getElementById('reportMonth').addEventListener('change', loadMonthlyReport);
-
-        async function loadMonthlyReport() {
-            const monthValue = document.getElementById('reportMonth').value;
-            if (!monthValue) return;
-            
-            const [year, month] = monthValue.split('-');
-            const startDate = `${year}-${month}-01`;
-            const lastDay = new Date(year, month, 0).getDate();
-            const endDate = `${year}-${month}-${String(lastDay).padStart(2, '0')}`;
-            
-            try {
-                const q = query(
-                    collection(db, 'daftar_zaytoon'),
-                    where('date', '>=', startDate),
-                    where('date', '<=', endDate)
-                );
-                
-                const querySnapshot = await getDocs(q);
-                const days = [];
-                
-                querySnapshot.forEach((doc) => {
-                    days.push(doc.data());
-                });
-                
-                renderMonthlyReport(days, monthValue);
-            } catch (error) {
-                console.error(error);
-                showToast('خطأ في تحميل التقرير', 'error');
-            }
-        }
-
-        function renderMonthlyReport(days, monthValue) {
-            const content = document.getElementById('reportContent');
-            
-            if (days.length === 0) {
-                content.innerHTML = '<div class="text-center text-gray-500 py-8">لا توجد بيانات لهذا الشهر</div>';
-                return;
-            }
-            
-            days.sort((a, b) => a.date.localeCompare(b.date));
-            
-            let totalSales = 0, totalPurchases = 0, totalExpenses = 0, totalIncome = 0;
-            
-            const rows = days.map(day => {
-                const daySales = (day.sales || []).reduce((sum, s) => sum + s.total, 0);
-                const dayPurchases = (day.purchases || []).reduce((sum, p) => 
-                    sum + (p.items || []).reduce((s, i) => s + i.total, 0), 0);
-                const dayExpenses = (day.operatingExpenses || 0) + (day.hospitalityExpenses || 0);
-                const dayCashSales = (day.sales || []).filter(s => s.paymentType === 'نقدي').reduce((sum, s) => sum + s.total, 0);
-                const dayIncome = dayCashSales + (day.cardSales || 0) + (day.creditSales || 0) + (day.otherIncome || 0);
-                const dayNet = dayIncome - dayPurchases - dayExpenses;
-                
-                totalSales += daySales;
-                totalPurchases += dayPurchases;
-                totalExpenses += dayExpenses;
-                totalIncome += dayNet;
-                
-                return `
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-3 py-2 text-sm">${formatDate(day.date)}</td>
-                        <td class="px-3 py-2 text-sm">${formatCurrency(daySales)}</td>
-                        <td class="px-3 py-2 text-sm">${formatCurrency(dayPurchases)}</td>
-                        <td class="px-3 py-2 text-sm">${formatCurrency(dayExpenses)}</td>
-                        <td class="px-3 py-2 text-sm font-semibold ${dayNet >= 0 ? 'text-green-600' : 'text-red-600'}">${formatCurrency(dayNet)}</td>
-                    </tr>
-                `;
-            }).join('');
-            
-            content.innerHTML = `
-                <div class="mb-4">
-                    <h4 class="text-lg font-bold text-zaytoon-900 mb-3">تقرير شهر ${monthValue}</h4>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-                        <div class="bg-green-50 rounded-lg p-3">
-                            <p class="text-xs text-gray-600">إجمالي المبيعات</p>
-                            <p class="text-lg font-bold text-green-700">${formatCurrency(totalSales)}</p>
-                        </div>
-                        <div class="bg-orange-50 rounded-lg p-3">
-                            <p class="text-xs text-gray-600">إجمالي المشتريات</p>
-                            <p class="text-lg font-bold text-orange-700">${formatCurrency(totalPurchases)}</p>
-                        </div>
-                        <div class="bg-red-50 rounded-lg p-3">
-                            <p class="text-xs text-gray-600">إجمالي المصاريف</p>
-                            <p class="text-lg font-bold text-red-700">${formatCurrency(totalExpenses)}</p>
-                        </div>
-                        <div class="bg-zaytoon-50 rounded-lg p-3">
-                            <p class="text-xs text-gray-600">صافي الربح</p>
-                            <p class="text-lg font-bold ${totalIncome >= 0 ? 'text-zaytoon-700' : 'text-red-700'}">${formatCurrency(totalIncome)}</p>
+                            <h1 style="font-size: 28px; font-weight: 900; color: #667eea;">دفتر يوميات محمص زيتون</h1>
+                            <p style="color: #666; font-size: 14px;">مرحباً، <span id="userEmail"></span></p>
                         </div>
                     </div>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button onclick="showSettings()" class="btn btn-primary"><i class="fas fa-cog"></i> الإعدادات</button>
+                        <button onclick="showMonthlyReport()" class="btn btn-success"><i class="fas fa-chart-bar"></i> التقرير الشهري</button>
+                        <button onclick="logout()" class="btn btn-danger"><i class="fas fa-sign-out-alt"></i> خروج</button>
+                    </div>
                 </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-sm border border-gray-200 rounded-lg">
-                        <thead class="bg-zaytoon-100">
+            </div>
+
+            <!-- اختيار التاريخ -->
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                    <h2 style="font-size: 24px; font-weight: 900;">اليومية: <span id="currentDate"></span></h2>
+                    <input type="date" id="datePicker" style="max-width: 200px;" onchange="changeDate(this.value)">
+                </div>
+            </div>
+
+            <!-- الإحصائيات السريعة -->
+            <div class="grid-4">
+                <div class="stat-box">
+                    <h3>إجمالي المبيعات</h3>
+                    <div class="value" id="totalSales">0.00 د.أ</div>
+                </div>
+                <div class="stat-box" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                    <h3>إجمالي المشتريات</h3>
+                    <div class="value" id="totalPurchases">0.00 د.أ</div>
+                </div>
+                <div class="stat-box" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                    <h3>إجمالي الدخل</h3>
+                    <div class="value" id="totalIncome">0.00 د.أ</div>
+                </div>
+                <div class="stat-box" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                    <h3>صافي الدخل</h3>
+                    <div class="value" id="netIncome">0.00 د.أ</div>
+                </div>
+            </div>
+
+            <!-- سجل المبيعات التفصيلي -->
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2 style="font-size: 22px; font-weight: 900;"><i class="fas fa-shopping-cart"></i> سجل المبيعات التفصيلي</h2>
+                    <button onclick="showAddSaleModal()" class="btn btn-success"><i class="fas fa-plus"></i> إضافة مبيعة</button>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table id="salesTable">
+                        <thead>
                             <tr>
-                                <th class="px-3 py-2 text-right font-semibold">التاريخ</th>
-                                <th class="px-3 py-2 text-right font-semibold">المبيعات</th>
-                                <th class="px-3 py-2 text-right font-semibold">المشتريات</th>
-                                <th class="px-3 py-2 text-right font-semibold">المصاريف</th>
-                                <th class="px-3 py-2 text-right font-semibold">الصافي</th>
+                                <th>الوقت</th>
+                                <th>الصنف</th>
+                                <th>الكمية</th>
+                                <th>سعر الوحدة</th>
+                                <th>الإجمالي</th>
+                                <th>نوع الدفع</th>
+                                <th>الزبون</th>
+                                <th>ملاحظات</th>
+                                <th>إجراءات</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-200">
-                            ${rows}
-                        </tbody>
-                        <tfoot class="bg-zaytoon-100 font-bold">
-                            <tr>
-                                <td class="px-3 py-2">الإجمالي</td>
-                                <td class="px-3 py-2">${formatCurrency(totalSales)}</td>
-                                <td class="px-3 py-2">${formatCurrency(totalPurchases)}</td>
-                                <td class="px-3 py-2">${formatCurrency(totalExpenses)}</td>
-                                <td class="px-3 py-2 ${totalIncome >= 0 ? 'text-green-700' : 'text-red-700'}">${formatCurrency(totalIncome)}</td>
-                            </tr>
-                        </tfoot>
+                        <tbody id="salesTableBody"></tbody>
                     </table>
                 </div>
-            `;
-        }
+            </div>
 
-        document.getElementById('printReportBtn').addEventListener('click', () => {
-            window.print();
-        });
+            <!-- سجل المشتريات التفصيلي -->
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2 style="font-size: 22px; font-weight: 900;"><i class="fas fa-file-invoice"></i> سجل المشتريات - الفواتير</h2>
+                    <button onclick="showAddPurchaseModal()" class="btn btn-success"><i class="fas fa-plus"></i> إضافة فاتورة</button>
+                </div>
+                <div id="purchasesContainer"></div>
+            </div>
 
-        document.getElementById('exportExcelBtn').addEventListener('click', () => {
-            const monthValue = document.getElementById('reportMonth').value;
-            exportToExcel(monthValue);
-        });
+            <!-- الدخل والمصاريف -->
+            <div class="grid-2">
+                <div class="card">
+                    <h2 style="font-size: 22px; font-weight: 900; margin-bottom: 20px;"><i class="fas fa-money-bill-wave"></i> الدخل</h2>
+                    <div style="space-y: 15px;">
+                        <div style="display: flex; justify-content: space-between; padding: 12px; background: #f8f9fa; border-radius: 10px; margin-bottom: 10px;">
+                            <span style="font-weight: 700;">مبيعات نقدي:</span>
+                            <span id="cashSalesDisplay" style="font-weight: 900; color: #11998e;">0.00 د.أ</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 12px; background: #f8f9fa; border-radius: 10px; margin-bottom: 10px;">
+                            <span style="font-weight: 700;">مبيعات كليك CliQ:</span>
+                            <span id="cliqSalesDisplay" style="font-weight: 900; color: #11998e;">0.00 د.أ</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 12px; background: #f8f9fa; border-radius: 10px; margin-bottom: 10px;">
+                            <span style="font-weight: 700;">مبيعات بطاقة:</span>
+                            <span id="cardSalesDisplay" style="font-weight: 900; color: #11998e;">0.00 د.أ</span>
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 8px; font-weight: 700;">مبيعات آجل:</label>
+                            <input type="number" id="creditSales" step="0.01" value="0" onchange="saveData()">
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 8px; font-weight: 700;">دخل إضافي:</label>
+                            <input type="number" id="extraIncome" step="0.01" value="0" onchange="saveData()">
+                        </div>
+                    </div>
+                </div>
 
-        function exportToExcel(monthValue) {
-            // Simple CSV export (Excel compatible)
-            const table = document.querySelector('#reportContent table');
-            if (!table) return;
-            
-            let csv = '\uFEFF'; // BOM for UTF-8
-            const rows = table.querySelectorAll('tr');
-            
-            rows.forEach(row => {
-                const cols = row.querySelectorAll('th, td');
-                const rowData = Array.from(cols).map(col => `"${col.textContent.trim()}"`).join(',');
-                csv += rowData + '\n';
-            });
-            
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = `تقرير_${monthValue}.csv`;
-            link.click();
-            
-            showToast('تم تصدير التقرير بنجاح');
-        }
-
-        // Backup & Restore
-        document.getElementById('backupBtn').addEventListener('click', async () => {
-            const monthValue = prompt('أدخل الشهر للنسخ الاحتياطي (YYYY-MM)', currentDate.substring(0, 7));
-            if (!monthValue) return;
-            
-            try {
-                const [year, month] = monthValue.split('-');
-                const startDate = `${year}-${month}-01`;
-                const lastDay = new Date(year, month, 0).getDate();
-                const endDate = `${year}-${month}-${String(lastDay).padStart(2, '0')}`;
-                
-                const q = query(
-                    collection(db, 'daftar_zaytoon'),
-                    where('date', '>=', startDate),
-                    where('date', '<=', endDate)
-                );
-                
-                const querySnapshot = await getDocs(q);
-                const data = [];
-                
-                querySnapshot.forEach((doc) => {
-                    data.push({ id: doc.id, ...doc.data() });
-                });
-                
-                const json = JSON.stringify(data, null, 2);
-                const blob = new Blob([json], { type: 'application/json' });
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(blob);
-                link.download = `backup_zaytoon_${monthValue}.json`;
-                link.click();
-                
-                showToast('تم إنشاء النسخة الاحتياطية');
-            } catch (error) {
-                console.error(error);
-                showToast('خطأ في النسخ الاحتياطي', 'error');
-            }
-        });
-
-        document.getElementById('restoreBtn').addEventListener('click', () => {
-            document.getElementById('restoreFileInput').click();
-        });
-
-        document.getElementById('restoreFileInput').addEventListener('change', async (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-            
-            if (!confirm('هل أنت متأكد؟ سيتم استبدال البيانات الحالية')) {
-                e.target.value = '';
-                return;
-            }
-            
-            try {
-                const text = await file.text();
-                const data = JSON.parse(text);
-                const batch = writeBatch(db);
-                
-                data.forEach(item => {
-                    const docRef = doc(db, 'daftar_zaytoon', item.date);
-                    const { id, ...itemData } = item;
-                    batch.set(docRef, itemData);
-                });
-                
-                await batch.commit();
-                showToast('تم استرداد البيانات بنجاح');
-                loadDayData(currentDate);
-            } catch (error) {
-                console.error(error);
-                showToast('خطأ في استرداد البيانات', 'error');
-            }
-            
-            e.target.value = '';
-        });
-
-        // Toast Close
-        document.getElementById('closeToastBtn').addEventListener('click', () => {
-            document.getElementById('toast').classList.add('hidden');
-        });
-    </script>
-<script>(function(){document.addEventListener("click",function(e){var a=e.target.closest("[data-product-id]");if(!a)return;e.preventDefault();var pid=a.getAttribute("data-product-id");if(pid)parent.postMessage({type:"ecto-artifact-link-click",productId:pid},"*")})})();</script>
-</body>
-</html>
+                <div class="card">
+                    <h2 style="font-size: 22px; font-weight: 900; margin-bottom: 20px;"><i class="fas fa-receipt"></i> المصاريف والضيافة</h2>
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 700;">مصاريف تشغيلية:</label>
+                        <input type="number" id="expenses" step="0.01" value="0" onchange="saveData()">
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 700;">ضيافة:</label>
+                        <input type="number" id="hospitality" step="0.01" value="0" onchange="saveData()">
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 700;">رواتب:</label>
+                        <input type="number" id="salaries" step="0.01" value="0" onchange="saveData()">
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 700;">رصيد الصندوق:</label>
+                        <input type="number" id="cashBox" step="0.01" value="0" onchange="saveData()">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
