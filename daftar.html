@@ -88,6 +88,37 @@ img, table, iframe, video {
 }
 </style>
 
+
+<style>
+/* Fix header/buttons overlap on mobile - added without touching your logic */
+@media screen and (max-width: 768px) {
+    /* لو عندك هيدر ثابت أو أزرار position: fixed */
+    header, .header, .navbar, .nav, .topbar {
+        position: relative !important;
+        z-index: 1 !important;
+        margin-top: 0 !important;
+    }
+    
+    /* لو الأزرار fixed/float فوق */
+    button, .btn, .button, .menu, .toolbar {
+        position: relative !important;
+        z-index: auto !important;
+    }
+    
+    /* خلي الترتيب طبيعي بالموبايل */
+    body {
+        display: flex !important;
+        flex-direction: column !important;
+    }
+    
+    /* تأكد اسم الشركة يظهر أول */
+    .company-name, .logo, h1, .brand {
+        order: -1 !important;
+        margin-top: 10px !important;
+    }
+}
+</style>
+
 </head>
 <body>
     <div id="toast"></div>
