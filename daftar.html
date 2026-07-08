@@ -33,6 +33,40 @@
         @media (max-width: 768px) {.grid-4,.grid-2 { grid-template-columns: 1fr; } }
         #toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #11998e; color: white; padding: 15px 30px; border-radius: 12px; font-weight: 700; z-index: 10000; display: none; }
     </style>
+
+<style>
+.header-btn-group {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+}
+.header-print-btn,.header-export-btn,.header-import-btn {
+    background: #2563eb;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 15px;
+    cursor: pointer;
+    font-family: 'Cairo', sans-serif;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+.header-print-btn:hover,.header-export-btn:hover,.header-import-btn:hover {
+    background: #1d4ed8;
+}
+.header-export-btn { background: #059669; }
+.header-export-btn:hover { background: #047857; }
+.header-import-btn { background: #7c3aed; }
+.header-import-btn:hover { background: #6d28d9; }
+@media print {
+   .header-btn-group { display: none; }
+}
+</style>
+
 </head>
 <body>
     <div id="toast"></div>
@@ -62,7 +96,12 @@
         <div class="container">
             <div class="card">
                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+    <div class="header-btn-group">
     <button class="header-print-btn" onclick="window.print()">🖨️ طباعة</button>
+    <button class="header-export-btn" onclick="exportBackup()">💾 نسخة احتياطية</button>
+    <button class="header-import-btn" onclick="document.getElementById('importFile').click()">📂 استيراد</button>
+    <input type="file" id="importFile" accept=".json" style="display:none" onchange="importBackup(event)">
+</div>
                     <div>
                         <h1 style="font-size: 28px; font-weight: 900; color: #667eea;">دفتر يوميات محمص زيتون</h1>
                         <p style="color: #666; font-size: 14px;">مرحباً، <span id="userEmail"></span></p>
@@ -217,7 +256,41 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js">
+        window.exportBackup = () => {
+            const backup = {
+                date: currentDate,
+                data: data,
+                timestamp: new Date().toISOString()
+            };
+            const blob = new Blob([JSON.stringify(backup, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `نسخة_احتياطية_${currentDate}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            toast('تم تصدير النسخة الاحتياطية ✓');
+        };
+
+        window.importBackup = async (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            try {
+                const text = await file.text();
+                const backup = JSON.parse(text);
+                if (confirm('هل تريد استبدال البيانات الحالية بالنسخة الاحتياطية؟')) {
+                    data = backup.data;
+                    await setDoc(doc(db, 'daftar_zaytoon', currentDate), data);
+                    toast('تم استيراد النسخة الاحتياطية ✓');
+                }
+            } catch (e) {
+                toast('خطأ في قراءة الملف');
+            }
+            event.target.value = '';
+        };
+
+    </script>
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
@@ -471,6 +544,40 @@
             XLSX.writeFile(wb, `مبيعات_${currentDate}.xlsx`);
             toast('تم تصدير الملف ✓');
         };
+
+        window.exportBackup = () => {
+            const backup = {
+                date: currentDate,
+                data: data,
+                timestamp: new Date().toISOString()
+            };
+            const blob = new Blob([JSON.stringify(backup, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `نسخة_احتياطية_${currentDate}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            toast('تم تصدير النسخة الاحتياطية ✓');
+        };
+
+        window.importBackup = async (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            try {
+                const text = await file.text();
+                const backup = JSON.parse(text);
+                if (confirm('هل تريد استبدال البيانات الحالية بالنسخة الاحتياطية؟')) {
+                    data = backup.data;
+                    await setDoc(doc(db, 'daftar_zaytoon', currentDate), data);
+                    toast('تم استيراد النسخة الاحتياطية ✓');
+                }
+            } catch (e) {
+                toast('خطأ في قراءة الملف');
+            }
+            event.target.value = '';
+        };
+
     </script>
 </body>
 </html>
