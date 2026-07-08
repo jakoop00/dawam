@@ -41,6 +41,41 @@
     transform: translateX(-50%);
     display: flex;
     gap: 10px;
+    z-index: 2;
+}
+/* Fix for mobile - prevents buttons covering company name */
+@media (max-width: 768px) {
+    .header-btn-group {
+        position: static !important;
+        left: auto !important;
+        transform: none !important;
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+        order: 10;
+        margin-bottom: 15px;
+    }
+    /* Header card layout on mobile */
+    #app .card:first-child > div {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+    #app .card:first-child h1 {
+        text-align: center;
+        font-size: 24px !important;
+        margin-bottom: 15px;
+        order: 1;
+    }
+    #app .card:first-child p {
+        text-align: center;
+        order: 2;
+        margin-bottom: 15px;
+    }
+    #app .card:first-child div:has(.btn) {
+        order: 11;
+        justify-content: center;
+        width: 100%;
+    }
 }
 .header-print-btn,.header-export-btn,.header-import-btn {
     background: #2563eb;
@@ -69,53 +104,20 @@
 
 
 <style>
-/* Auto responsive wrapper - added without touching your code */
-html, body {
-    max-width: 100%;
-    overflow-x: hidden;
+/* Additional mobile fix - ensure no overlap */
+@media (max-width: 768px) {
+    .card { padding: 15px !important; }
+    .header-print-btn, .header-export-btn, .header-import-btn {
+        flex: 1 1 auto;
+        min-width: 90px;
+        justify-content: center;
+        font-size: 13px;
+        padding: 10px 12px;
+    }
+    .btn { font-size: 14px; padding: 10px 16px; }
 }
-* {
-    box-sizing: border-box;
-}
-img, table, iframe, video {
-    max-width: 100%;
-    height: auto;
-}
-@media screen and (max-width: 768px) {
-    body {
-        padding: 8px !important;
-    }
-}
-</style>
-
-
-<style>
-/* Fix header/buttons overlap on mobile - added without touching your logic */
-@media screen and (max-width: 768px) {
-    /* لو عندك هيدر ثابت أو أزرار position: fixed */
-    header, .header, .navbar, .nav, .topbar {
-        position: relative !important;
-        z-index: 1 !important;
-        margin-top: 0 !important;
-    }
-    
-    /* لو الأزرار fixed/float فوق */
-    button, .btn, .button, .menu, .toolbar {
-        position: relative !important;
-        z-index: auto !important;
-    }
-    
-    /* خلي الترتيب طبيعي بالموبايل */
-    body {
-        display: flex !important;
-        flex-direction: column !important;
-    }
-    
-    /* تأكد اسم الشركة يظهر أول */
-    .company-name, .logo, h1, .brand {
-        order: -1 !important;
-        margin-top: 10px !important;
-    }
+@media (min-width: 769px) {
+    .header-btn-group { position: absolute; }
 }
 </style>
 
